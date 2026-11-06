@@ -1,6 +1,6 @@
 # Administrative-area linkage
 
-This project joins University of Manitoba facility supply profiles to every original SURGO woman's record in Lagos, Senegal, Côte d'Ivoire and Sindh. It performs data preparation, geographic linkage and validation only. It does not fit models, calculate research results or create a demand/supply constraint score.
+This module joins University of Manitoba facility supply profiles to every original SURGO woman's record in Lagos, Senegal, Côte d'Ivoire and Sindh. It performs data preparation, geographic linkage and validation only. It does not fit models, calculate research results or create a demand/supply constraint score.
 
 ## Inputs
 
@@ -8,7 +8,7 @@ Keep the supplied `SURGO_Manitoba_linkage_inputs.zip` outside this repository, f
 
 No Databricks connection or credentials are required. Input, output, cache and country-configuration locations are parameters; no personal paths are embedded in the scripts.
 
-This module aggregates facilities to the shared administrative area: LGA in Lagos, department in Senegal and Côte d'Ivoire, and district in Sindh. It is the administrative-only component of the [project](../README.md). The [urban/rural module](../urban_rural/README.md) provides a separate finer option.
+The join key is the shared administrative area: **LGA** in Lagos, **department** in Senegal and Côte d'Ivoire, and **district** in Sindh. Each woman receives one supply profile for her area. Residence type is not part of this module's join key. See the [project overview](../README.md) for the repository layout.
 
 Run the commands below from `administrative_area/`. Alternatively, invoke `Rscript administrative_area/R/run_join.R` from the repository root. Relative input/output/cache/configuration paths are resolved from this module directory; absolute paths or the input-ZIP environment variable can be used for external storage.
 
@@ -20,13 +20,13 @@ Requires R 4.1 or later with `haven`, `dplyr` 1.1.1 or later, `readr`, `jsonlite
 install.packages(c("haven", "dplyr", "readr", "jsonlite", "digest"))
 ```
 
-From the repository folder:
+From the `administrative_area/` module directory:
 
 ```sh
 Rscript R/run_join.R --input-zip "/path/to/OneDrive/SURGO_Manitoba_linkage_inputs.zip" --output-dir "/path/to/results"
 ```
 
-The ZIP can instead be specified through the `SURGO_MANITOBA_INPUT_ZIP` environment variable. Paths containing spaces must be quoted. Relative paths are resolved from the repository root. The cache defaults to `data/cache`; override it with `--cache-dir`. Country file names, question fields, woman IDs, weight fields and join levels are centralized in `R/00_config.R`; override that file's location with `--country-config`.
+The ZIP can instead be specified through the `SURGO_MANITOBA_INPUT_ZIP` environment variable. Paths containing spaces must be quoted. Relative paths are resolved from the `administrative_area/` module directory. The cache defaults to `data/cache`; override it with `--cache-dir`. Country file names, question fields, woman IDs, weight fields and join levels are centralized in `R/00_config.R`; override that file's location with `--country-config`.
 
 ## Geographic versions
 
@@ -48,6 +48,21 @@ The additional files are written to `checked_geography/`. Both versions retain t
 | Sindh | Original weighted forms | 10,364 | District |
 
 These are raw source-record totals, including records outside the author's analytical cohort. No woman is removed for consent, need, weight or missing supply. Analysts must later define their analytical population explicitly.
+
+## Administrative-area match results
+
+Counts are unweighted and include all original SURGO rows. The two geographic versions are separate outputs.
+
+| Geography | Women retained | Source-crosswalk matches | Completed-geography matches |
+|---|---:|---:|---:|
+| Lagos | 4,555 | 4,555 | 4,555 |
+| Senegal | 7,169 | 7,169 | 7,169 |
+| Côte d'Ivoire | 10,859 | 10,556 | 10,703 |
+| Sindh | 10,364 | 10,364 | 10,364 |
+
+In completed Côte d'Ivoire geography, Bonon (59 women), Facobly (37), Gohitafla (23) and Taabo (34) have no matched facility profile. The author's geographic export also reports zero matched facilities for those four departments. Three additional raw women have missing geographic information and are excluded from his analytical export but retained here. These 156 women remain without a supply profile. The source-crosswalk version additionally leaves Agboville, Sikensi and Tiassale unmatched; the documented completion recovers 147 women in those departments.
+
+For an unmatched woman, `link_has_supply = FALSE`, `n_facilities = 0` and supply estimates remain missing. `link_status` distinguishes missing woman geography from an area without a matched facility profile. Zero denotes no attached facility records, not verified physical absence of facilities. No woman is removed because of an unmatched profile.
 
 ## Join steps
 
@@ -113,13 +128,15 @@ RDS preserves original R classes and labels. Stata stores missing character valu
 
 ## Validation scope
 
+The supplied snapshot passes **69 administrative reference reconciliation checks**, including 19,764 geography-level supply comparisons. Original rows, fields and values are preserved in RDS and verified after DTA round-trip.
+
 For the supplied snapshot, the reference version reproduces all geographic supply values and overlapping populations when restricted to the same analytical women as the author. Raw row totals differ intentionally: the author's analytical files exclude 5 Lagos records, 3 Côte d'Ivoire records and 438 Sindh records. Three Côte d'Ivoire source records have blank woman IDs; they are retained using original row identity.
 
 Archetype assignments are checked against the supplied pipeline file. The older curated output renumbers clusters for k=3–5 while retaining identical partitions; k=6 names/codes match. Thirteen legacy Sindh archetype records with blank facility IDs are reconciled through their unique survey IDs.
 
 The default version is a faithful reproduction, not a certification of every upstream measurement assumption. Checked-geography differences are listed explicitly. Remaining boundary qualifications and incomplete counselor coverage prevent an unconditional substantive audit sign-off. No research-model validity or causal interpretation is assessed here.
 
-## Repository contents
+## Module files
 
 - `R/run_join.R`: parameterized entry point and input verification.
 - `R/00_config.R`: source fields and geographic levels.
