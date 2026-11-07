@@ -1,0 +1,38 @@
+---
+title: "Sindh · SURGO × Manitoba"
+output:
+  html_document:
+    template: ../common/report.html
+    theme: null
+    mathjax: null
+    self_contained: false
+    keep_md: false
+    pandoc_args: ["--wrap=none"]
+params:
+  input_zip: !r Sys.getenv("SURGO_MANITOBA_INPUT_ZIP", "")
+  work_dir: "output/report_build"
+  cache_dir: "data/cache"
+  join_dir: ""
+  python: !r Sys.getenv("SURGO_MANITOBA_PYTHON", "python3")
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+source("../common/pipeline.R")
+project_root <- normalizePath("../..", mustWork = TRUE)
+use_project_library(project_root)
+```
+
+```{r calculate-and-verify, include=FALSE}
+# All definitions, weighted summaries, models and verification are in the R
+# scripts in this country directory. Python formats the saved aggregate results.
+# A blank join_dir builds the original join modules directly from input_zip.
+report <- build_country_report("sindh", project_root, params$input_zip,
+  params$work_dir, params$cache_dir, params$join_dir, params$python)
+```
+
+```{r report, results='asis'}
+cat("```{=html}\n")
+cat(readLines(report$fragment, warn = FALSE, encoding = "UTF-8"), sep = "\n")
+cat("\n```\n")
+```

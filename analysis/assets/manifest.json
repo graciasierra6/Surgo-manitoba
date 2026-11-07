@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "file": "boundaries/sindh_districts.geojson",
+      "sha256": "88a68bd6b991281584fc2cdc79c6c56780d7b64a61792294c397ab3e12618d0a",
+      "kind": "Public display geometry; not linkage input"
+    },
+    {
+      "file": "boundaries/senegal_departments.geojson",
+      "sha256": "cfe5f628225ddc4f1498658a29e6990ec0d0f5cdb317aaf9d3e586b579c59712",
+      "kind": "Public display geometry; not linkage input"
+    },
+    {
+      "file": "boundaries/civ_departments_2018.geojson",
+      "sha256": "788f58c8bdd80ef000faeb9602858c0c5ad4b82238e039c52ca8f71cddfb9f80",
+      "kind": "Public display geometry; not linkage input"
+    },
+    {
+      "file": "boundaries/civ_subprefectures_2018.geojson",
+      "sha256": "2d164764a6de1b05c982250e4c834123a6dc5d876e08ce467f4b6cf3f62d7ef7",
+      "kind": "Public display geometry; not linkage input"
+    },
+    {
+      "file": "lagos_map_template.html",
+      "sha256": "4282fe0a4d50e8b00b59c3b1d74c124c0234b44dbfae9da01d3cd8db18bc792a",
+      "kind": "Archived display layout with aggregate facility-count dots; current results injected at render time"
+    }
+  ]
+}

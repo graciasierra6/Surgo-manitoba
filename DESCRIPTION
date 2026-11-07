@@ -1,0 +1,22 @@
+Package: SurgoManitoba
+Title: SURGO and Manitoba Geographic Linkage and Country Reports
+Version: 0.2.0
+Description: Reproducible geographic linkage, weighted demand and supply summaries,
+    relative planning classifications and modern contraceptive use models.
+License: file LICENSE-NOTICE
+Encoding: UTF-8
+Depends: R (>= 4.1)
+Imports:
+    haven,
+    dplyr,
+    readr,
+    readxl,
+    jsonlite,
+    digest,
+    sf,
+    survey,
+    clubSandwich,
+    ggplot2,
+    svglite,
+    rmarkdown,
+    knitr
