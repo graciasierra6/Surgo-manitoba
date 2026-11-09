@@ -1,0 +1,25 @@
+# Export a requested facility-level training table. Do not upload the resulting
+# facility records with the aggregate analysis repository.
+args<-commandArgs(trailingOnly=TRUE)
+value<-function(k){i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k);args[i+1L]}
+input<-value("--facility-input");raw<-value("--raw");area<-value("--area");out<-value("--output-dir")
+dir.create(out,recursive=TRUE,showWarnings=FALSE)
+f<-readRDS(input);f<-f[f$country=="lagos"&f$source_geo_name==area,];stopifnot(nrow(f)>0,!anyDuplicated(f$fid))
+f<-f[order(f$fid),]
+r<-haven::read_dta(raw,col_select=c("key","fac_status","consent","q506"))
+r<-r[match(as.character(f$fid),as.character(r$key)),];stopifnot(!anyNA(r$key))
+label<-function(v){a<-as.character(haven::as_factor(v));a[is.na(a)]<-"Unanswered";a}
+a<-data.frame(display_facility=sprintf("Facility %02d",seq_len(nrow(f))),original_facility_id=as.character(f$fid),
+ survey_status=label(r$fac_status),consent=label(r$consent),FP_services=label(r$q506),
+ n_train=as.numeric(f$n_train),n_tot=as.numeric(f$n_tot),p_train=as.numeric(f$p_train))
+valid<-is.finite(a$p_train)
+stopifnot(all(a$n_tot[valid]>0),max(abs(a$p_train[valid]-a$n_train[valid]/a$n_tot[valid]))<1e-10)
+prefix<-paste0(gsub("[^A-Za-z0-9]","_",area),"_facility_training")
+write.csv(a,file.path(out,paste0(prefix,".csv")),row.names=FALSE,na="")
+esc<-function(s){s<-gsub("&","&amp;",as.character(s),fixed=TRUE);s<-gsub("<","&lt;",s,fixed=TRUE);gsub('"',"&quot;",s,fixed=TRUE)}
+num<-function(v)ifelse(is.finite(v),as.character(v),"—")
+rows<-vapply(seq_len(nrow(a)),function(i)paste0('<tr><th scope="row">',a$display_facility[i],'</th><td class="id">',esc(a$original_facility_id[i]),'</td><td>',esc(a$survey_status[i]),'</td><td>',esc(a$FP_services[i]),'</td><td>',num(a$n_train[i]),'</td><td>',num(a$n_tot[i]),'</td><td class="value">',if(valid[i])sprintf('%.1f%%',100*a$p_train[i])else'Undefined','</td></tr>'),character(1))
+html<-paste0('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>',esc(area),' · Facility training table</title><style>body{font-family:Arial,Helvetica,sans-serif;background:#f6f9fa;color:#254654;margin:0;padding:28px}main{max-width:1400px;margin:auto}h1{color:#173d50;margin-bottom:12px}p{line-height:1.7}.summary{display:flex;gap:24px;flex-wrap:wrap;margin:22px 0}.metric{background:white;border:1px solid #dce7eb;border-radius:8px;padding:18px;min-width:160px}.metric b{display:block;font-size:30px;color:#087d89}.metric span{font-size:13px}.table-wrap{max-height:72vh;overflow:auto;background:white;border:1px solid #dce7eb;border-radius:8px}table{border-collapse:separate;border-spacing:0;width:100%}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid #e1e9ed;font-size:13px;vertical-align:top}thead th{position:sticky;top:0;background:#eaf4f5;z-index:1}tbody tr:nth-child(even){background:#f8fbfc}.id{font-size:11px;overflow-wrap:anywhere;min-width:250px}.value{font-weight:700;color:#087d89;white-space:nowrap}.note{font-size:12px;color:#617d8a}a{color:#087d89}</style></head><body><main><h1>',esc(area),' · Trained-provider share by facility</h1><p>Original cleaned UoM <b>p_train = n_train / n_tot</b>, displayed as a percentage. Each row is one facility record; display numbers are table labels and original IDs are retained.</p><div class="summary"><div class="metric"><b>',nrow(a),'</b><span>Facility records</span></div><div class="metric"><b>',sum(valid),'</b><span>Defined training shares</span></div><div class="metric"><b>',sum(!valid),'</b><span>Undefined shares</span></div><div class="metric"><b>',sprintf('%.1f%%',100*mean(a$p_train[valid])),'</b><span>Equal-facility mean</span></div></div><p class="note"><b>Numerator:</b> recorded individuals with Yes on at least one included training topic. <b>Denominator:</b> recorded individuals with usable responses on included topics. The original code excludes missing/inapplicable entries, sterilization topics and the “none” topic. This is the original training classification, not an independent assessment of competence or a census of all staff.</p><p><a href="',prefix,'.csv" download>Download complete table (CSV)</a></p><div class="table-wrap"><table><thead><tr><th>Facility</th><th>Original facility ID</th><th>Survey status</th><th>Provides FP?</th><th>Trained · n_train</th><th>Recorded denominator · n_tot</th><th>Trained share · p_train</th></tr></thead><tbody>',paste(rows,collapse=''),'</tbody></table></div><p class="note">Undefined is not zero. The LGA mean averages the ',sum(valid),' defined facility proportions equally; it is not a pooled personnel ratio. Files contain requested facility-level records and should remain separate from the aggregate report upload package.</p></main></body></html>')
+writeLines(html,file.path(out,paste0(prefix,".html")),useBytes=TRUE)
+cat('Exported',nrow(a),'facility records;',sum(valid),'defined;',sum(!valid),'undefined; mean',sprintf('%.4f%%',100*mean(a$p_train[valid])),'\n')
+print(head(a[c("display_facility","n_train","n_tot","p_train")],12),row.names=FALSE)

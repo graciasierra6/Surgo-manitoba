@@ -1,0 +1,38 @@
+---
+title: "Côte d’Ivoire department analysis | SURGO × Manitoba"
+output:
+  html_document:
+    template: ../../../analysis/common/report.html
+    theme: null
+    mathjax: null
+    self_contained: false
+    keep_md: false
+    pandoc_args: ["--wrap=none"]
+params:
+  join_dir: ""
+  cache_dir: "data/cache"
+  input_zip: !r Sys.getenv("SURGO_MANITOBA_INPUT_ZIP", "")
+  work_dir: "output/aggregate_reports/cotedivoire"
+  python: !r Sys.getenv("SURGO_MANITOBA_PYTHON", "python3")
+  prepared_fragment: ""
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+root <- normalizePath("../../..", mustWork = TRUE)
+source("Cote_dIvoire_analysis_aggregate.R")
+fragment <- params$prepared_fragment
+if (!nzchar(fragment)) {
+  if (!nzchar(params$join_dir) && !nzchar(params$input_zip))
+    stop("Supply join_dir or input_zip, or render through R/run_aggregate_reports.R")
+  report <- build_cotedivoire_aggregate(root, params$join_dir, params$cache_dir,
+    params$work_dir, params$python, params$input_zip)
+  fragment <- report$fragment
+}
+```
+
+```{r report, results='asis'}
+cat("```{=html}\n")
+cat(readLines(fragment, warn = FALSE, encoding = "UTF-8"), sep = "\n")
+cat("\n```\n")
+```

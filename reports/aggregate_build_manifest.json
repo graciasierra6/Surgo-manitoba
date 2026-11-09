@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "workflow": "administrative_area_aggregate",
+  "input_sha256": "fb7ec76ed7c5dcb4aba50c99640c3c168316d8a692e3f8a905272ae2d5ea3fca",
+  "source_bundle_verified": true,
+  "r_version": "4.6.0",
+  "packages": {
+    "rmarkdown": "2.31",
+    "knitr": "1.51",
+    "haven": "2.5.5",
+    "dplyr": "1.2.1",
+    "readr": "2.2.0",
+    "readxl": "1.5.0",
+    "jsonlite": "2.0.0",
+    "digest": "0.6.39",
+    "sf": "1.1.1",
+    "survey": "4.5",
+    "clubSandwich": "0.7.0",
+    "ggplot2": "4.0.3",
+    "svglite": "2.2.2"
+  },
+  "pandoc_version": "3.8.3",
+  "reports": {
+    "lagos": {
+      "file": "Lagos_analysis_aggregate.html",
+      "sha256": "74ed4bb99efbc1916b4bdc42d29a689ba9ee73b32d011c19ab963f7d1b6b4e57",
+      "source_women": 4555,
+      "women_in_need": 2159,
+      "model_women": 1865,
+      "supply_resolution": "Administrative area only",
+      "counseling_in_main": true,
+      "complete_case_sensitivity_sections_in_report": false,
+      "numerical_checks_passed": true
+    },
+    "senegal": {
+      "file": "Senegal_analysis_aggregate.html",
+      "sha256": "77c487d724582cda8768f558c014fb7d76f4e2d8790a3ab97d8ec45e6f9bdf8a",
+      "source_women": 7169,
+      "women_in_need": 1905,
+      "model_women": 1445,
+      "supply_resolution": "Administrative area only",
+      "counseling_in_main": true,
+      "complete_case_sensitivity_sections_in_report": false,
+      "numerical_checks_passed": true
+    },
+    "cotedivoire": {
+      "file": "Cote_dIvoire_analysis_aggregate.html",
+      "sha256": "6fbfd596a24b0f924e3f727dd1c0953bd140446702b6421b133fb23c684bc250",
+      "source_women": 10859,
+      "women_in_need": 4292,
+      "model_women": 3854,
+      "supply_resolution": "Administrative area only",
+      "counseling_in_main": true,
+      "complete_case_sensitivity_sections_in_report": false,
+      "numerical_checks_passed": true
+    }
+  }
+}
