@@ -1,5 +1,28 @@
 # Residence-specific analysis and shared definitions
 
+## Separate demand-population check
+
+Current main classifications already use weighted concern percentages among women
+in need. `check_demand_population.R` compares that population with all eligible
+women, keeping the six domain definitions, geographic reference set, supply flags
+and zero-cutoff rule fixed. Each population gets its own component means/SDs.
+It independently reproduces the saved need-only classifications before comparing
+them and never overwrites the main data or results.
+
+```sh
+Rscript analysis/check_demand_population.R \
+  --data-dir "$SURGO_MANITOBA_COUNTRY_ANALYSIS_DIR" \
+  --output-dir output/demand_population_check/COUNTRY
+python3 analysis/render_demand_population_check.py \
+  --results-dir output/demand_population_check \
+  --output reports/Demand_population_classification_check.html
+```
+
+Run the R check for each selected country, using `lagos`, `senegal`,
+`cotedivoire` or `sindh` as its output subdirectory for the combined renderer.
+Inputs and intermediate calculation CSVs stay in ignored working folders;
+the HTML embeds only aggregate area comparisons.
+
 The current administrative-area reports are built with
 `Rscript R/run_aggregate_reports.R`; see the
 [administrative-area analysis guide](../administrative_area/analysis/README.md).

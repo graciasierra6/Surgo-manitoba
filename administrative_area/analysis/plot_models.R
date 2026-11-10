@@ -23,6 +23,17 @@ render_modern_use_plots <- function(coefficients, curves, gaps, cc, demand_label
     sindh = "Supply uses matched district profiles; ",
     senegal = "Supply uses assigned department-residence / fallback profiles; ",
     cotedivoire = "Supply uses assigned department-residence profiles; ")
+  if (country == "lagos" && resolution == "urban_rural_fallback") {
+    supply_note <- paste0("LGA-residence supply; ", sum(cc$fallback),
+      " modeled women use a flagged LGA-wide fallback; ")
+    inference <- paste0("LGA CR2 inference; ", sum(cc$fallback),
+      " women use a flagged LGA-wide fallback. Official EA/strata remain unconfirmed. No random effects or interactions.")
+  }
+  if (country == "senegal" && resolution == "urban_rural_fallback") {
+    supply_note <- paste0("Département-residence supply; ", sum(cc$fallback),
+      " modeled women use flagged département-wide fallbacks; ")
+    inference <- "Département CR2 intervals; sampling-cluster sensitivity available. Facility residence is a health-district lookup proxy. No random effects or interactions."
+  }
   if (country %in% c("senegal", "cotedivoire") && resolution == "department") {
     inference <- "Department CR2 intervals; sampling-cluster sensitivity is available. Department-wide supply for every woman. No random effects or interactions."
     supply_note <- "Supply uses matched department-wide profiles; "

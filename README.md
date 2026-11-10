@@ -78,6 +78,52 @@ residence-specific Lagos, Senegal and Côte d’Ivoire reports remain available 
 Sindh always delegates to the current district workflow, since residence splitting
 is unavailable there.
 
+The updated Lagos residence-specific analysis is a separate report:
+[Lagos_rural_urban_updated.html](reports/Lagos_rural_urban_updated.html). Its
+[module guide](urban_rural/analysis/lagos/README.md) documents exact FP-provider
+LGA–Rural/Urban assignment, the Ibeju-Lekki–Urban coverage limitation and
+reproduction. Run it with:
+
+```sh
+Rscript urban_rural/analysis/lagos/Lagos_rural_urban_updated.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP"
+```
+
+Its planning heatmaps/maps retain LGA-wide summaries. Its models use residence
+profiles with a flagged LGA-wide fallback when an exact residence cell has zero
+FP providers. Undefined values are not zero-filled. The old three
+residence-specific HTMLs and the four current aggregate reports are preserved.
+
+The same updated residence-specific workflow is available for Senegal:
+[Senegal_rural_urban_updated.html](reports/Senegal_rural_urban_updated.html), with
+[source and reproduction notes](urban_rural/analysis/senegal/README.md).
+
+```sh
+Rscript urban_rural/analysis/senegal/Senegal_rural_urban_updated.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP"
+```
+
+Senegal uses matching département–Rural/Urban FP-provider means, with flagged
+département-wide fallback for 16 empty rural FP-provider cells. Facility residence
+is a health-district lookup proxy; this limitation and all fallback groups are
+documented in the report. Planning heatmaps/maps remain département-wide, while
+models and PCA use personal demand and assigned residence/fallback supply.
+
+The current Côte d’Ivoire residence workflow is also available:
+[CotedIvoire_rural_urban_updated.html](reports/CotedIvoire_rural_urban_updated.html),
+with [source and reproduction notes](urban_rural/analysis/cotedivoire/README.md).
+
+```sh
+Rscript urban_rural/analysis/cotedivoire/CotedIvoire_rural_urban_updated.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP"
+```
+
+It uses matching département–Rural/Urban FP-provider means for individual models
+and PCA while preserving département-wide planning summaries. The empty-cell
+fallback rule is implemented, but no fallback is required in the current source.
+Four unmatched survey areas and Daoukro's undefined ratios remain explicitly
+unresolved; they are not assigned zero or another département's services.
+
+See the [updated residence-analysis guide](urban_rural/analysis/README.md) for
+shared reproduction instructions and supplementary checks.
+
 ## Population, measures and scores
 
 Coverage precedes the need restriction. From Section 2 onward, Lagos, Senegal and
@@ -118,7 +164,9 @@ Five primary models all have **current modern-method use** as outcome: personal
 demand score; assigned supply risk; both scores; six personal demand indicators;
 and those indicators plus supply risk. Each country uses one common complete model
 sample. Personal demand scores retain each woman's own responses; supply risk is
-negative area readiness shared by residents of that area.
+the negative of assigned readiness: whole-area profiles in the aggregate workflow,
+or area–Rural/Urban profiles with flagged whole-area fallbacks in the updated
+residence workflow.
 
 All models retain final SURGO weights and adjust for age, age squared, education
 and fertility goal. Partnership and Rural/Urban are included in Lagos, Senegal and
@@ -142,6 +190,7 @@ investment allocation.
 
 ```sh
 python3 tests/check_aggregate_release.py
+python3 tests/check_rural_urban_release.py
 ```
 
 Each workflow independently checks raw-field preservation, FP eligibility,
@@ -149,6 +198,8 @@ geographic assignments, valid-response means, scoring direction/cutoffs, persona
 scores, weighted model coefficients, geographic covariance and report contents.
 The release checks inspect the actual source/report files and decoded embedded
 assets. `reports/aggregate_build_manifest.json` records relative report names,
-hashes, software versions and verification status; it contains no input datasets.
+hashes, software versions and verification status. The corresponding updated
+residence record is `reports/rural_urban_build_manifest.json`. Neither manifest
+contains input datasets.
 Working inputs and outputs remain in ignored directories. Upload source code,
 documentation and the HTML reports, without local input/output folders or ZIPs.
