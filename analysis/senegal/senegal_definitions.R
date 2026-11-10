@@ -33,7 +33,8 @@ senegal_definitions <- function(x) {
   d$need_code <- nv("FPN2"); d$need <- d$positive & d$need_code %in% 1
   d$agency <- flag("HS7C", 1, 1:2)
   d$stigma <- any_flag(cbind(flag("PB7B", 1:2, 1:4), flag("PB7C", 1:2, 1:4)))
-  d$health <- any_flag(sapply(paste0("PB2", LETTERS[1:3]), flag, pos = 1:2, valid = 1:4))
+  # Primary health/side-effect belief: perceived health problems, PB2A only.
+  d$health <- flag("PB2A", 1:2, 1:4)
   mp <- sapply(paste0("MP4_", letters[1:9]), nv)
   selected <- rowSums(mp[, 1:8, drop = FALSE] == 1, na.rm = TRUE) > 0
   none <- mp[, 9] %in% 1

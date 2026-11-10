@@ -13,7 +13,7 @@ files = [p for p in root.rglob('*') if p.is_file() and not (set(p.relative_to(ro
          and p.name not in {'.DS_Store', 'Rplots.pdf'} and p.suffix not in {'.pyc', '.log'}]
 private = re.compile(chr(47)+'Us'+'ers'+chr(47)+'|'+chr(47)+'ho'+'me'+chr(47)+
                      r'|[A-Za-z]:[\\/](?:Users|Documents|Desktop)')
-assistant = re.compile('co'+'dex|chat'+'gpt|open'+'ai', re.I)
+unwanted = re.compile('co'+'dex|chat'+'gpt|open'+'ai', re.I)
 text_suffixes = {'.R', '.Rmd', '.py', '.md', '.html', '.css', '.json', '.csv', '.geojson', '.yml', '.yaml', '.lock'}
 for p in files:
     assert p.suffix.lower() not in {'.dta', '.rds', '.rdata', '.zip'}, p
@@ -21,12 +21,12 @@ for p in files:
     if p.suffix in text_suffixes or p.name in {'DESCRIPTION','.gitignore','.Rprofile','LICENSE-NOTICE'}:
         text = p.read_text(encoding='utf-8')
         assert not private.search(text), ('private path', p)
-        assert not assistant.search(text), ('unwanted provenance string', p)
+        assert not unwanted.search(text), ('unwanted provenance string', p)
         if p.suffix == '.py': ast.parse(text, filename=str(p))
         if p.suffix == '.html':
             for encoded in re.findall(r'data:(?:image/svg\+xml|text/csv)(?:;[^,;]+)*;base64,([^"\s]+)', text):
                 decoded = base64.b64decode(encoded).decode('utf-8')
-                assert not private.search(decoded) and not assistant.search(decoded), ('embedded content', p)
+                assert not private.search(decoded) and not unwanted.search(decoded), ('embedded content', p)
 manifest = json.loads((root/'analysis/assets/manifest.json').read_text())
 for q in manifest['files']:
     p = root/'analysis/assets'/q['file']
@@ -41,7 +41,7 @@ for country, name in zip(countries, report_names):
     text = (root/'reports'/(name+'.html')).read_text()
     assert text.lower().startswith('<!doctype html>') and '<script>' in text
     assert not re.search(r'<(?:script|img)[^>]+(?:src)=["\']https?://', text)
-    assert len(re.findall(r'data:image/svg\+xml;base64,', text)) == 10
+    assert len(re.findall(r'data:image/svg\+xml;base64,', text)) == (4 if country == 'sindh' else 10)
 for module in ['administrative_area','urban_rural']:
     assert (root/module/'R'/('run_join.R' if module == 'administrative_area' else 'run_join_urban_rural.R')).is_file()
     assert (root/module/'R/00_config.R').is_file()

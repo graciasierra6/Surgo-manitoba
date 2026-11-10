@@ -1,5 +1,5 @@
 ---
-title: "Côte d’Ivoire department analysis | SURGO × Manitoba"
+title: "Côte d’Ivoire — analyse par département | SURGO × Manitoba"
 output:
   html_document:
     template: ../../../analysis/common/report.html
@@ -24,7 +24,7 @@ source("Cote_dIvoire_analysis_aggregate.R")
 fragment <- params$prepared_fragment
 if (!nzchar(fragment)) {
   if (!nzchar(params$join_dir) && !nzchar(params$input_zip))
-    stop("Supply join_dir or input_zip, or render through R/run_aggregate_reports.R")
+    stop("Supply join_dir or input_zip, or use Cote_dIvoire_analysis_aggregate.R")
   report <- build_cotedivoire_aggregate(root, params$join_dir, params$cache_dir,
     params$work_dir, params$python, params$input_zip)
   fragment <- report$fragment

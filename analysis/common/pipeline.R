@@ -88,6 +88,12 @@ build_country_report <- function(country, root, input_zip, work_dir, cache_dir,
   context <- prepare_linkage(root, input_zip, work_dir, cache_dir, join_dir)
   verify_report_assets(root)
   join <- context$join_dir; cache <- context$cache_dir
+  if (country == "sindh") {
+    env <- new.env(parent = globalenv())
+    source(file.path(root,"administrative_area/analysis/sindh/Sindh_analysis.R"),local=env)
+    return(env$build_sindh_aggregate(root,file.path(join,"admin_reference"),cache,
+      file.path(work_dir,"sindh"),python,""))
+  }
   admin <- file.path(join, "admin_reference")
   fac <- file.path(admin, "audit/facility_linkage_inputs.rds")
   module <- file.path(root, "analysis", country)

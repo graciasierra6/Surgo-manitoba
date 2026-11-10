@@ -61,7 +61,7 @@ order = ['coverage', 'use', 'joint', 'models', 'definitions',
          'appendix-scoring', 'pca']
 positions = [source.index(f'<section id="{x}"') for x in order]
 assert positions == sorted(positions), 'Report order differs from agreed order'
-assert len(p['supply_variables']) == 6 and 'counselor' in p['supply_variables']
+assert p['supply_variables'] == ['offering','free','training','daily_provision','larc_stock','stockout_burden']
 assert p['audit']['source_rows'] == 7169 and p['audit']['need_n'] == 1905
 assert p['audit']['fallback_source_women'] == 0
 for mode in ('coverage', 'classification'):
@@ -72,17 +72,34 @@ for src in parsed.images:
     assert src.startswith('data:image/svg+xml;base64,'), 'External or missing figure'
     blob = base64.b64decode(src.split(',', 1)[1]).decode()
     assert '<svg' in blob and '<text' in blob
+    assert not re.search(r'\bdepartments?\b',blob,re.I)
 for link in parsed.downloads:
     assert link['href'].startswith('data:text/csv;base64,')
     decoded = base64.b64decode(link['href'].split(',', 1)[1]).decode()
     assert list(csv.reader(decoded.splitlines())), 'Empty CSV download'
 text = ' '.join(parsed.text)
-assert '1,648' in text and '1,445' in text
+assert '1,648' in text and '1,568' in text and f'{p["audit"]["need_n"]:,}' in text
+model=json.loads((data/'models_zscore/model_results.json').read_text())
+assert f'{model["audit"]["common_n"]:,}' in text
+assert not re.search(r'\bdepartments?\b',text,re.I), 'Administrative label must be département'
+assert 'PB2A only' in text and 's5_6 = 1' in text
+assert p['audit']['daily_valid_linked']==1560 and p['audit']['daily_undefined_linked']==8
+assert p['audit']['stockout_valid_linked']==1568
+z=[r for r in p['scores'] if r['method']=='zscore']
+assert all(r['demand_flag']==(r['demand_score']>1e-10) and r['supply_flag']==(r['supply_score'] < -1e-10) for r in z)
+assert all(r['demand_cutoff']==0 and r['supply_cutoff']==0 for r in p['thresholds'] if r['method']=='zscore')
+for side in ('supply','demand'):
+    fragment=source.split(f'<div id="{side}-département-components">',1)[1].split('</table>',1)[0]
+    observed=len(re.findall(r'<tr>',fragment))-1
+    expected=sum(r[f'{side}_flag'] for r in p['planning'])
+    assert observed==expected,(side,observed,expected)
 assert 'appendix-facilities' not in parsed.ids and 'appendix-demand' not in parsed.ids
-assert 'including FP counseling' in text
-assert 'mixed signs' in text and 'pattern score' in text
+assert 'Daily provision of offered modern methods' in text and 'Stockout burden' in text
+assert 'higher = worse' in text and 'stock continuity = 1 − burden' in text
+pc=json.loads((data/'pca_appendix/pca_results.json').read_text())
+if pc['audit'].get('negative_supply_PC1_loadings'): assert 'mixed signs' in text and 'pattern score' in text
 assert 'No random effects or interactions' in text
-for pattern in (r'/[Uu]sers/', r'/[Hh]ome/', r'file://',
+for pattern in (r'/[Uu]sers/', r'/[Hh]ome/', r'file:[/][/]' ,
                 r'(?i)bearer\s+[a-z0-9]'):
     assert not re.search(pattern, source), ('Unwanted artifact content', pattern)
     for src in parsed.images:
@@ -92,4 +109,4 @@ for pattern in (r'/[Uu]sers/', r'/[Hh]ome/', r'file://',
 assert not re.search(r'<(?:script|link|img)[^>]+(?:src|href)=["\']https?://', source, re.I)
 assert not re.search(r'url\(["\']?https?://', source, re.I)
 print('PASS: report order, six main supply columns, two maps, 10 embedded figures,')
-print('aggregate downloads, source counts, PCA caveat and portable artifact scan.')
+print('aggregate downloads, source counts, stockout direction, updated definitions and portable artifact scan.')

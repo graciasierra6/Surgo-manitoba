@@ -2,7 +2,7 @@
 args<-commandArgs(trailingOnly=TRUE)
 opt<-function(k){i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k);args[i+1L]}
 input<-opt("--input");admin_input<-input;raw_file<-opt("--raw")
-facility_file<-opt("--facility-input");data_dir<-opt("--data-dir")
+facility_file<-opt("--facility-input");data_dir<-opt("--data-dir");raw_facility<-opt("--raw-facility");cleaned_facility<-opt("--cleaned-facility")
 library(haven);library(jsonlite);library(clubSandwich)
 out<-file.path(data_dir,"checks");dir.create(out,recursive=TRUE,showWarnings=FALSE)
 x<-readRDS(input);admin<-readRDS(admin_input);raw<-read_dta(raw_file)
@@ -36,11 +36,31 @@ reconciliation<-read.csv(file.path(data_dir,"supply_input_reconciliation.csv"))
 add("Every assigned and department supply component reconciled",nrow(reconciliation)==1278&&all(reconciliation$passed))
 add("Context coverage and incomplete components",nrow(frame$profiles)==82&&sum(complete.cases(frame$profiles[S]))==77)
 fac<-readRDS(facility_file);fac<-fac[fac$country=="cotedivoire",];fac$geo<-key(fac$assigned_join_area)
+raw_fp<-read_dta(raw_facility,col_select=all_of(c("fid","s2_5_sp","s5_1","s5_2a","s5_2b2m","s5_2b3m","s5_2c","s5_2d","s5_2e","s5_2f","s5_2g3a","s5_2g5a")))
+ii<-match(fac$fid,as.character(raw_fp$fid));add("Raw facility IDs matched for FP eligibility",!anyNA(ii))
+clean<-read.csv(cleaned_facility,check.names=FALSE,stringsAsFactors=FALSE);clean<-clean[clean$loc=="CDI",]
+ci<-match(fac$fid,clean$fid)
+add("Original cleaned stockout burden retained",nrow(clean)==3078&&!anyNA(ci)&&same(as.numeric(fac$p_any_stockout),as.numeric(clean$p_any_stockout[ci])))
+fp<-as.numeric(raw_fp$s2_5_sp[ii]);onsite<-as.numeric(raw_fp$s5_1[ii]);inventory<-fac
+add("General FP provision distinguished from on-site provision",sum(fp%in%1 & onsite%in%1)==2614&&sum(fp%in%1 & onsite%in%2)==109)
+add("Daoukro general FP Yes does not imply on-site Yes",sum(fac$geo%in%"DAOUKRO" & fp%in%1)==19&&all(onsite[fac$geo%in%"DAOUKRO" & fp%in%1]%in%2))
+q<-as.data.frame(lapply(raw_fp[ii,setdiff(names(raw_fp),c("fid","s2_5_sp"))],as.numeric))
+# Independently count a method class once. A recorded Daily variant establishes
+# daily provision; any recorded 1-4 variant establishes offering of that class.
+groups<-list("s5_2a",c("s5_2b2m","s5_2b3m"),"s5_2c","s5_2d","s5_2e","s5_2f",c("s5_2g3a","s5_2g5a"))
+day<-offer<-matrix(0,nrow(fac),7)
+for(j in seq_along(groups)){
+ vv<-as.matrix(q[groups[[j]]]);day[,j]<-rowSums(vv==1,na.rm=TRUE)>0
+ offer[,j]<-rowSums(vv>=1&vv<=4,na.rm=TRUE)>0
+}
+fac$daily_provision<-ifelse(rowSums(offer)>0,rowSums(day)/rowSums(offer),NA_real_)
+fac<-fac[fp%in%1,]
+add("Only confirmed general FP-service providers",nrow(fac)==2723&&sum(fac$geo%in%unique(d$geo))==2370)
 boolean<-function(v)ifelse(tolower(v)%in%c("true","1"),1,ifelse(tolower(v)%in%c("false","0"),0,NA_real_))
 fac$offering<-boolean(fac$one_larc_3_sa_offer);fac$free<-as.numeric(fac$p_free_prod)
-fac$training<-as.numeric(fac$p_train);fac$counselor<-as.numeric(fac$counselor_available)
-fac$larc_stock<-boolean(fac$one_larc_stockin);fac$popular_stock<-boolean(fac$mp_in_stock)
-fac$complete_supply<-complete.cases(fac[S])
+fac$training<-as.numeric(fac$p_train);fac$larc_stock<-boolean(fac$one_larc_stockin)
+fac$stockout_burden<-as.numeric(fac$p_any_stockout)
+add("Revised six supply components",identical(S,c("offering","free","training","daily_provision","larc_stock","stockout_burden")))
 for(g in unique(d$geo[!is.na(d$geo)]))for(k in S){
  ff<-fac[fac$geo%in%g,];v<-ff[[k]];v<-v[is.finite(v)];expected<-if(length(v))mean(v)else NA_real_
  observed<-frame$supply[[k]][d$geo%in%g]
@@ -48,15 +68,16 @@ for(g in unique(d$geo[!is.na(d$geo)]))for(k in S){
  else add(paste("Department profile assigned to every woman",g,k),all(abs(expected-observed)<=5.00001e-6))
 }
 add("Every woman's six assigned measures independently recomputed",TRUE,nrow(d)*6)
-add("All 100 facility department-equivalents retained",length(unique(fac$geo))==100&&nrow(fac)==3078)
+add("All 100 facility department-equivalents retained",length(unique(inventory$geo))==100&&nrow(inventory)==3078)
 add("Four unmatched departments are unassessed rather than zero",all(is.na(as.matrix(frame$supply[need&!d$matched_supply,]))))
 add("Daoukro free provision remains undefined",all(is.na(frame$supply$free[d$geo%in%"DAOUKRO"])))
+add("Daoukro daily provision also remains undefined",all(is.na(frame$supply$daily_provision[d$geo%in%"DAOUKRO"])))
 add("92 women have incomplete department supply inputs",sum(need&!complete.cases(frame$supply))==92)
 add("Three-LARC indicator is constant, not secretly modeled",all(boolean(fac$three_larc_stockin)==0))
 item<-function(k,pos,valid){v<-num(k);ifelse(v%in%valid,as.integer(v%in%pos),NA_real_)}
 combine<-function(mat)apply(mat,1,function(v)if(any(v==1,na.rm=TRUE))1 else if(anyNA(v))NA_real_ else 0)
 ind<-list(agency=item("HS7C",1,1:2),stigma=combine(cbind(item("PB7B",1:2,1:4),item("PB7C",1:2,1:4))),
- health=combine(cbind(item("PB2A",1:2,1:4),item("PB2B",1:2,1:4),item("PB2C",1:2,1:4))),
+ health=item("PB2A",1:2,1:4),
  confidence=combine(cbind(item("MC5A",3:4,1:4),item("MC5B",3:4,1:4))),opposes=item("FP1",3:4,1:4))
 mp<-sapply(paste0("MP4_",letters[1:9]),num)
 ind$fertility<-vapply(seq_len(nrow(mp)),function(i){v<-mp[i,]
@@ -99,12 +120,13 @@ write.csv(do.call(rbind,corr),file.path(out,"component_correlations.csv"),row.na
 z<-sapply(D,function(k){v<-ind[[k]];ok<-need&is.finite(v);mu<-weighted.mean(v[ok],d$weight[ok]);
  sd<-sqrt(weighted.mean((v[ok]-mu)^2,d$weight[ok]));(v-mu)/sd})
 personal<-rowSums(z)/6
+fav<-frame$supply[S];fav$stockout_burden<-1-fav$stockout_burden
 zs<-sapply(S,function(k){r<-p$component_trace[p$component_trace$side=="Supply"&p$component_trace$variable==k,];
- (100*frame$supply[[k]]-unique(r$indicator_mean))/unique(r$indicator_SD)})
+ (100*fav[[k]]-unique(r$indicator_mean))/unique(r$indicator_SD)})
 supply<- -rowSums(zs)/6
 pv<-readRDS(file.path(data_dir,"pca_appendix/pca_scores.rds"));max_svd<-0
 for(side in c("demand","supply")){
- f<-pv[[paste0(side,"_fit")]];mat<-if(side=="demand")as.matrix(d[D])else as.matrix(frame$supply[S])
+ f<-pv[[paste0(side,"_fit")]];mat<-if(side=="demand")as.matrix(d[D])else as.matrix(fav)
  use<-need&complete.cases(mat);w<-d$weight[use]/sum(d$weight[use])
  z0<-sweep(sweep(mat[use,,drop=FALSE],2,f$center,"-"),2,f$scale,"/")
  sv<-svd(z0*sqrt(w));err<-max(abs(sv$d^2-f$eigenvalues));max_svd<-max(max_svd,err)
@@ -150,11 +172,13 @@ areas<-sort(unique(d$geo[!is.na(d$geo)]))
 for(side in c("Demand","Supply")){
  fields<-if(side=="Demand")D else S
  mat<-sapply(fields,function(k){rr<-p$heatmap[p$heatmap$side==side&p$heatmap$variable==k,];rr$value[match(areas,rr$geo)]})
- zz<-sweep(sweep(mat,2,colMeans(mat,na.rm=TRUE),"-"),2,apply(mat,2,sd,na.rm=TRUE),"/")
+ if(side=="Supply")mat[,"stockout_burden"]<-100-mat[,"stockout_burden"]
+ ref<-complete.cases(mat)
+ zz<-sweep(sweep(mat,2,colMeans(mat[ref,,drop=FALSE]),"-"),2,apply(mat[ref,,drop=FALSE],2,sd),"/")
  expected<-rowMeans(zz);ss<-p$scores[p$scores$method=="zscore",];ss<-ss[match(areas,ss$geo),]
  observed<-if(side=="Demand")ss$demand_score else ss$supply_score
  add(paste("Independent geographic score",side),same(expected,observed))
- cut<-median(expected,na.rm=TRUE);flag<-if(side=="Demand")expected>cut+1e-10 else expected<cut-1e-10
+ cut<-0;add(paste("Final score mean and cutoff equal zero",side),abs(mean(expected[ref]))<1e-12&&p$thresholds[p$thresholds$method=="zscore",if(side=="Demand")"demand_cutoff"else"supply_cutoff"]==0);flag<-if(side=="Demand")expected>cut+1e-10 else expected<cut-1e-10
  add(paste("Independent geographic threshold",side),same(flag,if(side=="Demand")ss$demand_flag else ss$supply_flag))
 }
 model_rows<-zm$score_joint$data$row
@@ -180,53 +204,18 @@ weight_groups<-weight_groups[order(-weight_groups$weight_share),]
 write.csv(weight_groups,file.path(out,"model_weight_concentration.csv"),row.names=FALSE)
 test_diagnostics<-do.call(rbind,lapply(c("models_zscore","pca_appendix/models"),function(folder){v<-read.csv(file.path(data_dir,folder,"model_block_tests.csv"));v$method<-folder;v$denominator_df_below_one<-v$df_denom<1;v}))
 write.csv(test_diagnostics,file.path(out,"block_test_diagnostics.csv"),row.names=FALSE)
-# Facility and demand complete-case checks retain fixed primary score references.
-for(check_type in c("facility","demand")){
- alt_dir<-file.path(data_dir,if(check_type=="facility")"complete_facility_sensitivity"else"complete_demand_sensitivity")
- ap<-fromJSON(file.path(alt_dir,"report_data.json"));af<-readRDS(file.path(alt_dir,"analysis_frame.rds"))
- add(paste(check_type,"all original women retained"),identical(af$women$id,d$id)&&identical(af$women$need,need))
- add(paste(check_type,"counseling retained in six components"),identical(ap$supply_variables,S)&&ap$audit$counseling_included)
- if(check_type=="facility"){
-  add("Complete facility count 1173",ap$audit$facility_records_used==1173)
-  for(g in areas)for(k in S){vv<-fac[[k]][fac$geo%in%g&fac$complete_supply];actual<-if(length(vv))mean(vv)else NA_real_
-   v<-af$supply[[k]][af$women$geo%in%g]
-   add(paste("Complete facility summary",g,k),if(is.na(actual))all(is.na(v))else all(abs(v-actual)<1e-12))
-  }
- }else{
-  ccD<-need&complete.cases(d[D]);add("3954 complete-demand women",sum(ccD)==3954)
-  add("Demand sensitivity leaves supply unchanged",same(af$supply,frame$supply))
-  for(g in areas)for(k in D){rr<-ap$heatmap[ap$heatmap$geo==g&ap$heatmap$side=="Demand"&ap$heatmap$variable==k,];ok<-ccD&d$geo%in%g
-   expected<-if(any(ok))100*weighted.mean(d[[k]][ok],d$weight[ok])else NA_real_
-   add(paste("Complete demand prevalence",g,k),same(rr$value,expected)&&rr$n_valid==sum(ok))
-  }
- }
- for(side in c("Demand","Supply")){
-  fields<-if(side=="Demand")D else S
-  value<-vapply(areas,function(g)mean(vapply(fields,function(k){rr<-ap$heatmap[ap$heatmap$geo==g&ap$heatmap$side==side&ap$heatmap$variable==k,];
-   ref<-p$component_trace[p$component_trace$side==side&p$component_trace$variable==k,];
-   (rr$value-unique(ref$indicator_mean))/unique(ref$indicator_SD)},numeric(1))),numeric(1))
-  observed<-ap$scores[ap$scores$method=="zscore",];observed<-observed[match(areas,observed$geo),]
-  add(paste(check_type,"fixed-reference score",side),same(unname(value),if(side=="Demand")observed$demand_score else observed$supply_score))
-  cut<-p$thresholds[p$thresholds$method=="zscore",if(side=="Demand")"demand_cutoff"else"supply_cutoff"]
-  flag<-if(side=="Demand")value>cut+1e-10 else value<cut-1e-10
-  add(paste(check_type,"fixed threshold",side),same(unname(flag),if(side=="Demand")observed$demand_flag else observed$supply_flag))
- }
-}
-af<-readRDS(file.path(data_dir,"complete_facility_sensitivity/analysis_frame.rds"));aFits<-readRDS(file.path(data_dir,"complete_facility_sensitivity/models_zscore/fitted_models.rds"))
-for(id in names(aFits)){
- ob<-aFits[[id]];dd<-ob$data
- add(paste("Facility sensitivity same model women",id),identical(dd$row,zm[[id]]$data$row))
- expectedS<- -rowMeans(sapply(S,function(k){ref<-p$component_trace[p$component_trace$side=="Supply"&p$component_trace$variable==k,];(100*af$supply[[k]]-unique(ref$indicator_mean))/unique(ref$indicator_SD)}))
- add(paste("Facility sensitivity supply assignment",id),max(abs(dd$supply_risk-expectedS[dd$row]))<1e-12)
- ff<-glm(ob$formula,data=dd,weights=weight/mean(weight),family=quasibinomial(),control=glm.control(maxit=100))
- add(paste("Facility sensitivity coefficients",id),max(abs(coef(ff)-coef(ob$fit)))<1e-10)
- V<-clubSandwich::vcovCR(ff,cluster=dd$geo,type="CR2",inverse_var=FALSE)
- add(paste("Facility sensitivity covariance",id),max(abs(V-ob$V))<1e-10)
-}
+# The existing common model sample is required for comparisons; facility
+# summaries remain per-measure available-case means among confirmed providers.
+rr<-frame$profiles[S];rr$stockout_burden<-1-rr$stockout_burden
+ref<-complete.cases(rr);risk_inputs<-1-rr[ref,,drop=FALSE]
+expected_risk<-rowMeans(scale(risk_inputs))
+ss<-p$scores[p$scores$method=="zscore",]
+add("Risk-first and readiness-first scores equivalent",max(abs(expected_risk+ss$supply_score[match(frame$profiles$geo[ref],ss$geo)]))<1e-10)
+add("Missing supply never classified as neither",all(ss$category[!is.finite(ss$supply_score)]=="unassessed"))
 add("Models already require complete demand",all(complete.cases(zm$score_joint$data[D])))
 save<-do.call(rbind,checks);write.csv(save,file.path(out,"audit_checks.csv"),row.names=FALSE)
 write_json(list(check_count=nrow(save),all_passed=all(save$passed),source_rows=nrow(x),need_n=sum(need),model_n=nrow(zm$score_joint$data),
- models=15,source_raw_columns_verified=length(raw_same),facility_component_checks=nrow(reconciliation),
+ models=10,source_raw_columns_verified=length(raw_same),facility_component_checks=nrow(reconciliation),
  woman_supply_value_checks=nrow(d)*6,weighted_SVD_max_error=max_svd,all_models_same_women=TRUE,
- all_model_outcomes_modern=TRUE,no_random_effects=TRUE),file.path(out,"verification.json"),auto_unbox=TRUE,pretty=TRUE,digits=12)
+ all_model_outcomes_modern=TRUE,no_random_effects=TRUE,fp_providers_only=TRUE,health_PB2A_only=TRUE,primary_threshold_zero=TRUE),file.path(out,"verification.json"),auto_unbox=TRUE,pretty=TRUE,digits=12)
 cat('Passed',nrow(save),'independent checks.\n')

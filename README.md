@@ -1,89 +1,154 @@
 # SURGO–Manitoba
 
-Join individual SURGO women to their local University of Manitoba facility supply
-environment in Lagos, Sindh, Senegal and Côte d’Ivoire, then generate the four
-country analysis reports. Every source woman and original survey variable is
-retained in the joins.
+Join individual SURGO women to their recorded University of Manitoba facility
+supply environment in Lagos, Senegal, Côte d’Ivoire and Sindh. Original woman
+records and survey variables are retained. Supply profiles are contextual area
+measures; they do not identify the facility a woman attended.
 
-## Project structure
+## Inputs and data protection
 
-| Folder | Purpose |
-|---|---|
-| `administrative_area/` | Existing LGA/department/district aggregation and woman-level join. [Documentation](administrative_area/README.md) |
-| `urban_rural/` | Existing administrative area + Rural/Urban aggregation and join. [Documentation](urban_rural/README.md) |
-| `analysis/` | **New addition:** four country Rmds, analysis scripts, shared figures/style and public map assets. [Methods and country decisions](analysis/README.md) |
-| `reports/` | Four self-contained HTML reports and their build manifest. |
-| `R/` | Dependency installation and the single report-generation entry point. |
-| `tests/` | Calculation, linkage-to-analysis, report and reproducibility checks. |
+Original surveys, cleaned facility inputs, intermediate joins, fitted models and
+woman-level outputs stay outside GitHub. Supply external inputs at runtime through
+`SURGO_MANITOBA_INPUT_ZIP`, `--input-zip` or documented existing-join/cache arguments.
+The input ZIP is checked against its manifest. No personal computer paths or
+credentials belong in shared code, reports or documentation. Public display assets
+and aggregate report/build-validation metadata are included; input survey datasets
+are not. The root `.gitignore` excludes working data, caches and generated datasets.
 
-The two existing linkage modules are unchanged from the GitHub repository and
-remain distinctly separate and independently runnable. Today's analysis is an
-additional layer that consumes their outputs. It does not replace their geography,
-aggregation or unmatched-data policies. New analysis filenames describe their
-purpose; there are no duplicate country workflow runners.
-
-## Apply today’s addition
-
-Copy the addition package’s contents into the existing repository root. It adds
-`analysis/`, `reports/`, `R/`, tests and dependency records, and updates this README.
-It contains no replacement files for `administrative_area/` or `urban_rural/`.
-
-## Inputs and setup
-
-Keep the existing `SURGO_Manitoba_linkage_inputs.zip` outside the repository, for
-example in synced OneDrive storage. Its 54 source files are checksummed. No input
-files need to be added to that bundle for these reports. Public display boundaries
-are included in `analysis/assets/`; no previous HTML or temporary folder is needed.
-
-Requires R, Python 3.9+ (standard library only), and Pandoc. Install recorded R
-package versions from `renv.lock`:
+Install the declared dependencies:
 
 ```sh
 Rscript R/install_dependencies.R
 ```
 
-Pandoc must be discoverable by `rmarkdown`. If needed, set `RSTUDIO_PANDOC` to your
-Pandoc directory. Spatial R packages require compatible GDAL/GEOS/PROJ/UDUNITS
-libraries. See the [analysis guide](analysis/README.md) for software details.
+Python 3 formats saved aggregate results; statistical calculations and model fits
+use R. Pandoc must be available; its directory can be supplied at runtime with
+`--pandoc-dir` or `RSTUDIO_PANDOC`.
 
-## Generate the four reports
+## Two geographic join modules
 
-From the repository root, set your external input location and run:
-
-```sh
-export SURGO_MANITOBA_INPUT_ZIP="/path/to/SURGO_Manitoba_linkage_inputs.zip"
-Rscript R/run_reports.R
-```
-
-The command prepares and validates the joins, calculates the country summaries,
-scores and models, runs their checks, and knits the four Rmds. Final HTMLs go to
-`reports/`; private intermediate data and fits go to ignored `output/report_build/`.
-All input, cache and output locations are runtime parameters. Use `--help` for
-options, or select one country with `--countries lagos`.
-
-| Report | Source women | Women in need | Common model sample |
-|---|---:|---:|---:|
-| [Lagos](reports/Lagos_analysis.html) | 4,555 | 2,159 | 1,865 |
-| [Sindh](reports/Sindh_analysis.html) | 10,364 | 3,274 | 3,048 |
-| [Senegal](reports/Senegal_analysis.html) | 7,169 | 1,905 | 1,445 |
-| [Côte d’Ivoire](reports/Cote_dIvoire_analysis.html) | 10,859 | 4,292 | 3,768 |
-
-Coverage maps use all source records. Subsequent results use original SURGO FPN2 = 1,
-except Sindh's explicitly documented supplied reconstruction. Women's results use
-survey weights; facility aggregation is unweighted. Models describe adjusted
-cross-sectional associations, with geographic clustered inference and no random
-effects. Missingness and incomplete survey-design information remain disclosed.
-
-## Run the checks
+| Module | Join level | Documentation |
+|---|---|---|
+| `administrative_area/` | Lagos LGA, Senegal/CDI département-equivalent area, Sindh district | [Administrative-area join](administrative_area/README.md) |
+| `urban_rural/` | Administrative area plus Rural/Urban, where available | [Residence-specific join](urban_rural/README.md) |
 
 ```sh
-Rscript urban_rural/tests/test_urban_rural.R
-python3 tests/verify_report_reproduction.py --work-dir output/report_build
-python3 tests/check_release.py
+Rscript administrative_area/R/run_join.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP" --geography-version both
+Rscript urban_rural/R/run_join_urban_rural.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP" --geography-version both
 ```
 
-The saved-result check covers 27,149 values across all four analyses. The report
-manifest records software versions and input/report hashes without runtime paths.
-Only source code, documentation, public display assets, aggregate test references
-and the four HTMLs belong in the repository. Input ZIPs, raw surveys, woman-level
-datasets, fitted objects, caches and logs remain excluded.
+Base joins retain the original supply-summary definitions for upstream reconciliation.
+The current administrative-area **analysis preparation then reaggregates supply
+among confirmed FP providers**, writes the analysis-specific woman-level join to
+ignored working output, and uses that profile in all subsequent calculations.
+The residence-specific join module is unchanged by this analysis update. Sindh's
+women file has no documented Rural/Urban variable and is matched by district only.
+
+## Current administrative-area reports
+
+Reports replace their earlier versions under the same filenames. One runner
+builds all four, with inputs supplied at runtime:
+
+```sh
+Rscript R/run_aggregate_reports.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP"
+```
+
+A verified join and extracted bundle can be reused:
+
+```sh
+Rscript R/run_aggregate_reports.R \
+  --join-dir "$SURGO_MANITOBA_JOIN_DIR" \
+  --cache-dir "$SURGO_MANITOBA_CACHE_DIR" \
+  --countries all
+```
+
+| Geography | Report | Source women | Women in need | Common model sample |
+|---|---|---:|---:|---:|
+| Lagos | [Lagos_analysis_aggregate.html](reports/Lagos_analysis_aggregate.html) | 4,555 | 2,159 | 1,896 |
+| Senegal | [Senegal_analysis_aggregate.html](reports/Senegal_analysis_aggregate.html) | 7,169 | 1,905 | 1,558 |
+| Côte d’Ivoire | [Cote_dIvoire_analysis_aggregate.html](reports/Cote_dIvoire_analysis_aggregate.html) | 10,859 | 4,292 | 3,951 |
+| Sindh | [Sindh_analysis.html](reports/Sindh_analysis.html) | 10,364 | 3,274 | 3,115 |
+
+Matching R entry scripts, Rmds, definitions, model and verification helpers are in
+`administrative_area/analysis/<country>/`. See the [analysis guide](administrative_area/analysis/README.md)
+and each country README for reproduction and qualifications. The separate earlier
+residence-specific Lagos, Senegal and Côte d’Ivoire reports remain available under
+`reports/Lagos_analysis.html`, `reports/Senegal_analysis.html` and
+`reports/Cote_dIvoire_analysis.html`. Their workflow is `R/run_reports.R`.
+Sindh always delegates to the current district workflow, since residence splitting
+is unavailable there.
+
+## Population, measures and scores
+
+Coverage precedes the need restriction. From Section 2 onward, Lagos, Senegal and
+Côte d’Ivoire use original SURGO FPN2 = 1. Sindh uses the previously authorized
+instrument-based `fpn2_derived`, because its source FPN2 field is entirely code 95.
+The existing Sindh SA1 = 95/97 exclusion policy is retained and explicitly qualified;
+no permanent-protection additions are made. These flags are not the DHS unmet-need
+algorithm.
+
+Require FP provision: Lagos/Sindh Q506 Yes; Senegal s5_6 Yes; Côte d’Ivoire s2_5_sp
+Yes. The Côte d’Ivoire filter is general FP service provision and does not also
+require Yes to its separate on-site question s5_1. Within each geographic area,
+average valid facility values equally, retaining valid zeros/FALSE and excluding
+unknown or undefined values separately by measure. No facility weights or automatic
+zero filling. Preserve the original cleaned UoM definitions.
+
+Six supply inputs capture short/long-acting offering, free-product proportion,
+trained-provider proportion, daily provision of offered modern-method classes,
+at least one LARC in stock, and original cleaned stockout burden. Counseling and
+popular-product stock are no longer selected components. Six demand domains cover
+general healthcare permission, anticipated stigma, PB2A-only health beliefs,
+future-fertility concerns, method confidence under the retained knowledge label,
+and opposition to FP. MC5 measures confidence, not an objective knowledge test.
+
+For geographic classification, calculate weighted demand percentages and unweighted
+FP-facility summaries. Standardize each component against its side's complete-area
+reference mean and sample SD, then average six z-scores. Reverse stockout burden
+to continuity before supply scoring. Flag demand above zero and supply readiness
+below zero. These are relative patterns, not causal binding constraints or absolute
+service standards. Tables show the weakest service components and most elevated
+reported concerns, ordered by component z-scores rather than intervention effects.
+Sindh uses only this scoring approach. Other countries retain their documented
+alternative-scoring/PCA appendices.
+
+## Models and interpretation
+
+Five primary models all have **current modern-method use** as outcome: personal
+demand score; assigned supply risk; both scores; six personal demand indicators;
+and those indicators plus supply risk. Each country uses one common complete model
+sample. Personal demand scores retain each woman's own responses; supply risk is
+negative area readiness shared by residents of that area.
+
+All models retain final SURGO weights and adjust for age, age squared, education
+and fertility goal. Partnership and Rural/Urban are included in Lagos, Senegal and
+Côte d’Ivoire. In Sindh, partnership is constant in the modeled group and Rural/Urban
+is unavailable. Primary uncertainty uses geographic CR2 clustering, Satterthwaite
+intervals, HTZ block tests and Holm adjustment within each joint model's two tests.
+No random effects or interactions. Available recorded sampling-cluster fields
+support survey summaries/inference checks in Senegal, Côte d’Ivoire and Sindh.
+Original strata/FPC are unavailable; Lagos EA/PSU remains unconfirmed and its
+overview design intervals are withheld. Country reports explain these limits.
+
+Important qualifications remain: limited geographic contexts; component overlap;
+uncertainty conditional on estimated scores; incomplete source responses and some
+geographic-linkage qualifications. Sindh training proportions are defined for only
+278/2,823 FP facilities. Côte d’Ivoire has four unmatched survey areas and Daoukro's
+undefined free/daily measures, leaving five supply-unassessed areas. Verification
+checks implementation; it does not establish power, causal dominance or an optimal
+investment allocation.
+
+## Checks and outputs
+
+```sh
+python3 tests/check_aggregate_release.py
+```
+
+Each workflow independently checks raw-field preservation, FP eligibility,
+geographic assignments, valid-response means, scoring direction/cutoffs, personal
+scores, weighted model coefficients, geographic covariance and report contents.
+The release checks inspect the actual source/report files and decoded embedded
+assets. `reports/aggregate_build_manifest.json` records relative report names,
+hashes, software versions and verification status; it contains no input datasets.
+Working inputs and outputs remain in ignored directories. Upload source code,
+documentation and the HTML reports, without local input/output folders or ZIPs.

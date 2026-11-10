@@ -4,11 +4,11 @@ opt<-function(k){i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k)
 optional<-function(k,default){i<-match(k,args);if(is.na(i))return(default);if(i==length(args))stop("Supply ",k);args[i+1L]}
 input<-opt("--input");admin_input<-input;facility_file<-opt("--facility-input")
 facility_sample<-optional("--facility-sample","all");demand_sample<-optional("--demand-sample","available");reference_dir<-optional("--reference-dir","")
-stopifnot(facility_sample%in%c("all","complete"),demand_sample%in%c("available","complete"))
+stopifnot(facility_sample=="all",demand_sample=="available",reference_dir=="")
 raw_file<-opt("--raw");raw_facility<-opt("--raw-facility");codebook<-opt("--district-codebook");out<-opt("--output-dir")
 for(pkg in c("survey","jsonlite","haven"))if(!requireNamespace(pkg,quietly=TRUE))stop("Install ",pkg)
 here<-dirname(gsub("~+~", " ", sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)[1]), fixed=TRUE))
-source(file.path(here,"..","..","..","analysis","cotedivoire","cdi_definitions.R"));dir.create(out,recursive=TRUE,showWarnings=FALSE)
+source(file.path(here,"..","..","..","analysis","cotedivoire","cdi_definitions.R"));source(file.path(here,"supply_definitions.R"));dir.create(out,recursive=TRUE,showWarnings=FALSE)
 inputs<-c(input,admin_input,facility_file,raw_file,raw_facility,codebook)
 hash<-unname(tools::md5sum(inputs));savecsv<-function(v,name)write.csv(v,file.path(out,name),row.names=FALSE,na="")
 key<-cdi_key;lab<-function(v)if(inherits(v,"haven_labelled"))as.character(haven::as_factor(v))else as.character(v)
@@ -20,7 +20,7 @@ stopifnot(nrow(x)==10859,nrow(admin)==nrow(x),identical(x$IDW,admin$IDW),
  identical(as.character(x$link_geo_join),as.character(admin$link_geo_join)))
 # Residence is retained from the woman survey for adjustment, never as a supply key.
 x$link_rurb<-ifelse(as.numeric(x$FV_MILIEU)==1,"Rural",ifelse(as.numeric(x$FV_MILIEU)==2,"Urban",NA_character_))
-d<-cdi_definitions(x);domains<-cdi_domains();D<-domains$D;DL<-domains$DL;S<-domains$S;SL<-domains$SL
+d<-cdi_definitions(x);pb2a<-as.numeric(x$PB2A);d$health<-ifelse(pb2a%in%1:4,as.numeric(pb2a%in%1:2),NA_real_);domains<-cdi_domains();D<-domains$D;DL<-domains$DL;S<-domains$S;SL<-domains$SL
 sp<-cdi_supply(x);d$source_profile<-ifelse(is.na(d$geo),NA_character_,d$geo)
 d$matched_supply<-as.logical(x$link_has_supply)
 # Do not mutate any joined supply value or replace a missing profile with zero.
@@ -40,7 +40,7 @@ savecsv(ctx,"assigned_supply_profiles.csv")
 fac<-readRDS(facility_file);fac<-fac[fac$country=="cotedivoire",];fac$geo<-key(fac$assigned_join_area)
 areas<-sort(profiles$geo);names_map<-setNames(profiles$district,profiles$geo);mapped<-fac$geo%in%areas
 # Independently restore raw health-district names and check the explicit department rollups.
-r<-haven::read_dta(raw_facility,col_select=tidyselect::all_of(c("fid","s1_2","s1_5","s7_2","s2_5_sp")))
+r<-haven::read_dta(raw_facility,col_select=tidyselect::all_of(c("fid","s1_2","s1_5","s7_2","s2_5_sp",cdi_frequency_fields())))
 ri<-match(fac$fid,lab(r$fid));stopifnot(!anyNA(ri))
 cb<-read.csv(codebook,stringsAsFactors=FALSE);ci<-match(as.numeric(r$s1_2[ri]),as.numeric(cb$code));stopifnot(!anyNA(ci))
 restored<-cb$label[ci]
@@ -54,25 +54,19 @@ res<-as.numeric(r$s1_5[ri]);rr<-ifelse(res%in%1,"Rural",ifelse(res%in%2,"Urban",
 stopifnot(identical(rr,as.character(fac$rurb)))
 counsel<-as.numeric(r$s7_2[ri]);cf<-ifelse(counsel%in%1,1,ifelse(counsel%in%2,0,NA_real_))
 stopifnot(isTRUE(all.equal(cf,fac$counselor_available,check.attributes=FALSE)))
+inventory<-fac
+frequency<-cdi_frequency(r[ri,]);fac<-cbind(fac,frequency)
+fp<-as.numeric(r$s2_5_sp[ri]);fac<-fac[fp%in%1,];mapped<-fac$geo%in%areas
 fac$offering<-bool(fac$one_larc_3_sa_offer);fac$free<-as.numeric(fac$p_free_prod)
-fac$training<-as.numeric(fac$p_train);fac$counselor<-as.numeric(fac$counselor_available)
-fac$larc_stock<-bool(fac$one_larc_stockin);fac$popular_stock<-bool(fac$mp_in_stock)
-stopifnot(all(bool(fac$three_larc_stockin)==0),nrow(fac)==3078,length(unique(fac$geo))==100)
-# All six supply measures, including counseling, define facility completeness.
-fac$complete_supply<-complete.cases(fac[S]) & apply(fac[S],1,function(v)all(is.finite(v)))
-savecsv(data.frame(geo=areas,department=names_map[areas],
- total_facilities=vapply(areas,function(g)sum(fac$geo%in%g),integer(1)),
- complete_facilities=vapply(areas,function(g)sum(fac$geo%in%g & fac$complete_supply),integer(1))),"facility_complete_case_coverage.csv")
-stopifnot(sum(mapped & fac$complete_supply)==1173)
-if(facility_sample=="complete"){
- for(g in areas){ff<-fac[fac$geo%in%g & fac$complete_supply,]
-  for(k in S)profiles[[k]][profiles$geo==g]<-valid_mean(ff[[k]])
-  profiles$n_facilities[profiles$geo==g]<-nrow(ff)
- }
- for(k in S)sp[[k]]<-profiles[[k]][match(d$geo,profiles$geo)]
- ctx<-unique(cbind(d[c("geo","district","residence","source_profile","matched_supply")],sp,n_facilities=profiles$n_facilities[match(d$geo,profiles$geo)]))
- ctx<-ctx[!is.na(ctx$geo),]
-}
+fac$training<-as.numeric(fac$p_train);fac$larc_stock<-bool(fac$one_larc_stockin)
+fac$stockout_burden<-as.numeric(fac$p_any_stockout)
+stopifnot(nrow(inventory)==3078,nrow(fac)==2723,sum(mapped)==2370,all(bool(fac$three_larc_stockin)==0))
+savecsv(do.call(rbind,lapply(areas,function(g){ff<-fac[fac$geo%in%g,];data.frame(geo=g,department=names_map[[g]],
+ fp_facilities=nrow(ff),daily_valid=sum(is.finite(ff$daily_provision)),daily_undefined=sum(!is.finite(ff$daily_provision)),
+ all_seven_frequency_responses=sum(ff$frequency_valid_categories==7),
+ stockout_valid=sum(is.finite(ff$stockout_burden)),mean_daily_provision=valid_mean(ff$daily_provision),
+ mean_at_least_weekly_provision=valid_mean(ff$at_least_weekly_provision))})),"service_regularity_coverage.csv")
+savecsv(fac[c("fid","geo",names(frequency))],"daily_provision_facility_audit.csv")
 for(k in S)stopifnot(all(vapply(split(sp[[k]],d$geo),function(v)length(unique(v))==1,logical(1))))
 savecsv(ctx,"assigned_supply_profiles.csv")
 reconcile<-list()
@@ -84,8 +78,8 @@ check_profile<-function(ff,pp,scope,area,residence){
    facility_recalculation=actual,joined_value=expected,n_valid=sum(is.finite(ff[[k]])),n_facilities=nrow(ff),passed=passed)
  }
 }
-for(g in areas)check_profile(fac[fac$geo%in%g & (facility_sample=="all" | fac$complete_supply),],profiles[profiles$geo==g,],"Department",g,"All")
-for(j in seq_len(nrow(ctx))){q<-ctx[j,];fi<-fac$geo%in%q$geo & (facility_sample=="all" | fac$complete_supply)
+for(g in areas)check_profile(fac[fac$geo%in%g,],profiles[profiles$geo==g,],"Department",g,"All")
+for(j in seq_len(nrow(ctx))){q<-ctx[j,];fi<-fac$geo%in%q$geo
  check_profile(fac[fi,],q,"Department assigned to woman",q$geo,q$residence)
 }
 reconcile<-do.call(rbind,reconcile);stopifnot(all(reconcile$passed));savecsv(reconcile,"supply_input_reconciliation.csv")
@@ -120,15 +114,15 @@ bars<-lapply(seq_len(nrow(bar_defs)),function(i)c(as.list(bar_defs[i,]),estimate
 rates<-lapply(areas,function(g){a<-subset(need_design,geo==g);list(geo=g,name=names_map[[g]],n=nrow(a$variables),
  cpr=estimate(a,"user"),mcpr=estimate(a,"modern"),intender=estimate(a,"intender"),no_intent=estimate(a,"no_intent"))})
 dn<-d[d$need,];cells<-list();coverage<-list()
-dn_complete<-complete.cases(dn[D]);stopifnot(sum(dn_complete)==3954)
+dn_complete<-complete.cases(dn[D])
 savecsv(do.call(rbind,lapply(c("CDI",areas),function(g){ii<-if(g=="CDI")rep(TRUE,nrow(dn))else dn$geo%in%g
  data.frame(geo=g,department=if(g=="CDI")"Côte d’Ivoire"else names_map[[g]],women_in_need=sum(ii),complete_demand=sum(ii & dn_complete),
  excluded=sum(ii & !dn_complete),complete_weight_share=sum(dn$weight[ii & dn_complete])/sum(dn$weight[ii]))})),"demand_complete_case_coverage.csv")
 for(g in c("CDI",areas)){
  wi<-if(g=="CDI")rep(TRUE,nrow(dn)) else dn$geo%in%g
- fi<-mapped & (if(g=="CDI")rep(TRUE,nrow(fac)) else fac$geo%in%g) & (facility_sample=="all" | fac$complete_supply)
+ fi<-mapped & (if(g=="CDI")rep(TRUE,nrow(fac)) else fac$geo%in%g)
  coverage[[g]]<-list(geo=g,name=if(g=="CDI")"Côte d’Ivoire" else names_map[[g]],women=sum(d$positive & if(g=="CDI")rep(TRUE,nrow(d)) else d$geo%in%g),
-  all_source_women=if(g=="CDI")nrow(d) else sum(d$geo%in%g),n_need=sum(wi),facilities=sum(mapped & (if(g=="CDI")rep(TRUE,nrow(fac))else fac$geo%in%g)))
+  all_source_women=if(g=="CDI")nrow(d) else sum(d$geo%in%g),n_need=sum(wi),facilities=sum(inventory$geo%in%areas & (if(g=="CDI")rep(TRUE,nrow(inventory))else inventory$geo%in%g)),fp_facilities=sum(fi))
  for(j in seq_along(D)){k<-D[j];ok<-wi & is.finite(dn[[k]]) & (demand_sample=="available" | dn_complete)
   cells[[length(cells)+1L]]<-data.frame(geo=g,side="Demand",variable=k,label=DL[j],value=100*wm(dn[[k]][ok],dn$weight[ok]),
     n_valid=sum(ok),n_total=sum(wi),numerator=sum(dn[[k]][ok]==1))}
@@ -136,9 +130,9 @@ for(g in c("CDI",areas)){
   cells[[length(cells)+1L]]<-data.frame(geo=g,side="Supply",variable=k,label=SL[j],value=100*v,
     n_valid=sum(fi & is.finite(fac[[k]])),n_total=sum(fi),numerator=sum(fac[[k]][fi],na.rm=TRUE))}
 }
-for(g in setdiff(sort(unique(fac$geo[!is.na(fac$geo)])),areas)) {
- coverage[[g]]<-list(geo=g,name=fac$assigned_join_area[match(g,fac$geo)],women=0,
-  all_source_women=0,n_need=0,facilities=sum(fac$geo==g))
+for(g in setdiff(sort(unique(inventory$geo[!is.na(inventory$geo)])),areas)) {
+ coverage[[g]]<-list(geo=g,name=inventory$assigned_join_area[match(g,inventory$geo)],women=0,
+  all_source_women=0,n_need=0,facilities=sum(inventory$geo==g),fp_facilities=sum(fac$geo==g))
 }
 cells<-do.call(rbind,cells);savecsv(cells,"heatmap_values_and_denominators.csv")
 primary_trace<-if(nzchar(reference_dir))read.csv(file.path(reference_dir,"component_score_trace.csv"),stringsAsFactors=FALSE)else NULL
@@ -146,24 +140,29 @@ primary_thresholds<-if(nzchar(reference_dir))read.csv(file.path(reference_dir,"c
 M<-list(); transforms<-list()
 for(side in c("Demand","Supply")){
  cols<-if(side=="Demand")D else S
- m<-sapply(cols,function(k){z<-cells[cells$side==side & cells$variable==k,];z$value[match(areas,z$geo)]});rownames(m)<-areas
- means<-colMeans(m,na.rm=TRUE);sds<-apply(m,2,sd,na.rm=TRUE);meds<-apply(m,2,median,na.rm=TRUE);iqrs<-apply(m,2,IQR,na.rm=TRUE)
+ original<-sapply(cols,function(k){z<-cells[cells$side==side & cells$variable==k,];z$value[match(areas,z$geo)]})
+ m<-if(side=="Supply")as.matrix(100*cdi_favorable_supply(as.data.frame(original/100)))else original
+ rownames(m)<-areas;reference<-complete.cases(m)
+ means<-colMeans(m[reference,,drop=FALSE]);sds<-apply(m[reference,,drop=FALSE],2,sd)
+ meds<-apply(m[reference,,drop=FALSE],2,median);iqrs<-apply(m[reference,,drop=FALSE],2,IQR)
+ ranks<-matrix(NA_real_,nrow(m),ncol(m),dimnames=dimnames(m))
+ ranks[reference,]<-apply(m[reference,,drop=FALSE],2,rank,ties.method="average")
  stopifnot(all(sds>0),all(iqrs>0))
- M[[side]]<-list(raw=m,rank=apply(m,2,rank,ties.method="average",na.last="keep"),
+ M[[side]]<-list(raw=m,rank=ranks,
   robust=sweep(sweep(m,2,meds,"-"),2,iqrs,"/"),zscore=sweep(sweep(m,2,means,"-"),2,sds,"/"))
- for(k in cols)transforms[[length(transforms)+1L]]<-data.frame(geo=areas,side=side,variable=k,original_pct=m[,k],
+ for(k in cols)transforms[[length(transforms)+1L]]<-data.frame(geo=areas,side=side,variable=k,original_pct=original[,k],aligned_pct=m[,k],higher_raw_is_worse=side=="Supply"&&k=="stockout_burden",reference_included=reference,reference_n=sum(reference),
   indicator_mean=means[k],indicator_SD=sds[k],indicator_median=meds[k],indicator_IQR=iqrs[k],
   component_rank=M[[side]]$rank[,k],zscore=M[[side]]$zscore[,k],robust=M[[side]]$robust[,k])
 }
 classify<-function(df,sf)ifelse(is.na(df)|is.na(sf),"unassessed",ifelse(df&sf,"both",ifelse(df,"demand",ifelse(sf,"supply","neither"))))
 scores<-thresholds<-list()
 for(id in c("rank","raw","robust","zscore")){
- ds<-rowMeans(M$Demand[[id]]);ss<-rowMeans(M$Supply[[id]]);dc<-median(ds,na.rm=TRUE);sc<-median(ss,na.rm=TRUE)
+ ds<-rowMeans(M$Demand[[id]]);ss<-rowMeans(M$Supply[[id]]);dc<-if(id=="zscore")0 else median(ds,na.rm=TRUE);sc<-if(id=="zscore")0 else median(ss,na.rm=TRUE)
  df<-ds>dc+1e-10;sf<-ss<sc-1e-10
  scores[[id]]<-data.frame(method=id,geo=areas,demand_score=ds,supply_score=ss,demand_flag=df,supply_flag=sf,
    demand_priority_rank=rank(-ds,ties.method="average",na.last="keep"),supply_priority_rank=rank(ss,ties.method="average",na.last="keep"),category=classify(df,sf))
- thresholds[[id]]<-data.frame(method=id,demand_cutoff=dc,supply_cutoff=sc,demand_rule="strictly above final-score median",
-  supply_rule="strictly below readiness-score median",demand_reference_n=sum(is.finite(ds)),supply_reference_n=sum(is.finite(ss)))
+ thresholds[[id]]<-data.frame(method=id,demand_cutoff=dc,supply_cutoff=sc,demand_rule=if(id=="zscore")"strictly above final-score mean (zero)"else"strictly above final-score median",
+  supply_rule=if(id=="zscore")"strictly below readiness-score mean (zero)"else"strictly below readiness-score median",demand_reference_n=sum(is.finite(ds)),supply_reference_n=sum(is.finite(ss)))
 }
 dc<-rowSums(sweep(M$Demand$raw,2,apply(M$Demand$raw,2,median,na.rm=TRUE),"-")>1e-10)
 sc<-rowSums(sweep(M$Supply$raw,2,apply(M$Supply$raw,2,median,na.rm=TRUE),"-")< -1e-10)
@@ -172,32 +171,6 @@ scores$median_count<-data.frame(method="median_count",geo=areas,demand_score=dc,
 thresholds$median_count<-data.frame(method="median_count",demand_cutoff=4,supply_cutoff=4,demand_rule="4 or more of six above component medians",
  supply_rule="4 or more of six below component medians",demand_reference_n=sum(is.finite(dc)),supply_reference_n=sum(is.finite(sc)))
 scores<-do.call(rbind,scores);thresholds<-do.call(rbind,thresholds);trace<-do.call(rbind,transforms)
-if(!is.null(primary_trace)){
- # Hold references and thresholds fixed within a comparison using the same domains.
- for(side in c("Demand","Supply")){
-  fields<-if(side=="Demand")D else S
-  for(k in fields){rr<-primary_trace[primary_trace$side==side & primary_trace$variable==k,];ii<-trace$side==side & trace$variable==k
-   stopifnot(nrow(rr)==length(areas))
-   trace$indicator_mean[ii]<-unique(rr$indicator_mean);trace$indicator_SD[ii]<-unique(rr$indicator_SD)
-   trace$zscore[ii]<-(trace$original_pct[ii]-unique(rr$indicator_mean))/unique(rr$indicator_SD)
-  }
-  value<-vapply(areas,function(g)mean(trace$zscore[trace$side==side & trace$geo==g]),numeric(1))
-  cut<-primary_thresholds[primary_thresholds$method=="zscore",if(side=="Demand")"demand_cutoff"else"supply_cutoff"]
-  ix<-which(scores$method=="zscore")
-  if(side=="Demand"){
-   scores$demand_score[ix]<-value[match(scores$geo[ix],areas)]
-   scores$demand_flag[ix]<-scores$demand_score[ix]>cut+1e-10
-   scores$demand_priority_rank[ix]<-rank(-scores$demand_score[ix],ties.method="average")
-   thresholds$demand_cutoff[thresholds$method=="zscore"]<-cut
-  }else{
-   scores$supply_score[ix]<-value[match(scores$geo[ix],areas)]
-   scores$supply_flag[ix]<-scores$supply_score[ix]<cut-1e-10
-   scores$supply_priority_rank[ix]<-rank(scores$supply_score[ix],ties.method="average")
-   thresholds$supply_cutoff[thresholds$method=="zscore"]<-cut
-  }
- }
- scores$category[ix]<-classify(scores$demand_flag[ix],scores$supply_flag[ix])
-}
 planning<-lapply(areas,function(g){q<-scores[scores$method=="zscore" & scores$geo==g,];dt<-trace[trace$geo==g & trace$side=="Demand",];st<-trace[trace$geo==g & trace$side=="Supply",]
  list(geo=g,name=names_map[[g]],category=q$category,demand_flag=q$demand_flag,supply_flag=q$supply_flag,demand_score=q$demand_score,supply_score=q$supply_score,
   top_demand=head(dt$variable[order(-dt$zscore,match(dt$variable,D),na.last=TRUE)],3),
@@ -221,19 +194,21 @@ audit<-list(country="Côte d’Ivoire",source_rows=nrow(x),consenting_positive_w
  weight_field="WEIGHT",psu_field="IDZD: documented unique census-district / enumeration-zone identifier",
  survey_design="Final WEIGHT and recorded IDZD clusters. Construct the full consenting positive-weight frame before selecting FPN2=1. Original strata and FPC are not documented; no identifiers inferred from household or woman IDs.",
  survey_psus=length(unique(d$psu[d$positive])),districts=length(areas),departments=length(areas),
- facility_records=nrow(fac),mapped_facility_records=sum(mapped),facility_only_records=sum(!mapped),unmapped_facility_records=0,
- facility_departments=length(unique(fac$geo)),geography_version="Completed documented health-district to SURGO department-equivalent crosswalk. Raw health-district codes 1-13 restored from supplied companion codebook; explicit Abidjan/Bouake/Gagnoa/Korhogo rollups checked.",
+ facility_records=nrow(inventory),mapped_facility_records=sum(inventory$geo%in%areas),facility_only_records=sum(!inventory$geo%in%areas),unmapped_facility_records=0,
+ eligible_facility_records=nrow(fac),eligible_mapped_facilities=sum(mapped),daily_valid_linked=sum(mapped&is.finite(fac$daily_provision)),daily_undefined_linked=sum(mapped&!is.finite(fac$daily_provision)),stockout_valid_linked=sum(mapped&is.finite(fac$stockout_burden)),health_definition="PB2A only: 1/2 concern, 3/4 no concern, otherwise unresolved",
+ facility_departments=length(unique(inventory$geo)),geography_version="Completed documented health-district to SURGO department-equivalent crosswalk. Raw health-district codes 1-13 restored from supplied companion codebook; explicit Abidjan/Bouake/Gagnoa/Korhogo rollups checked.",
  supply_resolution="Department-wide facility summaries assigned to all women in the same department-equivalent. No residence split or neighboring-area fallback.",
- facility_sample=facility_sample,demand_sample=demand_sample,counseling_included=TRUE,primary_reference_fixed=nzchar(reference_dir),
- facility_records_used=if(facility_sample=="all")sum(mapped)else sum(mapped & fac$complete_supply),complete_demand_women=sum(dn_complete),
+ facility_sample=facility_sample,demand_sample=demand_sample,counseling_included=FALSE,daily_provision_included=TRUE,stockout_burden_included=TRUE,primary_reference_fixed=nzchar(reference_dir),
+ facility_records_used=sum(mapped),complete_demand_women=sum(dn_complete),
  matched_source_women=sum(d$matched_supply),unmatched_source_women=sum(!d$matched_supply),unmatched_need_women=sum(d$need&!d$matched_supply),
  assigned_context_profiles=length(areas),woman_residence_cells=nrow(ctx),matched_context_profiles=sum(vapply(areas,function(g)any(fac$geo%in%g),logical(1))),
  complete_supply_need_women=sum(d$need&complete.cases(sp)),facility_residence_missing=sum(is.na(fac$rurb)),
  supply_unavailable="Three-LARC stock indicator is constant FALSE in the cleaned source; use the already joined at-least-one-LARC stock indicator instead, explicitly labeled.",
- supply_missing="Four department-equivalents lack facility matches: Bonon, Facobly, Gohitafla and Taabo. Daoukro free provision remains undefined at department level. No unknown is coded zero, no partial score or geographic fallback is used. The complete-facility check retains unknown profiles where no complete facility exists.",
- supply_denominators="Original unweighted UoM valid-response definitions. s7_2 counseling: 1=Yes, 2=No, other/unknown excluded. Boolean join summaries retain five-decimal rounding.",
+ supply_missing="Four department-equivalents lack facility matches: Bonon, Facobly, Gohitafla and Taabo. Daoukro free provision remains undefined at department level. No unknown is coded zero, no partial score or geographic fallback is used. All six inputs are required for a supply index; no complete-facility sensitivity replaces the main per-measure valid-response means.",
+ supply_denominators="Restrict s2_5_sp to 1 (confirmed FP providers), then average valid facility values separately by measure, without facility weights. Valid zeros/FALSE remain included; unknown/undefined values are excluded. Daily: count Daily / count recorded offered core modern categories, from s5_2. Injectable/implant variants are collapsed to one category using the most frequent recorded provision. Original cleaned p_any_stockout is retained. Boolean means retain five-decimal rounding.",
+ supply_alignment="Raw burden remains higher = worse in the heatmap. Before all supply scoring/PCA, convert it to continuity = 1 - burden; all six inputs then have favorable direction. Readiness is their average z-score; risk is negative readiness.",
  residence_limitation="s1_5 records facility Rural/Urban directly. Geographic linkage describes the local recorded service environment; it does not identify the facility attended by a woman or prove absence of services in unmatched departments.",
- scoring="Planning uses all facilities in each department and weighted valid-domain demand percentages among original FPN2=1 women. Model demand is individual; every woman receives her department-wide supply profile. Sensitivity checks hold primary normalization and thresholds fixed; no residence-specific profiles enter.",
+ scoring="Planning uses confirmed FP providers and weighted valid-domain demand percentages among original FPN2=1 women. Direction-align first, standardize each side using its complete-department reference set, average six z-scores and classify against zero. Thus each side score has mean zero over its own reference set. Model demand remains personal; supply is department-wide. No residence-specific profile, zero filling or partial index is used.",
  weighted_need_share=wm(as.numeric(d$need[d$positive]),d$weight[d$positive]),
  use_definition="CU1 yes/sometimes plus CU5 prompts. Modern: CU4 1-8, prompted condoms/ECP or explicitly contraceptive LAM. Confirmed traditional-only and nonuse=0; unresolved outcomes stay missing.",
  controls="Age and age squared, Côte d’Ivoire education, partnership, fertility goal and woman Rural/Urban. No random effects or interactions.",

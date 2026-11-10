@@ -25,7 +25,8 @@ sindh_definitions <- function(x, need_file) {
       what = "double", n = nrow(x), size = 4)))
   d$agency <- flag("hs7c", 1, 1:2)
   d$stigma <- any_flag(cbind(flag("pb7b", 1:2, 1:4), flag("pb7c", 1:2, 1:4)))
-  d$health <- any_flag(sapply(paste0("pb2", letters[1:3]), flag, pos = 1:2, valid = 1:4))
+  # Primary health/side-effect belief: perceived health problems, PB2A only.
+  d$health <- flag("pb2a", 1:2, 1:4)
   mp <- sapply(paste0("mp4_", 1:9), nv)
   selected <- rowSums(mp[, 1:8, drop = FALSE] == 1, na.rm = TRUE) > 0
   none <- mp[, 9] %in% 1

@@ -23,7 +23,7 @@ order=['coverage','use','joint','models','definitions','appendix-scoring','appen
 assert [source.index('<section id="'+i+'"') for i in order]==sorted(source.index('<section id="'+i+'"') for i in order)
 assert len(f.images)==10
 assert p['audit']['need_n']==2159 and p['audit']['source_rows']==4555
-assert len(p['supply_variables'])==6 and 'counselor' in p['supply_variables']
+assert p['supply_variables']==['offering','free','training','daily_provision','larc_stock','stockout_burden']
 blobs=[source]
 for image in f.images:
  assert image.startswith('data:image/svg+xml;base64,')
@@ -36,10 +36,15 @@ for blob in blobs:
  assert not any(token in blob.lower() for token in ['co'+'dex','chat'+'gpt','open'+'ai','fi'+'le://']),'Unwanted artifact content'
 assert not re.search(r'<(?:script|link|img)[^>]+(?:src|href)=["\']https?://',source,re.I)
 text=' '.join(f.text)
-for label in ['1,891','1,865','614','1,447','2,159','4,555','mixed signs','No random effects or interactions']:
+for label in ['882','2,159','4,555','PB2A only','Q506','No random effects or interactions']:
  assert label in text,label
-for key in ['supply-priority-summary','demand-priority-summary','supply-department-priorities','demand-department-priorities']:
+z=[r for r in p['thresholds'] if r['method']=='zscore'][0]
+assert z['demand_cutoff']==0 and z['supply_cutoff']==0
+assert 'demand <b>above zero</b>' in source and 'readiness <b>below zero</b>' in source
+assert 'PB2A–C' not in text and 'three_larc_stockin' not in text
+assert 'Both-flagged LGAs are included' in text
+for key in ['supply-component-summary','demand-component-summary','supply-department-components','demand-department-components']:
  assert key in f.ids
-print('PASS: LGA-only report order, two maps, 10 embedded figures, priority tables, denominators and clean assets.')
+print('PASS: LGA-only report order, two maps, 10 embedded figures, component tables, denominators and clean assets.')
 
 assert 'appendix-facilities' not in f.ids and 'appendix-demand' not in f.ids

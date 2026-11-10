@@ -7,7 +7,7 @@ dir.create(out,recursive=TRUE,showWarnings=FALSE)
 report_file<-file.path(data_dir,"report_data.json");report<-jsonlite::fromJSON(report_file)
 report_hash<-unname(tools::md5sum(report_file));frame<-readRDS(file.path(data_dir,"analysis_frame.rds"))
 d<-frame$women;D<-report$demand_variables;S<-report$supply_variables
-eligible<-d$need;dm<-as.matrix(d[D]);sm<-as.matrix(frame$supply[S])
+eligible<-d$need;dm<-as.matrix(d[D]);sm0<-frame$supply[S];sm0$stockout_burden<-1-sm0$stockout_burden;sm<-as.matrix(sm0)
 di<-eligible & complete.cases(dm);si<-eligible & complete.cases(sm)
 weighted_pca <- function(m, weights, anchor = NULL) {
   w <- weights / sum(weights); center <- colSums(m * w)
@@ -92,7 +92,8 @@ audit<-list(method="Separate final-weighted correlation PCAs on individual deman
  negative_supply_PC1_loadings=pc1$variable[pc1$side=="Supply" & pc1$loading<0],
  supply_collapse_equivalence_error=collapse_error,report_md5=report_hash,
  weighting="SURGO weight on both sides. Supply PCA is equivalent to assigned LGA-wide profiles weighted by summed weights of represented women; these are not facility weights.",
- missingness="Require all six demand and all selected supply indicators. No new zero recoding, partial scores or geographic fallback. The already documented one-facility Ibeju free-product exception is retained in the LGA averages.",
+ missingness="Require all six demand and all selected supply indicators. No new zero recoding, partial scores or geographic fallback. Only Q506 Yes facilities contribute; no undefined facility value is zero-filled.",
+ alignment="Stockout burden becomes continuity=1-burden before PCA; all supply inputs favorable.",
  sign="Demand PC1 oriented toward average concern; supply PC1 toward average favorable provision and negated for modeling. Mixed signs remain and are explicitly reported.",
  uncertainty="Permutation and LGA-deletion checks assess exploratory construction stability, not validated survey-design inference. Regression intervals condition on estimated scores.",
  source_unchanged=report_hash==unname(tools::md5sum(report_file)))
@@ -101,6 +102,7 @@ saveRDS(obj,file.path(out,"pca_scores.rds"))
 jsonlite::write_json(obj[setdiff(names(obj),c("scores","demand_fit","supply_fit"))],file.path(out,"pca_results.json"),dataframe="rows",auto_unbox=TRUE,na="null",digits=12)
 jsonlite::write_json(audit,file.path(out,"pca_audit.json"),auto_unbox=TRUE,pretty=TRUE,digits=12)
 labels <- setNames(c(report$demand_labels, report$supply_labels), c(D, S))
+labels["stockout_burden"] <- "Stock continuity (1 - burden)"
 base <- ggplot2::theme_minimal(base_family = "sans", base_size = 11) + ggplot2::theme(
   panel.grid.minor = ggplot2::element_blank(), panel.grid.major.y = ggplot2::element_blank(),
   plot.title = ggplot2::element_text(face = "bold", size = 18, color = "#17374a"),

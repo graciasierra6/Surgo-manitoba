@@ -1,8 +1,48 @@
-# Country analysis
+# Residence-specific analysis and shared definitions
 
-Run **`Rscript R/run_reports.R`** from the repository root. This is the only analysis
-workflow entry point. Each country Rmd can also be knitted independently with its
-input parameters; it calls the same shared pipeline.
+The current administrative-area reports are built with
+`Rscript R/run_aggregate_reports.R`; see the
+[administrative-area analysis guide](../administrative_area/analysis/README.md).
+Those four reports use FP-provider-only supply summaries, PB2A-only health
+beliefs and zero cutoffs for the primary geographic z-scores. Their definitions,
+models and checks were rebuilt together.
+
+This folder retains the earlier residence-specific workflow for Lagos, Senegal
+and Côte d'Ivoire and supplies shared survey definitions to both workflows.
+Sindh has no residence split: either runner delegates to its current district
+module in `administrative_area/analysis/sindh/`.
+
+## Current health-belief definition
+
+As agreed on November 9, 2026, the primary **Health / side-effect beliefs**
+indicator uses **PB2A only** in all four country definition files: 1 for very or
+somewhat likely to experience health problems; 0 for somewhat or very unlikely;
+all other responses remain unresolved. PB2B and PB2C no longer enter this
+primary indicator. Future-fertility concerns continue to use the existing MP4
+definition. The prior PB2A–PB2C any-concern definition is retained in
+`check_health_beliefs.R` solely for comparison.
+
+The three previously rendered residence-specific HTMLs retain their earlier
+results and were not rebuilt in this administrative-area update. Rebuilding those
+reports against the revised shared definitions requires corresponding review of
+their older report wording and reference-snapshot assertions. Use the current
+administrative-area runner for the updated results.
+
+The comparison check reads a caller-supplied administrative join and Sindh need
+file, calls the current country definitions, and exports aggregate statistics:
+
+```sh
+Rscript analysis/check_health_beliefs.R \
+  --join-dir "$SURGO_MANITOBA_JOIN_DIR" \
+  --sindh-need-file "$SURGO_MANITOBA_SINDH_NEED_FILE" \
+  --output-dir output/data_checks
+```
+
+Run **`Rscript R/run_reports.R`** from the repository root for the earlier
+residence-specific workflow. Each country Rmd can also be knitted independently
+with its input parameters; it calls the same shared pipeline. The remaining
+residence-specific descriptions below apply to the three earlier reports; the
+linked administrative-area guide governs current Sindh results.
 
 ## Where to work
 
@@ -56,7 +96,7 @@ requires review of definitions/reference checks, rather than bypassing assertion
 | Country | Need group and assigned supply |
 |---|---|
 | Lagos | Original `fpn2 = 1`. Main sample, exact LGA–residence supply. Retain the approved Ibeju-Lekki Urban free-provision exception and the LGA fallback for its popular-stock component only. |
-| Sindh | Supplied `fpn2_derived`, independently reproduced. Retain its approved SA1 special-code exclusion policy. District-only supply using the source crosswalk; no woman's residence field is invented. The 881 facilities lacking source district names are not silently added. |
+| Sindh | Delegates to the current district module, using the authorized `fpn2_derived`, checked district assignments and FP-provider-only supply. See its [README](../administrative_area/analysis/sindh/README.md). No woman's residence field is invented. |
 | Senegal | Original `FPN2 = 1`. Checked department–residence supply, with flagged department-wide fallback only where a residence profile is absent: 1,815 source women, including 522 in need. Facility residence is a health-district lookup proxy; Mbacke's Urban-labelled facilities do not establish absence of Rural services. |
 | Côte d’Ivoire | Original `FPN2 = 1`. Exact checked department–residence supply, with no geographic or component fallback. Four departments have no facility match; other undefined components, including Daoukro free provision, remain missing. |
 

@@ -16,7 +16,8 @@ assert (root / 'administrative_area/analysis/plot_models.R').is_file()
 manifest = json.loads((root / 'reports/aggregate_build_manifest.json').read_text())
 reports = [('lagos', 'Lagos_analysis_aggregate'),
            ('senegal', 'Senegal_analysis_aggregate'),
-           ('cotedivoire', 'Cote_dIvoire_analysis_aggregate')]
+           ('cotedivoire', 'Cote_dIvoire_analysis_aggregate'),
+           ('sindh', 'Sindh_analysis')]
 for country, name in reports:
     module = root / 'administrative_area/analysis' / country
     assert (module / (name + '.R')).is_file()
@@ -26,17 +27,19 @@ for country, name in reports:
     path = root / 'reports' / (name + '.html')
     text = path.read_text()
     assert text.lower().startswith('<!doctype html>')
-    assert len(re.findall(r'data:image/svg\+xml;base64,', text)) == 10
+    assert len(re.findall(r'data:image/svg\+xml;base64,', text)) == (4 if country == 'sindh' else 10)
     assert '<section id="appendix-facilities"' not in text
     assert '<section id="appendix-demand"' not in text
-    assert 'id="supply-priority-summary"' in text
-    assert 'id="demand-priority-summary"' in text
+    assert 'id="supply-component-summary"' in text
+    assert 'id="demand-component-summary"' in text
     refs = re.findall(r'(?:href|src)=["\']([^"\']+)', text)
     assert all(x.startswith(('#', 'data:', 'https://', 'http://', 'mailto:'))
                for x in refs), ('local asset dependency', name)
     record = manifest['reports'][country]
     assert record['sha256'] == hashlib.sha256(path.read_bytes()).hexdigest()
     assert record['numerical_checks_passed'] is True
-    assert record['counseling_in_main'] is True
+    assert record['fp_providers_only'] is True
+    assert record['demand_cutoff'] == record['supply_readiness_cutoff'] == 0
+    assert record['counseling_in_main'] is False
     assert record['complete_case_sensitivity_sections_in_report'] is False
-print('Checked all three additional aggregate reports, independent source files and build hashes.')
+print('Checked all four current administrative-area reports, independent source files and build hashes.')

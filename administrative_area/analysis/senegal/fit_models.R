@@ -7,7 +7,9 @@ pca_file<-optional("--pca-score-file","");stopifnot(score_method%in%c("zscore","
 for(pkg in c("survey","clubSandwich","jsonlite","ggplot2","svglite"))if(!requireNamespace(pkg,quietly=TRUE))stop("Install ",pkg)
 script_dir<-dirname(gsub("~+~", " ", sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)[1]), fixed=TRUE))
 source(file.path(script_dir,"..","..","..","analysis","senegal","senegal_definitions.R"));dir.create(out,recursive=TRUE,showWarnings=FALSE)
+source(file.path(script_dir,"supply_definitions.R"))
 frame<-readRDS(file.path(data_dir,"analysis_frame.rds"));d<-frame$women
+favorable_supply<-senegal_favorable_supply(frame$supply)
 p<-jsonlite::fromJSON(file.path(data_dir,"report_data.json"));D<-p$demand_variables;S<-p$supply_variables
 report_hash<-unname(tools::md5sum(file.path(data_dir,"report_data.json")))
 refs<-list()
@@ -17,7 +19,7 @@ d$demand_score<-rowMeans(zz)
 write.csv(do.call(rbind,refs),file.path(out,"individual_demand_score_reference.csv"),row.names=FALSE)
 zs<-sapply(S,function(k){ref<-p$component_trace[p$component_trace$side=="Supply" & p$component_trace$variable==k,]
  mu<-unique(ref$indicator_mean);sd<-unique(ref$indicator_SD);stopifnot(length(mu)==1,length(sd)==1,sd>0)
- (100*frame$supply[[k]]-mu)/sd})
+ (100*favorable_supply[[k]]-mu)/sd})
 d$supply_risk<- -rowMeans(zs)
 sref<-do.call(rbind,lapply(S,function(k){q<-p$component_trace[p$component_trace$side=="Supply"&p$component_trace$variable==k,]
  data.frame(variable=k,reference_mean_pct=unique(q$indicator_mean),reference_SD_pct=unique(q$indicator_SD),reference_departments=length(unique(q$geo)))}))
@@ -193,7 +195,7 @@ saveRDS(fits,file.path(out,"fitted_models.rds"))
 audit<-list(country="Senegal",outcome="Current modern contraceptive use only: confirmed modern=1; traditional-only or confirmed nonuse=0; unresolved status remains missing.",
  need_definition="Original SURGO FPN2=1, unchanged. No reconstructed need flag or permanent-protection additions.",
  need_n=sum(d$need),common_n=nrow(cc),common_events=sum(cc$y_modern),score_method=score_method,
- supply_components=length(S),counseling_included="counselor"%in%S,
+ supply_components=length(S),counseling_included=FALSE,daily_provision_included=TRUE,stockout_burden_included=TRUE,
  demand_resolution="individual",supply_resolution="Department only: every woman receives the summary of all included facilities in her department",districts=length(unique(cc$geo)),
  survey_psus=length(unique(cc$psu)),demand_distinct_values=length(unique(cc$demand_score)),supply_distinct_values=length(unique(cc$supply_risk)),
  assigned_context_profiles=length(unique(cc$geo)),woman_residence_cells=nrow(unique(cc[c("geo","residence")])),
@@ -203,7 +205,7 @@ audit<-list(country="Senegal",outcome="Current modern contraceptive use only: co
  weights="Original Senegal WEIGHT; common mean-one fitting rescaling. No facility weights.",
  inference="Weighted logistic coefficients with department-clustered CR2 covariance, coefficient-specific Satterthwaite intervals, HTZ block tests and Holm adjustment within each joint model. No random effects or interactions.",
  design="Available sampling design: recorded RB0H census districts and final WEIGHT; original strata and FPC unavailable. Survey-PSU coefficient/interval sensitivity exported; point estimates identical to svyglm. Department CR2 primary for shared contextual supply exposures.",
- score_definition=if(score_method=="zscore")"Demand: mean of six personal binary indicators standardized with item-specific weighted mean/population SD in the need group. Supply: negative mean of selected assigned department-wide measures standardized against the fixed 33-department component references. Scores enter per one original average-z point." else "Separate weighted demand and supply PCAs; personal demand PC1 and negative assigned department-wide supply PC1. Mixed supply signs make it a pattern score, not a uniformly ordered risk index. Scores enter per one original PC1 unit.",
+ score_definition=if(score_method=="zscore")"Demand: mean of six personal binary indicators standardized with item-specific weighted mean/population SD in the need group. Supply: transform burden to continuity = 1 - burden, then negative mean of six favorable assigned department-wide measures standardized against fixed 33-department component references. Scores enter per one original average-z point." else "Separate weighted demand and supply PCAs; personal demand PC1 and negative assigned department-wide supply PC1. Mixed supply signs make it a pattern score, not a uniformly ordered risk index. Scores enter per one original PC1 unit.",
  supply_missing="All 33 departments have complete selected department-level supply inputs. No missing indicator is coded zero; no geographic fallback or residence-specific supply is used.",
  excluded_need=sum(d$need)-nrow(cc),eligible_weight_share=sum(cc$weight)/sum(d$weight[d$need]),
  excluded_departments=setdiff(unique(d$geo[d$need]),unique(cc$geo)),

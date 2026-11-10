@@ -17,7 +17,7 @@ d$demand_score<-rowMeans(zz)
 write.csv(do.call(rbind,refs),file.path(out,"individual_demand_score_reference.csv"),row.names=FALSE)
 zs<-sapply(S,function(k){ref<-p$component_trace[p$component_trace$side=="Supply" & p$component_trace$variable==k,]
  mu<-unique(ref$indicator_mean);sd<-unique(ref$indicator_SD);stopifnot(length(mu)==1,length(sd)==1,sd>0)
- (100*frame$supply[[k]]-mu)/sd})
+ (100*(if(k=="stockout_burden")1-frame$supply[[k]]else frame$supply[[k]])-mu)/sd})
 d$supply_risk<- -rowMeans(zs)
 sref<-do.call(rbind,lapply(S,function(k){q<-p$component_trace[p$component_trace$side=="Supply"&p$component_trace$variable==k,]
  data.frame(variable=k,reference_mean_pct=unique(q$indicator_mean),reference_SD_pct=unique(q$indicator_SD),reference_LGAs=length(unique(q$geo)))}))
@@ -204,8 +204,8 @@ audit<-list(country="Lagos",outcome="Current modern contraceptive use only: conf
  weights="Original Lagos weight; common mean-one fitting rescaling. No facility weights.",
  inference="Weighted logistic coefficients with LGA-clustered CR2 covariance, coefficient-specific Satterthwaite intervals, HTZ block tests and Holm adjustment within each joint model. No random effects or interactions.",
  design="Final weight and geographic LGA clusters. Official EA/PSU and strata remain unconfirmed. LGA Taylor intervals are a geographic inference comparison, not a full survey-design sensitivity.",
- score_definition=if(score_method=="zscore")"Demand: mean of six personal binary indicators standardized with item-specific weighted mean/population SD in the need group. Supply: negative mean of selected assigned LGA-wide measures standardized against the fixed 17-LGA component references. Scores enter per one original average-z point." else "Separate weighted demand and supply PCAs; personal demand PC1 and negative assigned LGA-wide supply PC1. Mixed supply signs make it a pattern score, not a uniformly ordered risk index. Scores enter per one original PC1 unit.",
- supply_missing="All 17 LGAs have complete selected LGA-level supply inputs. Only the documented Ibeju Urban free-product exception is zero; other unknowns remain missing; no geographic fallback or residence-specific supply is used.",
+ score_definition=if(score_method=="zscore")"Demand: mean of six personal binary indicators standardized with item-specific weighted mean/population SD in the need group. Supply: negative mean of selected assigned LGA-wide favorable measures (stock continuity=1-burden) standardized against the fixed 17-LGA component references. Scores enter per one original average-z point." else "Separate weighted demand and supply PCAs; personal demand PC1 and negative assigned LGA-wide supply PC1. Mixed supply signs make it a pattern score, not a uniformly ordered risk index. Scores enter per one original PC1 unit.",
+ supply_missing="All 17 LGAs have complete aggregate supply inputs among Q506 Yes facilities. No zero recoding, geographic fallback or residence-specific supply.",
  excluded_need=sum(d$need)-nrow(cc),eligible_weight_share=sum(cc$weight)/sum(d$weight[d$need]),
  excluded_LGAs=setdiff(unique(d$geo[d$need]),unique(cc$geo)),
  uncertainty="Intervals condition on estimated scores and do not propagate their construction uncertainty; full original sampling design is not available. Diagnostics are not a formal power analysis or causal identification.",

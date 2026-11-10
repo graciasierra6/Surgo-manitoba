@@ -3,12 +3,12 @@
 args <- commandArgs(trailingOnly = TRUE)
 opt <- function(k) { i <- match(k, args); if (is.na(i) || i == length(args)) stop("Supply ", k); args[i + 1L] }
 optional <- function(k) { i <- match(k, args); if (is.na(i)) return(NULL); if (i == length(args)) stop("Supply a value for ", k); args[i + 1L] }
-input <- opt("--input"); facility_input <- opt("--facility-input"); out <- opt("--output-dir")
+input <- opt("--input"); facility_input <- opt("--facility-input"); out <- opt("--output-dir"); raw_facility <- opt("--raw-facility")
 psu_var <- optional("--psu-var"); strata_var <- optional("--strata-var")
 facility_sample <- optional("--facility-sample"); if (is.null(facility_sample)) facility_sample <- "all"
 demand_sample <- optional("--demand-sample"); if (is.null(demand_sample)) demand_sample <- "available"
 reference_dir <- optional("--reference-dir"); if (is.null(reference_dir)) reference_dir <- ""
-stopifnot(facility_sample %in% c("all", "complete"), demand_sample %in% c("available", "complete"))
+stopifnot(facility_sample == "all", demand_sample == "available", reference_dir == "")
 if (!is.null(strata_var) && is.null(psu_var)) stop("--strata-var requires a confirmed --psu-var")
 for (pkg in c("survey", "jsonlite")) if (!requireNamespace(pkg, quietly = TRUE)) stop("Install ", pkg)
 dir.create(out, recursive = TRUE, showWarnings = FALSE)
@@ -23,14 +23,15 @@ flag <- function(k, pos, valid) { v <- nv(k); ifelse(v %in% valid, as.numeric(v 
 any_concern <- function(m) ifelse(rowSums(m == 1, na.rm = TRUE) > 0, 1, ifelse(rowSums(is.na(m)) > 0, NA_real_, 0))
 D <- c("agency", "stigma", "health", "fertility", "confidence", "opposes")
 DL <- c("Healthcare permission barriers", "Anticipated social stigma", "Health / side-effect beliefs", "Future-fertility concerns", "Low method knowledge", "Opposes family planning")
-S <- c("offering", "free", "training", "counselor", "larc_stock", "popular_stock")
-SL <- c("Short + long-acting offering", "Free-product provision", "Trained-provider share", "FP counselor availability", "Three-LARC stock breadth", "Most-popular product in stock")
 script_arg <- grep("^--file=", commandArgs(), value = TRUE)
 script_dir <- dirname(gsub("~+~", " ", sub("^--file=", "", script_arg[1]), fixed=TRUE))
 source(file.path(script_dir, "..", "..", "..", "analysis", "lagos", "lagos_definitions.R"))
+source(file.path(script_dir,"supply_definitions.R"))
+domains<-lagos_domains();S<-domains$S;SL<-domains$SL
 stopifnot(nrow(x) == 4555, !anyDuplicated(x$uid), all(x$link_has_supply))
 x$link_rurb <- as.character(x$settlement)
 d <- lagos_derive_women(x)
+pb2a<-as.numeric(x$pb2a);d$health<-ifelse(pb2a%in%1:4,as.numeric(pb2a%in%1:2),NA_real_)
 d$id <- as.character(x$uid); d$district <- d$lga
 # LGA is used only as the documented geographic inference cluster, not a survey EA.
 d$positive <- is.finite(d$weight) & d$weight > 0
@@ -83,20 +84,18 @@ rates <- lapply(areas, function(g) {
 })
 fac$geo <- ifelse(!is.na(fac$geo_join_pipeline), key(fac$geo_join_pipeline), key(fac$source_geo_name))
 stopifnot(all(!is.na(fac$geo)), length(unique(fac$geo)) == 20)
-# Reconcile joined zero exception at exactly one original facility, then combine
-# all Rural/Urban facility records within LGA. No other facility value changes.
-fac$free_original <- as.numeric(fac$p_free_prod)
-fac$free_analysis <- fac$free_original
-case <- fac$geo %in% "IBEJULEKKI" & as.character(fac$rurb) %in% "Urban"
-joined_case <- d$geo %in% "IBEJULEKKI" & as.character(x$link_rurb) %in% "Urban"
-stopifnot(sum(case) == 1, all(is.na(fac$free_original[case])))
-fac$free_analysis[case] <- 0
-fac$offering <- bool(fac$one_larc_3_sa_offer)
-fac$training <- as.numeric(fac$p_train)
-fac$counselor <- as.numeric(fac$counselor_available)
-fac$larc_stock <- bool(fac$three_larc_stockin)
-fac$popular_stock <- bool(fac$mp_in_stock)
-fac$free <- fac$free_analysis
+# The original inventory remains the coverage universe. Analysis uses Q506 Yes.
+inventory<-fac
+r<-haven::read_dta(raw_facility,col_select=tidyselect::all_of(c("key","q506",lagos_frequency_fields())))
+ri<-match(fac$fid,as.character(r$key));stopifnot(!anyNA(ri))
+frequency<-lagos_frequency(r[ri,]);fac<-cbind(fac,frequency)
+fp<-as.numeric(r$q506[ri]);fac<-fac[fp%in%1,]
+fac$offering<-bool(fac$one_larc_3_sa_offer);fac$free<-as.numeric(fac$p_free_prod)
+fac$training<-as.numeric(fac$p_train);fac$larc_stock<-bool(fac$one_larc_stockin)
+fac$stockout_burden<-as.numeric(fac$p_any_stockout)
+stopifnot(nrow(fac)==1040,sum(fac$geo%in%areas)==882)
+savecsv0<-function(z,name)write.csv(z,file.path(out,name),row.names=FALSE,na="")
+savecsv0(fac[c("fid","geo",names(frequency))],"daily_provision_facility_audit.csv")
 # Validate the single naming alias used by the existing join.
 assigned_key <- key(fac$assigned_join_area)
 assigned_key[assigned_key == "IFAKOIJAIYE"] <- "IFAKOIJAYE"
@@ -116,7 +115,7 @@ savecsv(do.call(rbind,lapply(S,function(k){ii<-fac$geo%in%areas;data.frame(varia
  missing=sum(!is.finite(fac[[k]][ii])),total=sum(ii),missing_pct=100*mean(!is.finite(fac[[k]][ii])))})),"supply_missingness.csv")
 savecsv(fac[c("fid","geo","source_geo_name","assigned_join_area","geo_join_pipeline")],"facility_geography_audit.csv")
 cells <- list(); meta <- list()
-display_areas <- sort(unique(fac$geo))
+display_areas <- sort(unique(inventory$geo))
 for (g in c("LAGOS", display_areas)) {
   wi <- if (g == "LAGOS") rep(TRUE, nrow(dn)) else dn$geo %in% g
   fi <- (if (g == "LAGOS") fac$geo %in% areas else fac$geo %in% g) & fac$included
@@ -136,75 +135,40 @@ for (g in c("LAGOS", display_areas)) {
 cells <- do.call(rbind, cells)
 savecsv <- function(z, name, rows = FALSE) write.csv(z, file.path(out, name), row.names = rows, na = "")
 savecsv(cells, "heatmap_values_and_denominators.csv")
-M <- list()
-for (side in c("Demand", "Supply")) {
-  cols <- if (side == "Demand") D else S
-  m <- sapply(cols, function(k) {
-    z <- cells[cells$side == side & cells$variable == k, ]
-    z$value[match(areas, z$geo)]
-  })
-  rownames(m) <- areas; stopifnot(all(is.finite(m)), all(apply(m, 2, sd) > 0), all(apply(m, 2, IQR) > 0))
-  M[[side]] <- list(raw = m, rank = apply(m, 2, rank, ties.method = "average"),
-    robust = sweep(sweep(m, 2, apply(m, 2, median), "-"), 2, apply(m, 2, IQR), "/"),
-    zscore = sweep(sweep(m, 2, colMeans(m), "-"), 2, apply(m, 2, sd), "/"))
+M<-list(); transforms<-list()
+for(side in c("Demand","Supply")){
+ cols<-if(side=="Demand")D else S
+ original<-sapply(cols,function(k){z<-cells[cells$side==side & cells$variable==k,];z$value[match(areas,z$geo)]})
+ m<-if(side=="Supply")as.matrix(100*lagos_favorable_supply(as.data.frame(original/100)))else original
+ rownames(m)<-areas;reference<-complete.cases(m)
+ means<-colMeans(m[reference,,drop=FALSE]);sds<-apply(m[reference,,drop=FALSE],2,sd)
+ meds<-apply(m[reference,,drop=FALSE],2,median);iqrs<-apply(m[reference,,drop=FALSE],2,IQR)
+ ranks<-matrix(NA_real_,nrow(m),ncol(m),dimnames=dimnames(m))
+ ranks[reference,]<-apply(m[reference,,drop=FALSE],2,rank,ties.method="average")
+ stopifnot(all(sds>0),all(iqrs>0))
+ M[[side]]<-list(raw=m,rank=ranks,
+  robust=sweep(sweep(m,2,meds,"-"),2,iqrs,"/"),zscore=sweep(sweep(m,2,means,"-"),2,sds,"/"))
+ for(k in cols)transforms[[length(transforms)+1L]]<-data.frame(geo=areas,side=side,variable=k,original_pct=original[,k],aligned_pct=m[,k],higher_raw_is_worse=side=="Supply"&&k=="stockout_burden",reference_included=reference,reference_n=sum(reference),
+  indicator_mean=means[k],indicator_SD=sds[k],indicator_median=meds[k],indicator_IQR=iqrs[k],
+  component_rank=M[[side]]$rank[,k],zscore=M[[side]]$zscore[,k],robust=M[[side]]$robust[,k])
 }
-methods <- c(rank = "Rank average", raw = "Mean percentages", robust = "Median/IQR", median_count = "Median count", zscore = "Z-score average")
-scores <- list(); thresholds <- list(); transforms <- list()
-for (id in c("rank", "raw", "robust", "zscore")) {
-  ds <- rowMeans(M$Demand[[id]]); ss <- rowMeans(M$Supply[[id]])
-  dc <- median(ds); sc <- median(ss); df <- ds > dc + 1e-10; sf <- ss < sc - 1e-10
-  scores[[id]] <- data.frame(method = id, geo = areas, demand_score = ds, supply_score = ss,
-    demand_priority_rank = rank(-ds, ties.method = "average"), supply_priority_rank = rank(ss, ties.method = "average"),
-    demand_flag = df, supply_flag = sf, category = ifelse(df & sf, "both", ifelse(df, "demand", ifelse(sf, "supply", "neither"))))
-  thresholds[[id]] <- data.frame(method = id, label = methods[[id]], demand_cutoff = dc, supply_cutoff = sc,
-    demand_rule = "strictly above final-score median", supply_rule = "strictly below final-readiness-score median")
+classify<-function(df,sf)ifelse(is.na(df)|is.na(sf),"unassessed",ifelse(df&sf,"both",ifelse(df,"demand",ifelse(sf,"supply","neither"))))
+scores<-thresholds<-list()
+for(id in c("rank","raw","robust","zscore")){
+ ds<-rowMeans(M$Demand[[id]]);ss<-rowMeans(M$Supply[[id]]);dc<-if(id=="zscore")0 else median(ds,na.rm=TRUE);sc<-if(id=="zscore")0 else median(ss,na.rm=TRUE)
+ df<-ds>dc+1e-10;sf<-ss<sc-1e-10
+ scores[[id]]<-data.frame(method=id,geo=areas,demand_score=ds,supply_score=ss,demand_flag=df,supply_flag=sf,
+   demand_priority_rank=rank(-ds,ties.method="average",na.last="keep"),supply_priority_rank=rank(ss,ties.method="average",na.last="keep"),category=classify(df,sf))
+ thresholds[[id]]<-data.frame(method=id,demand_cutoff=dc,supply_cutoff=sc,demand_rule=if(id=="zscore")"strictly above final-score mean (zero)"else"strictly above final-score median",
+  supply_rule=if(id=="zscore")"strictly below readiness-score mean (zero)"else"strictly below readiness-score median",demand_reference_n=sum(is.finite(ds)),supply_reference_n=sum(is.finite(ss)))
 }
-dc <- rowSums(sweep(M$Demand$raw, 2, apply(M$Demand$raw, 2, median), "-") > 1e-10)
-sc <- rowSums(sweep(M$Supply$raw, 2, apply(M$Supply$raw, 2, median), "-") < -1e-10)
-df <- dc >= 4; sf <- sc >= 4
-scores$median_count <- data.frame(method = "median_count", geo = areas, demand_score = dc, supply_score = sc,
-  demand_priority_rank = rank(-dc, ties.method = "average"), supply_priority_rank = rank(-sc, ties.method = "average"),
-  demand_flag = df, supply_flag = sf, category = ifelse(df & sf, "both", ifelse(df, "demand", ifelse(sf, "supply", "neither"))))
-thresholds$median_count <- data.frame(method = "median_count", label = methods[["median_count"]], demand_cutoff = 4, supply_cutoff = 4,
-  demand_rule = "at least 4 of 6 above component medians", supply_rule = "at least 4 of 6 below component medians")
-scores <- do.call(rbind, scores); thresholds <- do.call(rbind, thresholds)
-for (side in names(M)) for (k in colnames(M[[side]]$raw)) {
-  m <- M[[side]]$raw
-  transforms[[length(transforms) + 1L]] <- data.frame(geo = areas, side = side, variable = k,
-    original_pct = m[, k], indicator_mean = mean(m[, k]), indicator_SD = sd(m[, k]),
-    indicator_median = median(m[, k]), indicator_IQR = IQR(m[, k]),
-    component_rank = M[[side]]$rank[, k], zscore = M[[side]]$zscore[, k], robust = M[[side]]$robust[, k])
-}
-trace <- do.call(rbind, transforms)
-classify <- function(df,sf) ifelse(is.na(df)|is.na(sf),"unassessed",ifelse(df&sf,"both",ifelse(df,"demand",ifelse(sf,"supply","neither"))))
-primary_trace <- if(nzchar(reference_dir))read.csv(file.path(reference_dir,"component_score_trace.csv"))else NULL
-primary_thresholds <- if(nzchar(reference_dir))read.csv(file.path(reference_dir,"classification_thresholds.csv"))else NULL
-if(!is.null(primary_trace)){
- # Hold references and thresholds fixed within a comparison using the same domains.
- for(side in c("Demand","Supply")){
-  fields<-if(side=="Demand")D else S
-  for(k in fields){rr<-primary_trace[primary_trace$side==side & primary_trace$variable==k,];ii<-trace$side==side & trace$variable==k
-   stopifnot(nrow(rr)==length(areas))
-   trace$indicator_mean[ii]<-unique(rr$indicator_mean);trace$indicator_SD[ii]<-unique(rr$indicator_SD)
-   trace$zscore[ii]<-(trace$original_pct[ii]-unique(rr$indicator_mean))/unique(rr$indicator_SD)
-  }
-  value<-vapply(areas,function(g)mean(trace$zscore[trace$side==side & trace$geo==g]),numeric(1))
-  cut<-primary_thresholds[primary_thresholds$method=="zscore",if(side=="Demand")"demand_cutoff"else"supply_cutoff"]
-  ix<-which(scores$method=="zscore")
-  if(side=="Demand"){
-   scores$demand_score[ix]<-value[match(scores$geo[ix],areas)]
-   scores$demand_flag[ix]<-scores$demand_score[ix]>cut+1e-10
-   scores$demand_priority_rank[ix]<-rank(-scores$demand_score[ix],ties.method="average")
-   thresholds$demand_cutoff[thresholds$method=="zscore"]<-cut
-  }else{
-   scores$supply_score[ix]<-value[match(scores$geo[ix],areas)]
-   scores$supply_flag[ix]<-scores$supply_score[ix]<cut-1e-10
-   scores$supply_priority_rank[ix]<-rank(scores$supply_score[ix],ties.method="average")
-   thresholds$supply_cutoff[thresholds$method=="zscore"]<-cut
-  }
- }
- scores$category[ix]<-classify(scores$demand_flag[ix],scores$supply_flag[ix])
-}
+dc<-rowSums(sweep(M$Demand$raw,2,apply(M$Demand$raw,2,median,na.rm=TRUE),"-")>1e-10)
+sc<-rowSums(sweep(M$Supply$raw,2,apply(M$Supply$raw,2,median,na.rm=TRUE),"-")< -1e-10)
+scores$median_count<-data.frame(method="median_count",geo=areas,demand_score=dc,supply_score=sc,demand_flag=dc>=4,supply_flag=sc>=4,
+ demand_priority_rank=rank(-dc,ties.method="average",na.last="keep"),supply_priority_rank=rank(-sc,ties.method="average",na.last="keep"),category=classify(dc>=4,sc>=4))
+thresholds$median_count<-data.frame(method="median_count",demand_cutoff=4,supply_cutoff=4,demand_rule="4 or more of six above component medians",
+ supply_rule="4 or more of six below component medians",demand_reference_n=sum(is.finite(dc)),supply_reference_n=sum(is.finite(sc)))
+scores<-do.call(rbind,scores);thresholds<-do.call(rbind,thresholds);trace<-do.call(rbind,transforms)
 exact <- cells[cells$geo %in% areas, c("geo", "side", "variable", "value")]
 exact$original_pct_exact <- sprintf("%.17g", exact$value)
 savecsv(exact[c("geo", "side", "variable", "original_pct_exact")], "scoring_inputs_exact.csv")
@@ -218,47 +182,49 @@ planning <- lapply(areas, function(g) {
        demand_score = q$demand_score, supply_score = q$supply_score, n = meta[[g]]$n_need,
        top_demand = head(dt$variable, 3), top_supply = head(st$variable, 3))
 })
-coverage <- lapply(display_areas, function(g) list(geo = g, women = sum(d$geo %in% g), facilities = sum(fac$geo %in% g)))
+coverage <- lapply(display_areas, function(g) list(geo = g, women = sum(d$geo %in% g), facilities = sum(inventory$geo %in% g), fp_facilities=sum(fac$geo %in% g)))
 bar_table <- do.call(rbind, lapply(bars, function(r) as.data.frame(r, stringsAsFactors = FALSE)))
 savecsv(bar_table, "use_distribution_fpn2.csv")
 lga_rates <- do.call(rbind, lapply(rates, function(r) data.frame(geo = r$geo, n_need = r$n,
   cpr = r$cpr$estimate, mcpr = r$mcpr$estimate, intender = r$intender$estimate, no_intent = r$no_intent$estimate)))
 savecsv(lga_rates, "lga_use_rates_fpn2.csv")
-audit <- list(source_rows = nrow(x), positive_weight_rows = sum(valid_weight), need_n = nrow(dn),
-  need_eligibility = "Supplied SURGO fpn2 == 1, unchanged; no additional fertility/sexual-activity or sterilization filter.",
-  women_weight = "weight", weighted_need_share = wm(as.numeric(d$need[valid_weight]), d$weight[valid_weight]),
-  linked_lgas = length(areas), supply_lgas = length(display_areas), all_facility_records = nrow(fac),
-  linked_lga_facility_records = sum(fac$geo %in% areas),
-  supply_aggregation = "All included facility records within LGA, combining Rural and Urban; valid-response means; no facility weights. Not a woman-weighted mean of attached residence profiles.",
-  free_exception = "Only the original Ibeju-Lekki Urban facility's undefined free proportion is set to zero, consistent with the authorized joined-data exception; its 45 Rural facilities retain original values. The LGA mean includes this one zero with other valid facility proportions.",
-  popular_stock = "Mean of cleaned UoM mp_in_stock over TRUE/FALSE responses, equivalent to true/(true+false); unknowns excluded and coverage retained. This is the facility's most-popular product, not a woman's preferred method.",
-  chart_denominator = "Every bar and sub-bar uses all 2159 SURGO-in-need women, with final weights. n is unweighted; overlapping subsets do not sum to 100. Preference concerns initiation, not necessarily present preference.",
-  use_definition = "CU1 yes/sometimes or CU5 current-use prompts. Modern: CU4 1-8, prompted condom/ECP, or explicitly contraceptive LAM. Traditional-only: confirmed traditional practices without a confirmed modern method. Unresolved outcomes retained separately.",
-  design_fields_confirmed = design_confirmed,
-  survey_variance = if (design_confirmed) paste("Taylor-linearized logit intervals using the explicitly supplied confirmed PSU field", psu_var, "and stratum field", if (is.null(strata_var)) "none" else strata_var, "; no FPC. Need subgroup selected after creating the full positive-weight design.") else "Final-weight point estimates only. Official EA/PSU and stratum identifiers remain unconfirmed, so design-based confidence intervals and tests are withheld. No clusters are inferred from household IDs or sampling probabilities.",
-  four_category_labels = "Relative concern/service flags; not causal identification of binding constraints or absolute service-adequacy thresholds.",
-  scoring_reference = "17 linked LGAs, equal LGA contribution to normalization/cutoffs. Six equally weighted components per side; all supply components favorable. Sample SD uses n-1; IQR uses R type 7. Strict cutoffs with 1e-10 tie tolerance.",
-  main_method = "zscore", sources = list(joined_file = basename(input), facility_file = basename(facility_input)),
-  source_md5 = as.list(unname(hash_before)), source_files_unchanged = identical(unname(hash_before), unname(tools::md5sum(c(input, facility_input)))))
-stopifnot(audit$source_files_unchanged, sum(vapply(bars, function(b) if (b$field %in% c("user", "intender", "no_intent", "unresolved")) b$n else 0, numeric(1))) == nrow(dn))
+audit <- list(country="Lagos",source_rows=nrow(x),positive_weight_rows=sum(valid_weight),need_n=nrow(dn),
+ need_eligibility="Original SURGO fpn2=1, unchanged; no additional need reconstruction.",women_weight="weight",
+ weighted_need_share=wm(as.numeric(d$need[valid_weight]),d$weight[valid_weight]),
+ linked_lgas=length(areas),supply_lgas=length(display_areas),all_facility_records=nrow(inventory),
+ linked_lga_facility_records=sum(inventory$geo%in%areas),fp_facility_records=nrow(fac),
+ linked_fp_facilities=sum(fac$geo%in%areas),
+ supply_aggregation="Q506 Yes only; valid-response equal-facility means within LGA, combining Rural and Urban; no facility weights. Genuine zeros included, undefined excluded per measure.",
+ free_exception="No new zero recoding. The prior Ibeju-Lekki Urban exception was a Q506 No facility and is excluded under the FP-provider restriction.",
+ health_definition="PB2A only: 1/2 concern; 3/4 no concern; otherwise unresolved.",
+ stockout_definition="Original cleaned p_any_stockout unchanged. Heatmap shows burden; every score and PCA uses continuity=1-burden.",
+ chart_denominator="All 2159 women with original fpn2=1; final weight percentages, unweighted n. Overlapping subsets.",
+ use_definition="CU1/CU5 confirmed current use; CU4 and prompts classify modern/traditional; unresolved remains distinct.",
+ design_fields_confirmed=design_confirmed,
+ survey_variance=if(design_confirmed)"Confirmed runtime PSU/strata Taylor intervals"else"Final weight point estimates; official EA/PSU and strata unconfirmed, so overview intervals are withheld. No clusters inferred from household IDs or sampling probabilities.",
+ four_category_labels="Relative above-average concerns and below-average readiness; not causal binding constraints or an absolute standard.",
+ scoring_reference="17 linked LGAs equally weighted; each component centered on LGA mean and divided by sample SD. Mean six favorable supply z-scores; reverse stockout to continuity first. Demand>0 and readiness<0; 1e-10 ties unflagged.",
+ main_method="zscore",sources=list(joined_file=basename(input),facility_file=basename(facility_input)),
+ source_md5=as.list(unname(hash_before)),source_files_unchanged=identical(unname(hash_before),unname(tools::md5sum(c(input,facility_input)))))
+stopifnot(audit$source_files_unchanged)
 profiles <- data.frame(geo=areas,district=areas)
 for(k in S)profiles[[k]] <- vapply(areas,function(g)mean_valid(fac[[k]][fac$geo==g & fac$included]),numeric(1))
 profiles$n_facilities <- vapply(areas,function(g)sum(fac$geo==g & fac$included),integer(1))
 stopifnot(all(profiles$n_facilities > 0))
 sp <- profiles[match(d$geo,profiles$geo),S,drop=FALSE];rownames(sp)<-NULL
 # Reconcile the original administrative join, allowing only the documented
-# boolean rounding and the explicitly authorized free-provision exception.
-map <- c(offering="share_offer_larc_and_3_sa",free="mean_p_free_prod",training="mean_p_train",counselor="share_fp_counselor",larc_stock="share_stocked_3plus_larc")
+# precision of the newly reaggregated FP-provider profiles.
+map <- c(offering="share_offer_larc_and_3_sa",free="mean_p_free_prod",training="mean_p_train",daily_provision="mean_daily_modern_provision",larc_stock="share_stocked_1plus_larc",stockout_burden="mean_facility_any_stockout")
 reconcile <- do.call(rbind,lapply(names(map),function(k){a<-as.numeric(x[[map[k]]]);b<-sp[[k]]
- data.frame(variable=k,max_abs_difference=max(abs(a-b),na.rm=TRUE),exception=(k=="free"),
- passed=if(facility_sample=="all") {ii<-if(k=="free")d$geo!="IBEJULEKKI"else rep(TRUE,nrow(d)); max(abs(a[ii]-b[ii]),na.rm=TRUE)<5.0001e-6} else TRUE)}))
+ data.frame(variable=k,max_abs_difference=max(abs(a-b),na.rm=TRUE),exception=FALSE,
+ passed=if(facility_sample=="all") {ii<-rep(TRUE,nrow(d)); max(abs(a[ii]-b[ii]),na.rm=TRUE)<5.0001e-6} else TRUE)}))
 stopifnot(all(reconcile$passed));savecsv(reconcile,"join_supply_reconciliation.csv")
 audit$country <- "Lagos"; audit$facility_sample <- facility_sample; audit$demand_sample <- demand_sample
  audit$facility_records_used <- sum(fac$included & fac$geo%in%areas)
  audit$complete_facilities <- sum(fac$complete_supply & fac$geo%in%areas)
  audit$complete_demand_women <- sum(dn_complete)
  audit$supply_resolution <- "LGA only: each woman receives all included facilities averaged within her LGA"
- audit$counseling_included <- TRUE
+ audit$counseling_included <- FALSE
  audit$positive_weight_rows <- sum(d$positive)
 ctx <- unique(cbind(d[c("geo","district","residence","source_profile","fallback")],sp))
 savecsv(profiles,"lga_supply_profiles.csv");savecsv(ctx,"assigned_supply_profiles.csv")

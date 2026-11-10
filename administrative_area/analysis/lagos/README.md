@@ -1,115 +1,164 @@
-# Lagos: LGA-wide supply analysis
+# Lagos — updated aggregate analysis
 
-This module extends the verified administrative-area join. Every woman receives
-facility averages for her own LGA, combining Rural and Urban facilities. Her own
-settlement remains an adjustment variable. The original residence-specific Lagos
-report and all input joins are preserved.
+This is the current administrative-area workflow. It replaces the earlier report
+under its stable filename; separate residence-specific reports are unchanged.
+Original input datasets and working outputs are external or ignored, not uploaded.
 
-From the repository root:
+## Reproduce
+
+Run from the existing repository root:
 
 ```sh
 Rscript administrative_area/analysis/lagos/Lagos_analysis_aggregate.R \
-  --join-dir administrative_area/output \
-  --cache-dir administrative_area/data/cache \
+  --input-zip "$SURGO_MANITOBA_INPUT_ZIP" \
   --work-dir output/aggregate_reports/lagos \
   --output-dir reports
 ```
 
-Supply the actual verified administrative join directory at runtime. It must
-contain the checked woman-level join and facility audit inputs. For a new input
-bundle, `--input-zip "$SURGO_MANITOBA_INPUT_ZIP"` and `--cache-dir data/cache`
-invoke the existing bundle verification and linkage preparation first. Pandoc
-must be available; its directory can be supplied with `--pandoc-dir`.
+Or reuse a verified administrative join and extracted input bundle:
 
-`Lagos_analysis_aggregate.Rmd` renders `reports/Lagos_analysis_aggregate.html`. It can be
-knitted with the same runtime parameters. Inputs, intermediate woman frames,
-fitted objects and caches are excluded from shared artifacts. Internal paths
-are relative; external paths are caller supplied.
+```sh
+Rscript administrative_area/analysis/lagos/Lagos_analysis_aggregate.R \
+  --join-dir "$SURGO_MANITOBA_JOIN_DIR" \
+  --cache-dir "$SURGO_MANITOBA_CACHE_DIR" \
+  --work-dir output/aggregate_reports/lagos \
+  --output-dir reports
+```
 
-## Population and measurement
+Optional `--project-root`, `--python` and `--pandoc-dir` select existing installed
+resources at runtime. The adjacent R Markdown supports the same parameters.
+This module uses the repository's shared plotting, input, template and map helpers;
+the entry script is not standalone. Working data and fitted models stay in ignored
+output folders and are not part of the code package.
 
-- Retain all 4,555 source women. Section 2 onward uses the original `fpn2 = 1`:
-  2,159 women. No reconstructed need variable or additional permanent-protection
-  or sexual-activity recoding is applied.
-- Demand definitions are shared explicitly with `analysis/lagos/lagos_definitions.R`.
-  The six domains remain general healthcare permission, anticipated stigma,
-  health/side-effect beliefs, future-fertility concerns, method confidence and
-  opposition to FP. Confidence is not objective knowledge.
-- Use 1,447 facilities across the 17 shared LGAs, retaining 294 facilities in
-  three facility-only LGAs for coverage. The existing Ifako-Ijaiye/IFAKO-IJAYE
-  spelling alias is checked explicitly against the administrative join.
-- Supply domains are original UoM short/long-acting offering, free-product share,
-  trained-provider share, Q702 counselor availability, three-LARC product/category
-  stock breadth and most-popular-product stock. The stock-breadth rule does not
-  mean three distinct clinical LARC methods.
-- Average valid facility proportions equally; binary flags become valid-response
-  shares. Include valid zeros and FALSE, exclude undefined responses per measure.
-  Facility weights are not supplied or constructed. Preserve the previously
-  authorized zero for one Ibeju-Lekki Urban facility's free-product proportion;
-  the original source value stays missing. No other missing value is zero-filled.
-- Main classifications average six component z-scores separately by side and
-  use separate final-score medians. Normalization gives each of the 17 LGAs equal
-  contribution. A missing component prevents a complete score; median ties are
-  unflagged. Labels describe relative priorities, not causal binding constraints.
-- Include component heatmaps, five-method classifications, interactive coverage
-  and classification maps, priority tables for the six supply-only and six demand-only LGAs,
-  frequency summaries, and the complete 17-LGA planning table.
+## Population and facility aggregation
 
-## Models and inference
+Keep all 4,555 original main-sample women and every original survey column.
+Coverage uses all women and all 1,741 facility records across 20 LGAs. Section 2
+onward uses original SURGO `fpn2 = 1`: 2,159 women. No historical need reconstruction,
+additional sexual-activity rule or sterilization/hysterectomy recoding is applied.
 
-Five models have modern contraceptive use as the outcome. Use individual demand
-scores or six personal responses, and the supply risk score from her LGA-wide
-facility means. Adjust for age, age squared, education, partnership, fertility goal
-and settlement. All use the same 1,865 women, including 943 modern users, so model
-comparisons do not mix woman samples. Retain original `weight`, mean-one fitting
-rescaling, geographic LGA-clustered CR2 covariance, Satterthwaite intervals, HTZ
-block tests and Holm correction within each joint model's two tests.
+Facility eligibility is **Q506 = 1 (Yes)**: “Does this facility provide any family
+planning services at the facility?” There are 1,040 Yes, 465 No and 236 unanswered
+records; 882 Yes facilities are in the 17 surveyed LGAs. Join raw data by `key`
+against cleaned `fid`; raw numeric `fid` is not the same identifier. Validate raw
+district names, the checked LGA assignment and the Ifako-Ijaiye/IFAKO-IJAYE alias.
 
-Official survey EA/PSU and stratum identifiers remain unconfirmed. Overview design
-intervals are withheld; the geographic model intervals are not presented as the
-full original survey design. Geographic Taylor intervals are explicitly unavailable
-when their residual design degrees of freedom are nonpositive. Seventeen contextual
-supply values and occasionally low effective degrees of freedom require caution.
-No random effects or interactions are fitted. Diagnostics do not establish power
-or causality, and uncertainty in constructing scores is not propagated.
+Reaggregate all original supply columns and archetype counts/shares among eligible
+FP providers. For each mean, retain valid zeros/FALSE, exclude unknown/undefined
+values for that measure, and weight facilities equally. Do not require a common
+complete-facility sample. Selected component means retain full precision; display
+rounding follows scoring. Broader inherited flags retain the original pipeline's
+five-decimal output convention.
 
-## Rendered appendices
+Assign each woman the FP-provider profile for her own LGA, combining Rural and
+Urban facilities. Preserve her own Rural/Urban residence as a model covariate.
+The prior Ibeju-Lekki Urban free-product zero exception concerns a Q506 No facility
+and is excluded by the eligibility rule. No undefined value is zero-filled here.
 
-1. Five scoring approaches: rank average, original percentages, median/IQR,
-   median count and average z-scores. Median count flags four of six components.
-2. Separate weighted individual-demand and assigned LGA-supply PCAs, including
-   PC1 coefficients, variance, permutations, geographic deletion checks and models.
-   Mixed supply signs are labeled as a pattern, not uniformly worse provision.
+| Selected component | Facility input | LGA interpretation |
+|---|---|---|
+| Short + long-acting offering | `one_larc_3_sa_offer` | Share meeting the original offering criterion |
+| Free-product provision | `p_free_prod` | Mean facility proportion of recorded products provided free |
+| Trained-provider share | `p_train` | Mean facility proportion of recorded personnel trained |
+| Daily provision | Frequency ratio below | Mean facility proportion of offered modern-method classes provided daily |
+| At least one LARC in stock | `one_larc_stockin` | Share meeting the original current-stock criterion |
+| Stockout burden | Original cleaned `p_any_stockout` | Mean facility share of coded product groups with a stock interruption |
 
-The complete-facility and common-woman demand sensitivity sections are omitted
-from the current HTML. Existing diagnostic calculations remain internal for
-reproduction and audit; they do not replace the main valid-response estimates.
-The main models retain their documented woman-level complete-case requirements.
-The main component, classification, frequency and detailed priority tables remain
-unchanged, including FP counseling and response-coverage explanations.
+Counseling and popular-product stock remain in the broader inventory but are not
+selected components of this report's indices, component tables or models.
 
-## Missingness and verification
+### Daily provision
 
-Among 2,159 women, unresolved health concerns affect 147, future fertility 129,
-confidence 13 and opposition 23; agency and stigma have no unresolved responses.
-Among 1,447 facilities, undefined values affect free provision 606, training 211,
-counseling 272 and popular stock 819. Cleaned offering and stock-breadth flags are
-complete; this does not certify complete underlying questionnaire responses.
-Unknown stock is not an observed stockout or proof of no FP service.
+Seven classes use Q507: pills (`q507ad`), injectables (`q507ag/ah/ai`), male/female
+condoms (`q507ae/af`), ECP (`q507ao`), IUD (`q507aa/ab`), and implants (`q507aj`).
+Collapse IUD and injectable variants to the most frequent recorded offered variant,
+so a class counts once. Any Daily variant establishes Daily. If no variant is
+offered, classify Not at all only when every variant says so; otherwise unknown.
+Partial source information is flagged and interpreted conditionally on recorded
+offering, not assumed absent. Exclude removal services, permanent methods and
+other categories from this seven-class measure to retain the agreed definition.
 
-`audit_missingness.R` diagnoses these two indicators without changing the report.
-Supply `--raw`, `--facility-input`, `--uom-rdata` and `--output-dir` at runtime.
-It independently recovers the original free-product counts, tabulates missingness
-by LGA and FP provision, and distinguishes unidentified popular products from
-missing stock responses. Of 606 undefined free proportions, 380 records report
-no FP service, 184 lack a Q506 answer and 42 report FP service. Of 819 undefined
-popular-stock flags, 812 have no identified popular product, five combine an
-out-of-stock IUD response with missing brand status, and two concern methods
-without a comparable commodity-stock item. The male-condom question is included
-in Lagos. These diagnostics do not recode unknowns or revise classifications.
+Codes: 1 Daily, 2 Weekly, 3 Fortnightly, 4 Monthly, 5 Not at all. Within a facility,
+`Daily classes / classes coded 1:4`. Code 5 is excluded from the offered denominator.
+Zero offered classes produces an undefined ratio. Genuine zero daily classes with
+a positive offered denominator remains zero. Average valid facility ratios within
+LGA. Higher daily frequency can coexist with narrow method choice; it is not an
+independently validated access standard.
 
-`verify_analysis.R` independently reconstructs facility means/denominators, woman
-assignments, weighted concern estimates, standardization, thresholds, fixed-reference
-sensitivities, weighted coefficients, CR2 covariance and PCA using weighted SVD.
-`verify_html.py` checks tables, maps, report order, embedded assets and portability.
-These checks validate reproduction, not missing-data assumptions or construct validity.
+### Demand
+
+Six personal domains remain HS7C healthcare permission; PB7B/C anticipated stigma;
+**PB2A only** health/side-effect beliefs; coherent MP4_a–i/MP4_99 coding of concerns
+about reversible methods' future fertility effects; MC5A/B low method confidence
+under the retained knowledge label; and FP1 opposition to family planning.
+MC5 is confidence/self-efficacy, not objective knowledge. Special and unanswered
+responses remain unresolved; zero requires known negative constituent responses.
+
+## Geographic scores and planning tables
+
+Demand component percentages use final woman weights among women in need and
+valid domain responses. Supply components use unweighted valid FP-facility means.
+All 17 linked LGAs have complete aggregate profiles. Use the same 17 LGAs as the
+reference for every component within each side, giving each LGA equal contribution.
+
+Heatmaps display raw stockout burden, higher = worse. Before every score, ranking
+and PCA, replace burden with **continuity = 1 - burden**. The six supply inputs
+then run higher = favorable. For each component subtract the LGA mean and divide
+by the sample SD. Average six component z-scores separately by side; each final
+score has mean zero. Demand > 0 flags above-average concerns; readiness < 0 flags
+below-average provision. Values within 1e-10 of zero are unflagged ties. These are
+relative planning signals, not validated absolute thresholds or causal constraints.
+
+Alternative rank-average, mean-percentage and Median/IQR approaches use separate
+final-score medians; median count flags at least four unfavorable component
+comparisons. All methods use the same direction alignment. Top-three selected components
+use component z-scores, not regression coefficients or raw percentage ordering.
+Recurrence and detailed tables include all LGAs flagged on each side, including
+both-flagged LGAs. The two side groups overlap; percentages describe LGAs.
+
+Equal-weight standardization/aggregation is a recognized composite-indicator
+construction, not validation of this particular component list or zero cutoff.
+Correlations, offsetting strengths and weaknesses, extreme values and nonresponse
+affect interpretation. Compare component values and alternative classifications.
+
+## Individual models and inference
+
+Five primary models have **modern contraceptive use only** as outcome:
+personal demand score; assigned supply risk; both scores; six personal demand
+indicators; and those indicators plus supply risk. All adjust for age, age squared,
+education, partnership, fertility goal and Rural/Urban residence. Every fit uses
+the same complete model sample; incomplete records remain in eligible overview
+estimates wherever their required responses are valid.
+
+Personal demand scores standardize each woman's six responses using item-specific
+weighted mean and population SD among women in need, then average. Do not assign
+her an LGA-level demand score. Supply risk is negative LGA readiness, so higher
+values mean weaker provision; all women within an LGA share it.
+
+Retain original `weight`, weighted logistic point estimates, LGA-clustered CR2
+covariance, Satterthwaite coefficient intervals, HTZ block tests and Holm adjustment
+within each joint model's two block tests. No random effects or interactions.
+Official survey EA/PSU and strata remain unconfirmed; do not infer them from
+household IDs or probability fields. Overview intervals are withheld. LGA Taylor
+comparisons are geographic inference checks, not the full original survey design.
+Seventeen contextual values and low effective degrees of freedom limit supply
+inference. Convergence and VIF checks do not establish adequate power or causality.
+
+Appendices retain the five scoring comparisons and updated weighted PCA analyses,
+including the same five models. Stock continuity enters PCA before fitting.
+Inspect signed coefficients, variance retained and exploratory permutation/deletion
+checks. Model intervals condition on estimated scores and do not propagate their
+construction uncertainty. Complete-facility/common-demand sensitivity sections are
+not reintroduced.
+
+## Verification
+
+Checks independently recover raw survey fields, Q506 eligibility, raw LGA names,
+daily frequency, original cleaned stockout values, valid-response denominators,
+every woman assignment, weighted concern rates, aligned component z-scores,
+zero-cutoff classifications, personal demand scores, weighted coefficients,
+LGA CR2 covariance/HTZ tests and PCA through weighted SVD. HTML checks inspect
+maps, section order, definitions, embedded assets and aggregate downloads.
+These verify implementation; source-data quality and identification limitations
+remain explicit. Shared files contain no respondent-level data or personal paths.
