@@ -67,4 +67,42 @@ for identity in ['senegal-residence-fallbacks','cdi-residence-fallbacks',
     assert checks.count('id="'+identity+'"')==1,identity
 assert (root/'reports/Demand_population_classification_check.html').is_file()
 assert (root/'analysis/check_demand_population.R').is_file()
+supplements=manifest.get('supplementary_checks',{})
+generated=json.loads((root/'tests/report_reference_hashes.json').read_text())['generated_only']
+assert set(supplements)=={'score_profile_examples','check_method_awareness',
+                         'score_profile_contrasts','surgo_uom_checks',
+                         'demand_pair_comparisons','demand_and_supply_regional_comparisons'}
+for name, record in supplements.items():
+    relative=Path(record.get('path',str(Path('reports')/record['file'])))
+    assert not relative.is_absolute() and '..' not in relative.parts
+    report=root/relative
+    for relative, expected in record['source_files'].items():
+        assert hashlib.sha256((root/relative).read_bytes()).hexdigest()==expected,relative
+    if not report.is_file():
+        key=report.relative_to(root).as_posix()
+        assert key in generated and generated[key]['sha256']==record['sha256'],record['file']
+        print('Generated-only supplement: source checked; full rebuild verifies registered HTML hash: '+key)
+        continue
+    assert hashlib.sha256(report.read_bytes()).hexdigest()==record['sha256']
+    text=report.read_text()
+    parsed=Inspect();parsed.feed(text)
+    assert len(parsed.images)==record['embedded_figure_count']
+    assert all(uri.startswith('data:image/') for uri in parsed.images)
+    assert not re.search(r'<(?:script|link|img)[^>]+(?:src|href)=["\']https?://',text,re.I)
+    assert 'mathjax.rstudio.com' not in text
+    assert record['validation_basis']
+    assert record['main_analyses_unchanged'] is True
+    assert len(parsed.ids)==len(set(parsed.ids)),('duplicate IDs',name)
+    assert set(parsed.anchors).issubset(parsed.ids),('internal links',name)
+
+coverage=root/'data_checks/Surgo_UoM_checks.html'
+assert coverage.is_file() and (root/'data_checks/README.md').is_file()
+assert (root/'analysis/tabulate_women_residence.R').is_file()
+assert (root/'analysis/check_need_definition_concordance.R').is_file()
+text=coverage.read_text()
+assert len(re.findall(r'<table\b',text))==20
+for n in ['10,859','4,292','4,555','2,159','7,169','1,905','10,364','3,274']:
+    assert n in text,('coverage population',n)
+assert not (root/'reports/Surgo_UoM_checks.html').exists(),'Use one canonical coverage report'
 print('Checked all three updated residence reports, source modules, coverage tables and offline assets.')
+print('Checked supplementary sources and present report assets; generated-only outputs require full rebuild hash verification.')

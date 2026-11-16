@@ -7,6 +7,7 @@ License: file LICENSE-NOTICE
 Encoding: UTF-8
 Depends: R (>= 4.1)
 Imports:
+    base64enc,
     haven,
     dplyr,
     readr,
@@ -18,5 +19,8 @@ Imports:
     clubSandwich,
     ggplot2,
     svglite,
+    tidyselect,
     rmarkdown,
     knitr
+Suggests:
+    renv

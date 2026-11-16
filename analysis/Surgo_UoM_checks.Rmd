@@ -1,0 +1,185 @@
+---
+title: "Surgo UoM checks"
+output:
+  html_document:
+    template: common/report.html
+    theme: null
+    mathjax: null
+    self_contained: false
+    pandoc_args: ["--wrap=none"]
+params:
+  facility_input: !r Sys.getenv("SURGO_MANITOBA_FACILITY_LINKAGE_INPUT", "")
+  lagos_input: !r Sys.getenv("SURGO_MANITOBA_LAGOS_WOMEN_JOIN", "")
+  lagos_raw_facility: !r Sys.getenv("SURGO_MANITOBA_LAGOS_RAW_FACILITY", "")
+  cotedivoire_input: !r Sys.getenv("SURGO_MANITOBA_COTEDIVOIRE_WOMEN_JOIN", "")
+  cotedivoire_raw_facility: !r Sys.getenv("SURGO_MANITOBA_COTEDIVOIRE_RAW_FACILITY", "")
+  senegal_input: !r Sys.getenv("SURGO_MANITOBA_SENEGAL_WOMEN_JOIN", "")
+  senegal_raw_facility: !r Sys.getenv("SURGO_MANITOBA_SENEGAL_RAW_FACILITY", "")
+  senegal_residence_lookup: !r Sys.getenv("SURGO_MANITOBA_SENEGAL_RESIDENCE_LOOKUP", "")
+  sindh_input: !r Sys.getenv("SURGO_MANITOBA_SINDH_WOMEN_JOIN", "")
+  sindh_raw_facility: !r Sys.getenv("SURGO_MANITOBA_SINDH_RAW_FACILITY", "")
+  sindh_need_file: !r Sys.getenv("SURGO_MANITOBA_SINDH_NEED_FILE", "")
+  work_dir: "output/surgo_uom_checks"
+  prepared_dir: ""
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE,warning=FALSE,message=FALSE)
+root<-normalizePath("..",mustWork=TRUE);source("Surgo_UoM_checks.R")
+countries<-c("cotedivoire","lagos","senegal","sindh")
+titles<-c(cotedivoire="Côte d’Ivoire",lagos="Lagos",senegal="Senegal",sindh="Sindh")
+work<-params$prepared_dir
+if(!nzchar(work)) {
+  inputs<-setNames(lapply(countries,function(k)list(input=params[[paste0(k,"_input")]],raw_facility=params[[paste0(k,"_raw_facility")]],
+    residence_lookup=if(k=="senegal")params$senegal_residence_lookup else"",need_file=if(k=="sindh")params$sindh_need_file else"")),countries)
+  work<-prepare_surgo_uom_checks(root,inputs,params$facility_input,params$work_dir)
+}
+esc<-function(x){x<-gsub("&","&amp;",as.character(x),fixed=TRUE);x<-gsub("<","&lt;",x,fixed=TRUE);gsub(">","&gt;",x,fixed=TRUE)}
+num<-function(x)format(x,big.mark=",",scientific=FALSE,trim=TRUE)
+pct<-function(x)ifelse(is.finite(x),sprintf("%.1f%%",x),"Not estimable")
+emit<-function(...)cat(...,sep="")
+women_line<-function(n,p)paste0('<div class="women"><strong>',num(n),'</strong> <span>(',pct(p),')</span></div>')
+cell<-function(z,prefix,area_label,need=FALSE) {
+  if(z$geo=="UNRECORDED")return('<td><span class="detail">Residence not recorded</span></td>')
+  n<-z[[paste0(prefix,"_n")]];p<-z[[paste0(prefix,"_pct")]];fp<-z[[paste0(prefix,"_fp_n")]]
+  status<-z[[paste0(prefix,"_status")]];used<-z[[paste0(prefix,"_assigned_fp_n")]]
+  badge<-switch(status,exact=paste0('Exact match (',num(fp),' FP)'),fallback=paste0(area_label,' fallback (',num(used),' FP)'),unmatched='Unmatched (0 FP)',no_women=paste0(if(need)'No women in need ('else'No women surveyed (',num(fp),' FP)'))
+  paste0('<td>',women_line(n,p),'<span class="badge ',status,'">',badge,'</span>',if(status=="fallback")paste0('<div class="detail">',num(fp),' FP in this ',prefix,' cell</div>')else'', '</td>')
+}
+```
+
+```{r report, results='asis'}
+emit('```{=html}\n<style>
+:root{--ink:#183e4d;--muted:#536b75;--line:#d9e4e8}*{box-sizing:border-box}
+html{scroll-padding-top:24px}body{margin:0;background:#f5f7f8;color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.55}
+.layout{display:grid;grid-template-columns:205px minmax(0,1fr);gap:24px;max-width:1580px;margin:28px auto;padding:0 24px;align-items:start}
+.toc{position:sticky;top:24px;background:white;border:1px solid var(--line);border-radius:8px;padding:18px 12px;max-height:calc(100vh - 48px);overflow:auto}.toc-title{font-size:12px;text-transform:uppercase;letter-spacing:.09em;margin:0 10px 12px;color:var(--muted)}.toc a{display:block;color:var(--ink);text-decoration:none;border-radius:4px;padding:8px 10px;font-size:14px;font-weight:600}.toc a:hover,.toc a:focus{background:#e4f0f1}.toc a.sub{font-size:12px;font-weight:400;padding:5px 10px 5px 24px;color:var(--muted)}.toc-group+.toc-group{margin-top:9px}
+main{min-width:0;padding:30px 32px;background:white;border:1px solid var(--line);border-radius:10px}
+h1{font-size:30px;line-height:1.2;margin:0 0 8px}header p{color:var(--muted);margin:0 0 28px}h2{font-size:27px;margin:0 0 8px}h3{font-size:21px;margin:26px 0 10px}h4{font-size:17px;margin:20px 0 10px}p{font-size:14px;margin:10px 0}.country+.country{border-top:3px solid var(--line);margin-top:44px;padding-top:30px}.population+.population{border-top:2px solid var(--line);margin-top:30px;padding-top:5px}
+.note{color:var(--muted);font-size:13px}.legend{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}.badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-top:5px;white-space:normal}
+.exact{background:#e2f2ef;color:#126557}.fallback{background:#fff0d7;color:#825400}.unmatched{background:#fce6e5;color:#9a3530}.no_women{background:#edf0f3;color:#536473}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:7px;margin:15px 0}table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}thead th{background:var(--ink);color:white;font-weight:700}thead small{display:block;font-size:11px;color:#d5e5eb;font-weight:normal}
+tbody th{font-weight:600}tbody tr:nth-child(even){background:#f8fafb}tbody tr:hover{background:#edf5f6}td{border-left:1px solid var(--line)}tfoot{font-weight:bold;background:#e8f1f3}tfoot td,tfoot th{border-top:2px solid #a7bdc6;border-bottom:0}
+.women{font-size:15px;white-space:nowrap}.women span{color:var(--muted);font-size:13px}.detail{font-size:11px;color:var(--muted);margin-top:3px}.summary{max-width:790px}.summary th,.summary td{padding:9px 13px}.summary th:not(:first-child),.summary td:not(:first-child){text-align:right}.summary th:first-child{width:48%}.exceptions table{min-width:720px}.exceptions th,.exceptions td{font-size:12px}.exceptions th:first-child{width:22%}
+@media(max-width:1100px){.layout{grid-template-columns:175px minmax(0,1fr);gap:16px;padding:0 16px}main{padding:25px 22px}.coverage{min-width:700px}}
+@media(max-width:800px){.layout{display:block;margin:0;padding:0}.toc{position:static;border-radius:0;max-height:none;padding:12px 16px;display:flex;gap:4px 16px;flex-wrap:wrap}.toc-title{width:100%;margin:0}.toc a.sub{display:none}.toc-group+.toc-group{margin-top:0}main{padding:23px 16px;border:0;border-radius:0}h1{font-size:26px}.summary table{min-width:550px}}
+@media print{.layout{display:block;margin:0;padding:0}.toc{display:none}body{background:white}main{border:0;margin:0;padding:0;max-width:none}.table-wrap{overflow:visible}table,.coverage{min-width:0;font-size:9px}.women{font-size:10px}.women span{font-size:9px}.badge{font-size:8px}th,td{padding:6px 8px}thead{display:table-header-group}tr{break-inside:avoid}h2,h3,h4{break-after:avoid}.country+.country{break-before:page}}
+</style>\n<div class="layout"><nav class="toc" aria-label="Table of contents"><p class="toc-title">Contents</p>')
+for(i in seq_along(countries)){k<-countries[i];emit('<div class="toc-group"><a href="#',k,'">',i,'. ',titles[k],'</a><a class="sub" href="#',k,'-all-women">All women</a><a class="sub" href="#',k,'-women-in-need">Women in need of FP</a>',if(k%in%c("cotedivoire","senegal"))paste0('<a class="sub" href="#',k,'-restored-matches">',if(k=="senegal")'Changes to facility averages'else'Newly matched women','</a>')else'','</div>')}
+emit('</nav><main><header><h1>Surgo UoM checks</h1><p>Survey coverage and data completeness</p></header>')
+render_population<-function(country,population) {
+  need<-population=="women_in_need";folder<-file.path(work,country,population)
+  coverage<-read.csv(file.path(folder,"women_and_facility_coverage.csv"),check.names=FALSE)
+  assignments<-read.csv(file.path(folder,"assignment_summary.csv"))
+  exceptions<-read.csv(file.path(folder,"fallback_exceptions.csv"))
+  meta<-jsonlite::fromJSON(file.path(folder,"coverage_metadata.json"))
+  has_residence<-meta$has_residence;area_label<-switch(country,lagos="LGA",sindh="District","Département")
+  areas_label<-switch(country,lagos="LGAs",sindh="districts","départements")
+  population_label<-if(need)'women in need of family planning'else'all women'
+  stopifnot(sum(coverage$total_n)==meta$women_n,sum(coverage$total_fp_n)==meta$fp_facilities)
+  emit('<section class="population" id="',country,'-',if(need)'women-in-need'else'all-women','"><h3>',if(need)'Women in need of family planning'else'All women','</h3><h4>Women and FP-facility coverage by ',tolower(area_label),if(has_residence)' and residence'else'','</h4>')
+  emit('<p class="coverage-overview"><strong>SURGO:</strong> ',num(meta$women_n),' women',if(need)' in need of family planning'else'',
+    if(meta$unknown_geography_women_n>0)paste0('; ',num(meta$women_n-meta$unknown_geography_women_n),' with recorded geography')else'',
+    ' in <strong>',meta$surveyed_areas,' ',areas_label,'</strong>',
+    if(meta$unknown_geography_women_n>0)paste0(' (',num(meta$unknown_geography_women_n),' women have unrecorded geography)')else'',
+    '. <strong>Manitoba:</strong> ',num(meta$source_facilities),' facility records across <strong>',meta$facility_record_areas,' ',areas_label,
+    '</strong>, including <strong>',num(meta$fp_facilities),' confirmed FP-providing facilities across ',meta$fp_provider_areas,' ',areas_label,'</strong>.</p>')
+  emit('<p class="geographic-overlap"><strong>Geographic overlap:</strong> <strong>',meta$both_data_areas,' ',areas_label,
+    '</strong> have both SURGO and Manitoba FP-provider data; <strong>',meta$demand_only_areas,'</strong> have SURGO data only; <strong>',
+    meta$supply_only_areas,'</strong> have Manitoba FP-provider data only.</p>')
+  emit('<p class="note">These overlap counts use whole-',tolower(area_label),' geography and the women’s population shown in this table. Supply coverage requires at least one confirmed FP provider. ',
+    if(has_residence)'Rural/Urban gaps and fallback assignments are shown below. 'else'',
+    'Records with unrecorded geography are excluded from the area counts.</p>')
+  if(need) {
+    if(country=="sindh")emit('<p class="note">Uses the previously approved <strong>fpn2_derived = 1</strong> definition, matched to women by col_id. The original Sindh fpn2 field is not a usable need flag. The derivation is unchanged.</p>') else emit('<p class="note">Restricted to SURGO’s original <strong>',esc(meta$need_variable),' = 1</strong> classification, without recoding. Women’s counts and weighted percentages below use this population only; facility counts are unchanged.</p>')
+  } else emit('<p class="note">All source women are counted, regardless of FP need or contraceptive use. Areas with facility data only remain visible.</p>')
+  emit('<p class="note">Each cell shows <strong>women N (weighted column %)</strong> and FP-facility coverage. A match describes the geographic service environment, not a facility the woman attended. FP eligibility: <strong>',esc(meta$fp_variable),' = Yes</strong>.</p>')
+  if(!has_residence)emit('<p class="note"><strong>District-level assignment:</strong> Sindh SURGO has no Rural/Urban identifier. Women receive the FP-provider profile for their district; no Rural/Urban assignment or fallback is inferred.</p>')
+  emit('<div class="legend"><span class="badge exact">',if(has_residence)'Exact match'else'District match','</span>',if(has_residence)paste0('<span class="badge fallback">',area_label,' fallback</span>')else'', '<span class="badge unmatched">Unmatched</span><span class="badge no_women">',if(need)'No women in need'else'No women surveyed','</span></div>')
+  emit('<div class="table-wrap"><table class="coverage" aria-label="',titles[country],' ',population_label,' and FP-facility coverage">')
+  if(has_residence)emit('<colgroup><col style="width:22%"><col style="width:26%"><col style="width:26%"><col style="width:26%"></colgroup><thead><tr><th scope="col">',area_label,'</th><th scope="col">Rural<small>Women and local FP coverage</small></th><th scope="col">Urban<small>Women and local FP coverage</small></th><th scope="col">Total<small>Women and unique whole-area FP facilities</small></th></tr></thead><tbody>') else emit('<colgroup><col style="width:34%"><col style="width:30%"><col style="width:36%"></colgroup><thead><tr><th scope="col">District</th><th scope="col">Women<small>N (weighted %)</small></th><th scope="col">FP-facility coverage</th></tr></thead><tbody>')
+  for(i in seq_len(nrow(coverage))) {
+    z<-coverage[i,];emit('<tr><th scope="row">',esc(z$area),'</th>')
+    if(has_residence) {
+      emit(cell(z,"rural",area_label,need),cell(z,"urban",area_label,need),'<td>',women_line(z$total_n,z$total_pct),'<div class="detail">',num(z$total_fp_n),' FP facilities across the ',tolower(area_label),'</div>')
+      if(z$unknown_residence_n>0)emit('<div class="detail">',num(z$unknown_residence_n),' women: residence not recorded</div>')
+      if(z$unknown_residence_fp_n>0)emit('<div class="detail">',num(z$unknown_residence_fp_n),' FP facilities: residence not recorded</div>')
+      if(z$total_n==0)emit('<span class="badge no_women">Facility data only</span>')
+      if(z$total_n>0&&z$total_fp_n==0)emit('<span class="badge unmatched">No linked FP facilities</span>')
+      emit('</td>')
+    } else {
+      badge<-switch(z$total_status,exact=paste0('District match (',num(z$total_fp_n),' FP)'),no_women=paste0('No women in this group (',num(z$total_fp_n),' FP)'),unmatched='Unmatched (0 FP)')
+      emit('<td>',women_line(z$total_n,z$total_pct),'</td><td><span class="badge ',z$total_status,'">',badge,'</span></td>')
+    }
+    emit('</tr>')
+  }
+  emit('</tbody><tfoot><tr><th scope="row">Total</th>')
+  if(has_residence)emit('<td>',women_line(meta$rural_women_n,100),'<div class="detail">',num(meta$rural_fp_facilities),' Rural FP facilities</div></td><td>',women_line(meta$urban_women_n,100),'<div class="detail">',num(meta$urban_fp_facilities),' Urban FP facilities</div></td><td>',women_line(meta$women_n,100),'<div class="detail">',num(meta$fp_facilities),' unique FP facilities</div></td>') else emit('<td>',women_line(meta$women_n,100),'</td><td>',num(meta$fp_facilities),' FP facilities</td>')
+  emit('</tr></tfoot></table></div>')
+  emit('<p class="note"><strong>Denominators.</strong> Ns are unweighted counts in this population. Weighted percentages use ',num(meta$valid_weighted_n),' consenting women with valid positive ',esc(meta$weight_variable),' values',if(meta$excluded_weighted_n>0)paste0('; ',num(meta$excluded_weighted_n),' records remain in N only')else'; no records are excluded from weighted estimation','. ',if(has_residence)'Rural and Urban percentages each sum to 100% down their column. 'else'', 'Total percentages sum to 100% across areas, before rounding. ',if(has_residence)'These are not within-area residence percentages.'else'','</p>')
+  if(has_residence&&meta$unknown_residence_women_n>0)emit('<p class="note">',num(meta$unknown_residence_women_n),' source records have unrecorded geography and residence. They are retained in the Total column and the unmatched count; they are not assigned to Rural or Urban.</p>')
+  emit('<p class="note"><strong>Facility counts.</strong> Whole-area totals count unique FP-providing facilities in their recorded geography, including areas without SURGO women. Fallback providers are not counted again as local facilities. Geographic matching does not guarantee valid answers for every supply indicator.</p>')
+  if(country=="senegal")emit('<p class="note"><strong>Residence limitation:</strong> facility Rural/Urban status is a health-district lookup proxy rather than a site-level measurement. ',num(meta$unknown_residence_fp_facilities),' FP providers have unknown proxy residence; they appear in whole-département totals only. An empty Rural cell does not establish absence of rural services.</p>')
+  emit('<h4>Supply-profile assignment among ',population_label,'</h4><div class="table-wrap summary"><table aria-label="',titles[country],' supply assignment summary for ',population_label,'"><thead><tr><th scope="col">Supply assignment</th><th scope="col">Women N</th><th scope="col">Sample %</th><th scope="col">Weighted %</th></tr></thead><tbody>')
+  labels<-c(exact=if(has_residence)paste0('Exact ',area_label,'–Rural/Urban profile')else'Matched district profile',fallback=paste0('Whole-',tolower(area_label),' fallback'),unmatched='Unmatched')
+  for(i in seq_len(nrow(assignments))) {
+    z<-assignments[i,];if(!has_residence&&z$status=="fallback")next
+    emit('<tr><th scope="row">',labels[z$status],'</th><td>',num(z$women_n),'</td><td>',pct(z$sample_pct),'</td><td>',pct(z$weighted_pct),'</td></tr>')
+  }
+  emit('</tbody><tfoot><tr><th scope="row">Total</th><td>',num(meta$women_n),'</td><td>100.0%</td><td>100.0%</td></tr></tfoot></table></div>')
+  missing_areas<-coverage[coverage$total_status=="unmatched"&coverage$total_n>0,]
+  if(nrow(missing_areas))emit('<p class="note"><strong>Unmatched areas (women N):</strong> ',paste(paste0(esc(missing_areas$area),' (',num(missing_areas$total_n),')'),collapse='; '),'. These women remain in the source coverage tables; no other area’s supply profile or zero-valued supply profile is substituted.</p>')
+  if(nrow(exceptions)==1) {
+    z<-exceptions[1,];emit('<h4>Where a whole-area fallback was used</h4><p><strong>',esc(z$area),'–',esc(z$residence),':</strong> ',num(z$local_fp_n),' confirmed FP providers in this residence cell. Its <strong>',num(z$women_n),' women',if(need)' in need of family planning'else'','</strong> receive the whole-',tolower(area_label),' averages from <strong>',num(z$assigned_fp_n),' FP facilities</strong>. This affects ',pct(z$sample_pct),' of ',population_label,' and ',pct(z$weighted_pct),' using survey weights.</p>')
+  }
+  if(nrow(exceptions)>1) {
+    emit('<h4>Residence groups receiving whole-département averages</h4><div class="table-wrap exceptions"><table aria-label="',titles[country],' whole-area fallback groups for ',population_label,'"><thead><tr><th>Département</th><th>Residence</th><th>Women N</th><th>Weighted %*</th><th>Local FP</th><th>Whole-area FP</th></tr></thead><tbody>')
+    for(i in seq_len(nrow(exceptions))){z<-exceptions[i,];emit('<tr><th scope="row">',esc(z$area),'</th><td>',esc(z$residence),'</td><td>',num(z$women_n),'</td><td>',pct(z$weighted_pct),'</td><td>',num(z$local_fp_n),'</td><td>',num(z$assigned_fp_n),'</td></tr>')}
+    emit('</tbody></table></div><p class="note">*Weighted share of all ',population_label,' in this country, rather than the share within the département.</p>')
+  }
+  if(has_residence)emit('<p class="note">When an exact residence cell has zero eligible FP providers, the same ',tolower(area_label),'’s FP-provider profile is used if available and flagged as fallback. If no whole-area profile is available, supply remains unmatched. An undefined individual indicator among existing providers does not trigger this fallback.</p>')
+  if(has_residence)emit('<p><strong>Overall weighted residence distribution:</strong> ',pct(meta$rural_weighted_share),' Rural and ',pct(meta$urban_weighted_share),' Urban.</p>')
+  emit('</section>')
+}
+render_restored_matches<-function(country) {
+  z<-read.csv(file.path(work,country,"restored_geographic_matches.csv"),check.names=FALSE)
+  all_meta<-jsonlite::fromJSON(file.path(work,country,"all_women","coverage_metadata.json"))
+  need_meta<-jsonlite::fromJSON(file.path(work,country,"women_in_need","coverage_metadata.json"))
+  np<-function(n,p)paste0(num(n),' (',sprintf('%.2f%%',p),')')
+  emit('<section id="',country,'-restored-matches"><h3>',if(country=="senegal")'Additional facilities in existing département averages'else'Women gaining a facility profile after the geographic correction','</h3>')
+  if(country=="cotedivoire") {
+    stopifnot(!any(z$jc_departement_profile_present))
+    emit('<p>These three départements were unmatched in the <strong>uploaded GitHub merge prepared by JC</strong>; correcting the health-district labels using the companion codebook linked ',
+      num(sum(z$facility_records_recovered)),' facility records and ',num(sum(z$all_women_n)),' women, including ',num(sum(z$need_women_n)),' women in need of family planning.</p>')
+    emit('<p class="note"><strong>What changed:</strong> these women previously had no département-level facility profile in JC’s merge. They now receive the profile for their assigned département. This differs from Senegal, where the correction changes the facility pool behind existing profiles.</p>')
+  } else {
+    stopifnot(all(z$jc_departement_profile_present))
+    emit('<p><strong>All ',num(all_meta$source_women_n),' Senegal SURGO women across ',all_meta$surveyed_areas,' départements already had a département-level facility profile in the uploaded GitHub merge prepared by JC.</strong></p>')
+    emit('<p>However, ',num(sum(z$facility_records_recovered)),' facility records from ',sum(z$health_district_count),
+      ' health districts had blank SURGO département assignments and were left out of those département averages. Our crosswalk assigns these records to the ',nrow(z),' départements below. Eligible FP-providing facilities with valid responses can now contribute to the corresponding averages.</p>')
+    emit('<p class="note"><strong>How to read this table:</strong> the women shown already had a supply match. Their département averages may change because the pool of contributing facilities changes. The resident counts below do not represent newly matched women; each woman is counted once per département.</p>')
+  }
+  emit('<div class="table-wrap"><table class="restored-matches" style="min-width:700px" aria-label="',titles[country],if(country=="senegal")' added facility records and residents with updated département profiles'else' newly matched women and restored health-district assignments','"><colgroup><col style="width:21%"><col style="width:31%"><col style="width:24%"><col style="width:24%"></colgroup><thead><tr><th scope="col">Département</th><th scope="col">',if(country=="senegal")'Previously omitted health districts'else'Manitoba health district assigned','<small>Facility records in parentheses</small></th><th scope="col">',if(country=="senegal")'Resident women'else'Newly matched women','<small>All women, N (weighted %)</small></th><th scope="col">',if(country=="senegal")'Residents in need of FP'else'Newly matched women in need','<small>N (weighted %)</small></th></tr></thead><tbody>')
+  for(i in seq_len(nrow(z)))emit('<tr><th scope="row">',esc(z$departement[i]),'</th><td>',gsub('; ','<br>',esc(z$health_district_with_counts[i]),fixed=TRUE),'</td><td>',np(z$all_women_n[i],z$all_women_weighted_pct[i]),'</td><td>',np(z$need_women_n[i],z$need_women_weighted_pct[i]),'</td></tr>')
+  emit('</tbody><tfoot><tr><th scope="row">Total</th><td>',sum(z$health_district_count),' health districts<br>(',num(sum(z$facility_records_recovered)),' facility records)</td><td>',np(sum(z$all_women_n),sum(z$all_women_weighted_pct)),'</td><td>',np(sum(z$need_women_n),sum(z$need_women_weighted_pct)),'</td></tr></tfoot></table></div>')
+  emit('<p class="note">Numbers in parentheses beside health-district names count all facility records in those districts. Supply summaries still use confirmed FP providers with valid responses. Women’s Ns are respondent counts; percentages are survey-weighted, using ',num(all_meta$valid_weighted_n),' eligible women in the all-women denominator and ',num(need_meta$valid_weighted_n),' women in the need-group denominator. The health-district column shows the current crosswalk assignments.</p>')
+  if(any(!is.na(z$qualified_districts)&nzchar(as.character(z$qualified_districts))))emit('<p class="note">*Diakhao → Fatick is the retained provisional assignment; the full health-district boundary has not been independently confirmed.</p>')
+  if(country=="senegal") {
+    other<-read.csv(file.path(work,country,"other_geographic_revisions.csv"))
+    if(nrow(other))for(i in seq_len(nrow(other)))emit('<p class="note"><strong>Separate reassignment:</strong> ',num(other$facility_records[i]),' facility records in ',esc(tools::toTitleCase(tolower(other$corrected_source_geo_name[i]))),
+      ' health district were assigned to ',esc(tools::toTitleCase(tolower(other$geo_join_pipeline[i]))),' in JC’s merge. Our crosswalk assigns them to ',esc(tools::toTitleCase(tolower(other$assigned_join_area[i]))),
+      ', which has ',num(other$current_source_women[i]),' SURGO respondents. These records are separate from the ',num(sum(z$facility_records_recovered)),' previously unmatched facility records listed above. ',
+      if(coverage_key(other$geo_join_pipeline[i])%in%z$geo)paste0(esc(tools::toTitleCase(tolower(other$geo_join_pipeline[i]))),' gains ',num(z$facility_records_recovered[match(coverage_key(other$geo_join_pipeline[i]),z$geo)]),' records from the health districts above and loses ',num(other$facility_records[i]),' records through this reassignment, a net ',if(z$facility_records_recovered[match(coverage_key(other$geo_join_pipeline[i]),z$geo)]<other$facility_records[i])'reduction'else'increase',' of ',num(abs(z$facility_records_recovered[match(coverage_key(other$geo_join_pipeline[i]),z$geo)]-other$facility_records[i])),' facility records. Its averages therefore use fewer recorded facilities overall.')else'',
+      '</p>')
+  }
+  emit('</section>')
+}
+for(i in seq_along(countries)) {
+  k<-countries[i];emit('<section class="country" id="',k,'"><h2>',i,'. ',titles[k],'</h2>')
+  render_population(k,"all_women");render_population(k,"women_in_need")
+  if(k%in%c("cotedivoire","senegal"))render_restored_matches(k)
+  emit('</section>')
+}
+emit('</main></div>\n\n```\n')
+```

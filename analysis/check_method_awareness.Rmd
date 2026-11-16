@@ -1,0 +1,165 @@
+---
+title: "Method awareness and confidence"
+subtitle: "Separate diagnostic · Senegal and Lagos · Women in need of family planning"
+output:
+  html_document:
+    self_contained: true
+    mathjax: null
+    toc: true
+    toc_depth: 2
+    theme: readable
+params:
+  prepared_dir: null
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+r <- readRDS(file.path(params$prepared_dir, "aggregate_results.rds"))
+fmt <- function(v, digits=1) formatC(v, format="f", digits=digits)
+pfmt <- function(v) ifelse(v<.001,"<0.001",fmt(v,3))
+table_out <- function(x) cat(as.character(knitr::kable(x,format="html",row.names=FALSE)),"\n")
+picture <- function(name) cat('<img style="width:100%;height:auto" alt="',name,'" src="data:image/png;base64,',base64enc::base64encode(file.path(params$prepared_dir,name)),'">\n',sep="")
+coefs <- do.call(rbind,lapply(r,`[[`,"coefficients"))
+gaps <- do.call(rbind,lapply(r,`[[`,"gaps"))
+```
+
+<style>
+body{color:#263e4c;line-height:1.6}.main-container{max-width:1180px}h1,h2,h3{color:#173d4d}h2{margin-top:42px;border-top:1px solid #dbe6e9;padding-top:20px}table{width:100%;margin:18px 0;font-size:14px}th{background:#edf4f5}th,td{padding:9px!important}.callout{background:#eef6f5;border-left:4px solid #087d8a;padding:16px 20px;margin:20px 0}.small{font-size:13px;color:#526773}
+</style>
+
+This check asks whether method awareness provides different information from our current low-confidence indicator. It uses the latest residence-specific Lagos and Senegal analyses. **The working reports, their six demand domains and their classifications are unchanged.**
+
+## 1. What was compared?
+
+**Awareness** is the number of eight modern methods a woman names spontaneously (KA1) or recognizes from a picture (KA2): condoms, injectables, daily pills, emergency pills, IUDs, implants, female sterilization and male sterilization. Recognition with or without correctly naming the picture counts. Each method counts once, for a total from 0 to 8. These eight options follow the recognition module; this is not a count of every modern method included in the contraceptive-use outcome.
+
+**Low confidence** is the existing MC5A/MC5B indicator: 1 if she is not very or not at all confident choosing a suitable method or finding solutions to side effects; 0 if she is somewhat or very confident on both; otherwise unresolved. This captures perceived capability. The existing report label “Low method knowledge” should not be interpreted as an objective knowledge measure.
+
+KA2 legitimately skips methods already named in KA1. Such skips are recognized methods, not missing responses. An unnamed method is coded unrecognized only when KA2 explicitly says it is not recognized. Other unresolved responses remain unknown. KA11 recognition after an explanation is excluded from the primary awareness measure. Spontaneous naming alone is checked separately.
+
+```{r population, results='asis'}
+tab <- do.call(rbind,lapply(r,function(a){s<-a$summary;data.frame(Setting=s$country,`Women in need`=s$need_n,`Valid awareness`=s$awareness_valid,`Valid confidence`=s$confidence_valid,`Common model sample`=s$model_n,`Geographic clusters`=s$geographic_clusters,check.names=FALSE)}))
+table_out(tab)
+```
+
+Original SURGO FPN2=1 defines need, retaining the current consent and positive-weight requirements. Senegal has five contradictory KA1 responses selecting both “none” and named methods. Their awareness count is unresolved in the primary check; a sensitivity check retains the positive method responses. No other awareness response is unresolved among women in need. The low-confidence definitions are reproduced independently from the raw MC5 answers.
+
+## 2. Awareness distribution and overlap with confidence
+
+```{r distribution, results='asis'}
+picture("awareness_distribution.png")
+tab <- do.call(rbind,lapply(r,function(a){s<-a$summary;data.frame(Setting=s$country,`Mean methods recognized (95% CI)`=sprintf("%.2f (%.2f–%.2f)",s$weighted_awareness_mean[1],s$weighted_awareness_mean[2],s$weighted_awareness_mean[3]),`Mean named spontaneously`=fmt(s$weighted_recall_mean[1],2),`Low confidence (%)`=fmt(s$weighted_confidence_pct),`Awareness–low confidence correlation`=fmt(s$awareness_confidence_correlation,3),check.names=FALSE)}))
+table_out(tab)
+picture("awareness_confidence_overlap.png")
+```
+
+The correlation compares each woman's awareness count with her binary low-confidence flag using survey weights. A negative value means women recognizing more methods tend to report less low confidence; it does not mean the two measures are interchangeable. The figure compares mean awareness across the two confidence groups. It is an unadjusted comparison.
+
+```{r overlap, results='asis'}
+for(a in r){
+ cat("### ",a$summary$country,"\n\n",sep="")
+ z<-a$overlap
+ table_out(data.frame(`Methods recognized`=z$count,`Valid women (N)`=z$n,`Low confidence (N)`=z$low_confidence_n,`Low confidence within count (%)`=fmt(z$low_confidence_pct),check.names=FALSE))
+}
+```
+
+The last column answers: **among women recognizing this many methods, what weighted percentage report low confidence?** Ns are unweighted. Sparse extreme-count groups warrant caution.
+
+## 3. Adjusted associations with modern use
+
+Four weighted logistic models use the **same women within each setting**:
+
+1. **Common adjustment:** age, age squared, education, partnership, fertility goal, Rural/Urban residence, the other five demand indicators and the assigned supply-risk score.
+2. Common adjustment **plus low confidence**.
+3. Common adjustment **plus awareness count**.
+4. Common adjustment **plus both low confidence and awareness count**.
+
+The other demand indicators are healthcare permission, anticipated social stigma, PB2A health/side-effect beliefs, future-fertility concerns and opposition to family planning. Each woman's supply-risk score uses her existing Rural/Urban facility profile, with the existing flagged area-wide fallback where applicable. Awareness enters per additional recognized method; confidence compares a flag of 1 with 0. No random effects or interactions are used.
+
+```{r forest, results='asis'}
+picture("awareness_adjusted_associations.png")
+z<-coefs[coefs$model=="both" & coefs$term%in%c("confidence","awareness_count"),]
+table_out(data.frame(Setting=z$country,Measure=ifelse(z$term=="confidence","Low confidence: yes vs no","One additional method recognized"),`Adjusted OR (95% CI)`=sprintf("%.2f (%.2f–%.2f)",z$odds_ratio,z$lo,z$hi),`p-value`=pfmt(z$p),check.names=FALSE))
+```
+
+An odds ratio below 1 indicates lower adjusted odds of modern use; above 1 indicates higher adjusted odds. The two measures have different units, so their odds-ratio magnitudes cannot establish which is more important. Including both asks whether either retains an association after accounting for the other.
+
+```{r margins, results='asis'}
+table_out(data.frame(Setting=gaps$country,Comparison=ifelse(gaps$term=="confidence","Low confidence vs confidence on both items","One additional method recognized; women below 8"),`Adjusted probability difference (pp)`=sprintf("%+.1f (%+.1f to %+.1f)",100*gaps$estimate,100*gaps$lo,100*gaps$hi),check.names=FALSE))
+```
+
+These are weighted average model-based probability differences from the model containing both measures. The awareness contrast increases each woman's observed count by one among women below eight. The confidence contrast sets the flag to 0 and 1 across the common model sample. They are associations, not estimated intervention effects; current use may itself increase awareness and confidence.
+
+### Does either add predictive information?
+
+```{r prediction, results='asis'}
+z<-do.call(rbind,lapply(r,`[[`,"cv"))
+labels<-c(base="Common adjustment",confidence="+ Low confidence",awareness="+ Awareness",both="+ Both")
+table_out(data.frame(Setting=z$country,Model=unname(labels[z$model]),`Held-out geographic Brier score`=fmt(z$brier,4),`Held-out geographic log loss`=fmt(z$log_loss,4),check.names=FALSE))
+```
+
+Each model is refitted excluding one LGA/département at a time, then predicts women in the excluded area. **Lower scores indicate better prediction.** These are exploratory point comparisons with only 17 Lagos LGAs and 33 Senegal départements; small differences do not establish superiority. Existing supply-score references are held fixed and use no outcome information. This is an internal geographic validation, not independent external validation.
+
+## 4. What this means for our demand domains
+
+```{r findings, results='asis'}
+for(a in r){
+ s<-a$summary; z<-a$coefficients; z<-z[z$model=="both",]; q<-z[z$term=="confidence",]; v<-z[z$term=="awareness_count",]
+ cat('<div class="callout"><strong>',s$country,'</strong><br>',sep='')
+ cat('Mean awareness is ',fmt(s$weighted_awareness_mean[1],2),' of eight methods. The weighted awareness–low-confidence correlation is ',fmt(s$awareness_confidence_correlation,3),'. ',sep='')
+ cat('With both measures included, the adjusted odds ratio is ',fmt(q$odds_ratio,2),' for low confidence (95% CI ',fmt(q$lo,2),'–',fmt(q$hi,2),') and ',fmt(v$odds_ratio,2),' per additional method recognized (',fmt(v$lo,2),'–',fmt(v$hi,2),').</div>\n',sep='')
+}
+```
+
+**What the results suggest:** awareness is not redundant with confidence. Their weighted correlations are modest (−0.17 in Lagos and −0.15 in Senegal), and both retain adjusted associations when included together. The model containing both has the lowest held-out prediction error in each setting. Awareness alone adds more predictive information than confidence alone in these comparisons; this does not establish a stronger causal role. The VIFs for these two terms in the joint models range from 1.12 to 1.28, giving no indication that they duplicate one another statistically.
+
+**Interpretation of the measures:** confidence captures perceived capability, while awareness captures familiarity with contraceptive options. The diagnostic does not establish that confidence is empirically better than awareness. Adding awareness to the six-domain index would change its coverage and weighting. The working reports remain unchanged.
+
+The spontaneous-naming sensitivity retains the association between greater awareness and modern use in both settings. Retaining the five contradictory Senegal responses changes its joint-model odds ratios only slightly. Senegal's quadratic sensitivity suggests the awareness association may flatten at higher counts, so a constant per-method odds ratio is an initial summary rather than a proven functional form. This diagnostic does not validate a new index or identify a binding causal constraint.
+
+## Appendix: checks and sensitivity analyses
+
+### Coding and survey inference
+
+The eight-method mapping is matched across KA1 and KA2, including the different positions of emergency contraception and sterilization. A woman naming a method remains aware even if an inconsistent later prompt records otherwise; these anomalies are counted below. The stricter “none plus named” check excludes the entire contradictory awareness response. No source answers are recoded or overwritten.
+
+```{r routing, results='asis'}
+table_out(do.call(rbind,lapply(r,function(a){s<-a$summary;data.frame(Setting=s$country,`None plus named contradictions`=s$contradictions,`Unnamed but skipped picture cells`=s$skipped_unnamed_method_cells,`Named but picture also answered (cells)`=s$named_but_prompted_cells,`Description PSUs`=s$descriptive_psus,check.names=FALSE)})))
+```
+
+Descriptive estimates use original final weights and the currently available sampling clusters: the recorded 118 Senegal PSUs in the need group, and 17 geographic Lagos clusters because official Lagos EA/PSU identifiers remain unconfirmed. The original strata and finite-population corrections are unavailable. This is the available design specification, not a claim to reconstruct the full original survey design. Confidence intervals for descriptive means use Taylor linearization and design degrees of freedom.
+
+Model coefficients reproduce `survey::svyglm` weighted estimates. Primary model inference uses LGA/département-clustered CR2 covariance, coefficient-specific Satterthwaite intervals and HTZ tests, matching the current reports. Full rank, convergence, finite coefficients and weighted design-column VIFs are checked. This geographic clustering also accounts for the common assigned supply profile within areas; the limited number of LGAs particularly constrains Lagos precision.
+
+```{r diagnostics, results='asis'}
+z<-do.call(rbind,lapply(r,`[[`,"samples"))
+table_out(data.frame(Setting=z$country,Model=unname(labels[z$model]),N=z$n,`Modern users`=z$events,Clusters=z$clusters,Parameters=z$parameters,`Maximum design-column VIF`=fmt(z$max_vif,2),check.names=FALSE))
+j<-read.csv(file.path(params$prepared_dir,"joint_model_tests.csv"))
+table_out(data.frame(Setting=j$country,Measure=ifelse(j$term=="confidence","Low confidence","Awareness count"),`Incremental HTZ p-value`=pfmt(j$p),`Holm p-value across four joint-model tests`=pfmt(j$holm_p_four_tests),check.names=FALSE))
+```
+
+Each joint-model test asks whether the relevant coefficient equals zero after accounting for the other measure and all common adjustments. It does not test whether the two constructs are equally important.
+
+### Spontaneous naming, contradictory answers and count nonlinearity
+
+```{r sensitivity, results='asis'}
+z<-do.call(rbind,lapply(r,`[[`,"sensitivity"))
+checks<-c(recall_count="Use spontaneous naming only",retain_named_conflicts="Retain named methods despite none conflict",quadratic_awareness="Allow a quadratic awareness relationship")
+terms<-c(confidence="Low confidence",awareness_count="Count term",awareness_sq="Count squared")
+table_out(data.frame(Setting=z$country,Check=unname(checks[z$check]),N=z$n,Term=unname(terms[z$term]),`Adjusted OR (95% CI)`=sprintf("%.2f (%.2f–%.2f)",z$odds_ratio,z$lo,z$hi),`p-value`=pfmt(z$p),check.names=FALSE))
+```
+
+In the quadratic model, the count and squared-count terms must be interpreted together; neither odds ratio describes a constant effect per method. These sensitivity checks are exploratory and do not change the main reports.
+
+### Methods recognized
+
+```{r method_table, results='asis'}
+z<-do.call(rbind,lapply(r,`[[`,"methods"))
+table_out(data.frame(Setting=z$country,Method=z$method,`Valid N`=z$n_valid,`Recognized (%)`=fmt(z$pct),check.names=FALSE))
+```
+
+### Reproducibility and limits
+
+The companion R script accepts caller-supplied joined datasets and saved analysis directories. It independently reconstructs confidence, applies the awareness rules, fits the comparison models and generates this report. It checks that source input hashes are unchanged. Outputs contain aggregate statistics only; the original woman-level joins remain outside the report and source package.
+
+Self-efficacy has supporting family-planning measurement research, but our two-item binary indicator is not the complete validated CSESSA scale and this check does not establish psychometric validity. [CSESSA validation study](https://pubmed.ncbi.nlm.nih.gov/33145490/). Awareness is recognition rather than a test of correct method use, effectiveness or safety knowledge.

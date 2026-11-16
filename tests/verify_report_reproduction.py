@@ -1,4 +1,7 @@
-"""Compare a clean report build with frozen current analytical results."""
+"""Compare historical country calculations with their frozen analytical results.
+
+Current outputs use verify_rebuilt_reports.py; Sindh no longer uses this snapshot.
+"""
 import argparse
 import json
 import math
@@ -24,7 +27,7 @@ def compare(a, b, path):
     else:
         assert a == b, (path, a, b)
         checks += 1
-for country, name, z in [('lagos','Lagos','models_urban_rural'),('sindh','Sindh','models_zscore'),
+for country, name, z in [('lagos','Lagos','models_urban_rural'),
                           ('senegal','Senegal','models_zscore'),('cotedivoire','Cote_dIvoire','models_zscore')]:
     data = Path(args.work_dir)/country/(name+'_analysis_files')
     report = json.loads((data/'report_data.json').read_text())

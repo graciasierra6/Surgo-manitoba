@@ -159,11 +159,162 @@
       "embedded_figures_downloads_and_maps_unchanged": true,
       "analysis_inputs_and_calculated_outputs_unchanged": true,
       "no_model_refitting_needed": "No analytical code changed. Previously verified numerical outputs were reused for this wording-only revision."
-    }
+    },
+    "cumulative_review": {
+      "date": "2026-11-10",
+      "public_baseline_commit": "464cffe1a67ec0024dbdd2a83e545676a514f5b1",
+      "fresh_external_bundle_rebuild": true,
+      "relocated_project": true,
+      "current_country_reports_rebuilt": [
+        {
+          "workflow": "residence_specific",
+          "country": "lagos",
+          "file": "Lagos_rural_urban_updated.html",
+          "sha256": "ff4a9d107d10a8d2faba949266a785a4eac3e2e7bb4d7a121195b23e0fdcb8ab",
+          "independent_checks": 2143,
+          "identical_to_saved": true
+        },
+        {
+          "workflow": "residence_specific",
+          "country": "senegal",
+          "file": "Senegal_rural_urban_updated.html",
+          "sha256": "8c8f5daf4ac00468f1ec529c000f6de2a405b8d3150e998c6b24eeba42940974",
+          "independent_checks": 1158,
+          "identical_to_saved": true
+        },
+        {
+          "workflow": "residence_specific",
+          "country": "cotedivoire",
+          "file": "CotedIvoire_rural_urban_updated.html",
+          "sha256": "2c585cdd4245053029cb8832cd5fd6f26a88cd9bcfb8caa3c7f3992d1296da53",
+          "independent_checks": 2979,
+          "identical_to_saved": true
+        },
+        {
+          "workflow": "administrative_area",
+          "country": "lagos",
+          "file": "Lagos_analysis_aggregate.html",
+          "sha256": "d937c45f28f52c1b667a12240556f5941c9acca81e4c7a19323c0f89299b57cc",
+          "independent_checks": 2018,
+          "identical_to_saved": true
+        },
+        {
+          "workflow": "administrative_area",
+          "country": "senegal",
+          "file": "Senegal_analysis_aggregate.html",
+          "sha256": "868d01d122960b1d589157da787a973d65cdc279d09fcd6b60a58c2e4a6400c9",
+          "independent_checks": 567,
+          "identical_to_saved": true
+        },
+        {
+          "workflow": "administrative_area",
+          "country": "cotedivoire",
+          "file": "Cote_dIvoire_analysis_aggregate.html",
+          "sha256": "d0482cb1d080b08fe4dc7357da3b3e478fca91d0e77f8ea79ae2b76c675de3b3",
+          "independent_checks": 1140,
+          "identical_to_saved": true
+        },
+        {
+          "workflow": "administrative_area",
+          "country": "sindh",
+          "file": "Sindh_analysis.html",
+          "sha256": "88dc4a9f85c61750554cb128ecaa68d4b2273847ab7ffffb273bac8b4217a18f",
+          "independent_checks": 2423,
+          "identical_to_saved": true
+        }
+      ],
+      "supplementary_checks_rebuilt": 2,
+      "population_comparison_rebuilt_all_four_geographies": true,
+      "data_check_residence_tables_reproduced": true,
+      "data_check_previous_sections_preserved": true,
+      "data_check_rendering_difference": "Only blank-line spacing differs after reapplying the section updaters; content is identical.",
+      "earlier_report_snapshots_preserved": true,
+      "no_input_survey_datasets_in_upload": true,
+      "runtime_dependency_scope": "Rebuild verified with the documented installed R, Python and Pandoc dependencies; a fresh operating-system installation was not tested."
+    },
+    "coverage_report_rebuilt_and_identical_to_uploaded": true
   },
   "limitations": [
     "Original strata and FPC are not fully available; geographic CR2 inference and recorded-PSU sensitivity are documented.",
     "Categories are relative planning signals, not causal diagnoses.",
     "Data-check updaters recalculate their residence sections and preserve earlier sections from a caller-supplied HTML."
-  ]
+  ],
+  "supplementary_checks": {
+    "score_profile_examples": {
+      "file": "Score_profile_examples.html",
+      "path": "reports/Score_profile_examples.html",
+      "sha256": "0a0c458db53596e62ff01c73e7be8c78cf685a66baf88412b38ee4ea6578b201",
+      "source_files": {
+        "analysis/score_profile_examples.R": "c8321c6abbb73dbfdb3b8f7b4936687ae1ba41b0faf840aa45ccac03c498ed0d",
+        "analysis/score_profile_examples.Rmd": "6c044bab4accf44af154c8919cbcf313ebadea8453214734f25c1ec58712f55c"
+      },
+      "embedded_figure_count": 6,
+      "validation_basis": "fresh country outputs verified earlier; saved aggregate inputs reconciled again",
+      "main_analyses_unchanged": true
+    },
+    "check_method_awareness": {
+      "file": "Method_awareness_check_Senegal_Lagos.html",
+      "path": "reports/Method_awareness_check_Senegal_Lagos.html",
+      "sha256": "bbfb445ded636dc840c96950fe14fe3c2eca6cdfda41a7817dcb8b8dc17351e1",
+      "source_files": {
+        "analysis/check_method_awareness.R": "2d6d5c9872a5a231d0046abc7d1a79f207481d5ca428ff0484d116ec97bde1b5",
+        "analysis/check_method_awareness.Rmd": "f407c7d51555b7409bce8c1c11b75db1d5df9e54f83ca9a65c4f0fb44f557940"
+      },
+      "embedded_figure_count": 3,
+      "validation_basis": "report and sources exactly match the earlier fresh rebuild",
+      "main_analyses_unchanged": true
+    },
+    "score_profile_contrasts": {
+      "file": "Score_profile_contrasts.html",
+      "path": "reports/Score_profile_contrasts.html",
+      "sha256": "9b1b5b2cd9ae569dcfec6a66b5a6616feb5f061490aa9079bc07ec5930cee9da",
+      "source_files": {
+        "analysis/score_profile_contrasts.R": "baec97486ce883cb809896e184e52537b10ee0bed66c5984edbe63efd419cf57",
+        "analysis/score_profile_contrasts.Rmd": "fc2a36b058f78d968688fca7b1444453c1058a59685d846f263bd8d191cda3a2",
+        "analysis/score_profile_examples.R": "c8321c6abbb73dbfdb3b8f7b4936687ae1ba41b0faf840aa45ccac03c498ed0d",
+        "analysis/plot_score_profiles_combined.R": "0605fb09009dd2578144af8b51e0d790068b27db8b9191b6ac1d01f184445c3f"
+      },
+      "embedded_figure_count": 4,
+      "validation_basis": "re-rendered from current verified country aggregates in a relocated project",
+      "main_analyses_unchanged": true
+    },
+    "surgo_uom_checks": {
+      "file": "Surgo_UoM_checks.html",
+      "path": "data_checks/Surgo_UoM_checks.html",
+      "sha256": "0207a44e5dc2e5f9d8bc99587ab6a25f60642b58d7898f97ca9d0d9059f0fb06",
+      "source_files": {
+        "analysis/Surgo_UoM_checks.R": "3fe7342b330bb2de6a9d1a49a97e25053001ed0ccd6f296008bff8fc2ee61812",
+        "analysis/Surgo_UoM_checks.Rmd": "baa1701b744a183094975fc150fcdd13bdaba5a1a6c8e225815f6232a1df8599",
+        "analysis/tabulate_women_residence.R": "af43987b08a9965fca91602b5ca8499815e592eba8913f6b0cf3273319fba4fe"
+      },
+      "embedded_figure_count": 0,
+      "validation_basis": "rebuilt in a relocated project from parameterized joins and raw facility inputs",
+      "main_analyses_unchanged": true
+    },
+    "demand_pair_comparisons": {
+      "file": "Demand_pair_comparisons.html",
+      "path": "reports/Demand_pair_comparisons.html",
+      "sha256": "beff267b7c72f4f8858785101dbb1882d7f2271d7bd623b685895edbf1499e5d",
+      "source_files": {
+        "analysis/plot_demand_pair_table.R": "87f8ca59a85f6b0a67198a1518db296e557e064a032ee6bf9c7cf7c7ea8327f9"
+      },
+      "embedded_figure_count": 4,
+      "validation_basis": "All 48 raw component percentages and 24 pair differences reconciled to saved country outputs; bolding verified, requested subtitle and footnote removals checked in each SVG; standalone HTML tested offline.",
+      "main_analyses_unchanged": true,
+      "report_updated_date": "2026-11-11"
+    },
+    "demand_and_supply_regional_comparisons": {
+      "file": "Composite score_comparisons.html",
+      "path": "data_checks/Composite score_comparisons.html",
+      "sha256": "7b869d88de8b709ee4a222be7fcdc4a7eab487510321906948c4688f830e21c9",
+      "source_files": {
+        "analysis/plot_demand_pair_table.R": "87f8ca59a85f6b0a67198a1518db296e557e064a032ee6bf9c7cf7c7ea8327f9",
+        "analysis/plot_supply_pair_table.R": "e8e787cd2395219d2482bd82ca826b3f01c7099a3a8fd5f086ccf2e8e92ed022"
+      },
+      "embedded_figure_count": 13,
+      "validation_basis": "Presentation cleanup removed the context/navigation block, all thirteen Definitions and accessible values sections, and the specified supply-introduction sentence. All thirteen figures, comparison labels, key findings and the opening paragraph retained byte-for-byte. Original numerical reconciliations remain applicable; rebuilt HTML checked offline at desktop and mobile widths.",
+      "main_analyses_unchanged": true,
+      "report_updated_date": "2026-11-11"
+    }
+  }
 }

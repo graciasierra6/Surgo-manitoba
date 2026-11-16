@@ -1,0 +1,289 @@
+{
+  "schema_version": 1,
+  "package": "SURGO-Manitoba woman-level linkage inputs",
+  "files": [
+    {
+      "member": "curated/Facilities data with archetype assignments.csv",
+      "bytes": 5142980,
+      "sha256": "7621cfe6caecba0594af3d2dbc56bbface90152de65ced42b20753ca500f9cac"
+    },
+    {
+      "member": "curated/geo_crosswalk_draft.csv",
+      "bytes": 9340,
+      "sha256": "061e0a64a59fd3eeb8632f670912538fd7d39e57ef877a5118d9b9512399bbf5"
+    },
+    {
+      "member": "curated/geo_surgo_levels.xlsx",
+      "bytes": 17129,
+      "sha256": "708242f017ad91477bd2c7160d2d63152c68aad5e090626831023936dc0e32f1"
+    },
+    {
+      "member": "exports/exports_manifest.csv",
+      "bytes": 628,
+      "sha256": "f7dffb0ba98fae1f69a33fd67d0de72ed61e11bd72465d1c54dcc7b3595770eb"
+    },
+    {
+      "member": "exports/merged_supply_demand_coverage.csv",
+      "bytes": 302,
+      "sha256": "81f8fd702faa372b49a0ee58460270f0b02c145336373d03a7f8caa6508594b2"
+    },
+    {
+      "member": "exports/merged_supply_demand_department.csv",
+      "bytes": 306462,
+      "sha256": "0bf0456767484ee09943ac27cdf7a009cf3521472f5e05099ff72ab7cf9177d3"
+    },
+    {
+      "member": "exports/merged_supply_demand_dictionary.csv",
+      "bytes": 57755,
+      "sha256": "dcc970b4e0c5282cd9878b006b53d3721b34511b6e001b37620afdb1a06152b5"
+    },
+    {
+      "member": "exports/surgo_demand_department.csv",
+      "bytes": 140362,
+      "sha256": "6f29ba24cd035a155092ba09becc6b091256c4085e80eeb4a6b961006f424953"
+    },
+    {
+      "member": "exports/surgo_demand_qc_log.csv",
+      "bytes": 18354,
+      "sha256": "f729193c0ccbdc3b2e33733ded5071fed75c13275ca4cd3ea6fddf2c654efb43"
+    },
+    {
+      "member": "exports/surgo_demand_region.csv",
+      "bytes": 18067,
+      "sha256": "8c844a0bd8adcac0f1bfe36ea232742b8ed355cf096d27bf6cf1ebadc0d84589"
+    },
+    {
+      "member": "exports/surgo_geo_levels.csv",
+      "bytes": 22434,
+      "sha256": "5eb64c2ba1c74f960fd4489a9c54bf0f840d89a8f55b48ece84116f1dcf541cf"
+    },
+    {
+      "member": "exports/uom_facility_summary_diff.csv",
+      "bytes": 74,
+      "sha256": "c8620c0859621858831f18609ba5fe0d3a40ff587f5631cd7f77ec1a1d33f8e1"
+    },
+    {
+      "member": "exports/uom_facility_summary_original.csv",
+      "bytes": 2648316,
+      "sha256": "a883d7a1f2ea2178da95504b8b0d212dfa2154f50fd99fd690dc5234917fef47"
+    },
+    {
+      "member": "exports/uom_facility_summary_pipeline.csv",
+      "bytes": 2603727,
+      "sha256": "bf9a89baea3a19d237b0fc61db4350cc497d8b3c4b6b6d274cd5e3171e3927da"
+    },
+    {
+      "member": "exports/uom_surgo_geo_crosswalk.csv",
+      "bytes": 25991,
+      "sha256": "5b6b615323896592c1f58187d0d60575c40b2f6880a4bce64d9187ea839da120"
+    },
+    {
+      "member": "exports/uom_surgo_geo_crosswalk_reviewed.csv",
+      "bytes": 27891,
+      "sha256": "6f78409418dfd344cfeb1cc9c7054e7a34b502647a64b8924c3777e87725bf3f"
+    },
+    {
+      "member": "inputs/SenegalURlookup.xlsx",
+      "bytes": 9145,
+      "sha256": "6f7a20f8942e667fdc9d0607b8af89f38a959d6e760c953331b933b3b1c830bb"
+    },
+    {
+      "member": "inputs/surgo/cotedivoire/surgo_cotedivoire_women.dta",
+      "bytes": 119830255,
+      "sha256": "fc66af3fc880d8d6873dc06e3bcc064db4f8225fecf08424749eff97983d6bdc"
+    },
+    {
+      "member": "inputs/surgo/lagos/surgo_lagos_women.csv",
+      "bytes": 16726617,
+      "sha256": "618d883dbf9f219052390e800bce9c17e6ae3fdc92e16fc17848c6ce70a90daf"
+    },
+    {
+      "member": "inputs/surgo/senegal/surgo_senegal_women.dta",
+      "bytes": 81267194,
+      "sha256": "bf8604b1dfcc9c12f6241e02d7d4a30d5543e9db7ee4b60ac9445df435e3ea95"
+    },
+    {
+      "member": "inputs/surgo/sindh/20250124_forms.dta",
+      "bytes": 42547391,
+      "sha256": "8c1fa18212a5dc4d034fe1fccef3b5e0ffe7b10909676e256d96444b13fdcb5b"
+    },
+    {
+      "member": "inputs/surgo/sindh/20250124_forms_wt.dta",
+      "bytes": 43017253,
+      "sha256": "84840d5883d49c18038d6afb3a75c4ca89e37847576bf958a437cbb20957eccb"
+    },
+    {
+      "member": "inputs/uom/cdi/uom_cdi_facility_pooled.dta",
+      "bytes": 130217757,
+      "sha256": "7c1fe207452f10c78cd413cdd07222c55d9f804a7599e7ba60b2d5fb1e88e681"
+    },
+    {
+      "member": "inputs/uom/lagos/uom_lagos_facility_pooled.dta",
+      "bytes": 95464554,
+      "sha256": "64565cda53f47b300dc133b86c03cb9f5aa8072dd02028c3fb01d5ea5064f62c"
+    },
+    {
+      "member": "inputs/uom/senegal/uom_senegal_facility_pooled.dta",
+      "bytes": 36543860,
+      "sha256": "93ee53f49124a6437062a43dcfcef1159077edc2161a92e63c00720cc3278476"
+    },
+    {
+      "member": "inputs/uom/sindh/uom_sindh_facility_pooled.dta",
+      "bytes": 239919794,
+      "sha256": "a1f11eb3daf006a165e08ac9809aa31ff12b71258382b4e56754c92ec119c5be"
+    },
+    {
+      "member": "lookups/cdi_health_district_codebook.csv",
+      "bytes": 1659,
+      "sha256": "f158c1f85bf42049991147d90eb6c752eace3e9c5a41982e27eea740f6ba335d"
+    },
+    {
+      "member": "lookups/geographic_sources.json",
+      "bytes": 3014,
+      "sha256": "b4b87a09d13aa535c96a6dc97d1684229d97402829a4f259974ee058020782a0"
+    },
+    {
+      "member": "lookups/senegal_health_district_department.csv",
+      "bytes": 106738,
+      "sha256": "327558f3d46da956f4c6f61ed26373b455eb436f28662b83a1882e9b4e1f44eb"
+    },
+    {
+      "member": "lookups/senegal_health_district_department_evidence.csv",
+      "bytes": 106738,
+      "sha256": "327558f3d46da956f4c6f61ed26373b455eb436f28662b83a1882e9b4e1f44eb"
+    },
+    {
+      "member": "lookups/sindh_district_aliases.csv",
+      "bytes": 1582,
+      "sha256": "5ac31249cb8be02619e7a02d567652b368b8567cf2d68f733d9e92bbac2f4410"
+    },
+    {
+      "member": "merge_pipeline/geo_bridge.csv",
+      "bytes": 28659,
+      "sha256": "d915d0c77348f06b4aec57a42430faf26c7f5d0c4ec4d283093e691b1fc136fb"
+    },
+    {
+      "member": "merge_pipeline/new_demand_vol_facility_crosswalked.csv",
+      "bytes": 1797333,
+      "sha256": "2dc3bfb41dec5cb1279672a3dfdf9377e42628dee44cab8c68331eaee07b80a3"
+    },
+    {
+      "member": "merge_pipeline/qc/e05_qc.csv",
+      "bytes": 2527,
+      "sha256": "0598ad7384a880516b5dc9088bb26c87f42541b087a8c370bd9148a82a2ea38c"
+    },
+    {
+      "member": "merge_pipeline/qc/e05a_qc.csv",
+      "bytes": 117,
+      "sha256": "71ba39650b32fa22d8e143e61356f09b821d82c19e3150d0bf921d78fcb7b94a"
+    },
+    {
+      "member": "merge_pipeline/qc/m01_qc.csv",
+      "bytes": 116,
+      "sha256": "63e14091ffd0cb1b31033146b448f64c46b07b6b3f10ddf16753d2762ecdb76f"
+    },
+    {
+      "member": "merge_pipeline/qc/m05_qc.csv",
+      "bytes": 2527,
+      "sha256": "43399af6c3181b494614d4753a9e7a8a7318878659b8fdac43456366b6aadb05"
+    },
+    {
+      "member": "merge_pipeline/uom_facility_geo.csv",
+      "bytes": 752949,
+      "sha256": "d04e66cb53cd16c450d66e92fd89dc94f5e03448ef2094838a42c27fdf205243"
+    },
+    {
+      "member": "merge_pipeline/uom_goes.csv",
+      "bytes": 9416,
+      "sha256": "e03b22d27b4c3a1287785ceae978e4db4d5a0c4a9e58dfddb584a975a9bd4355"
+    },
+    {
+      "member": "merge_pipeline/uom_summary_facility_crosswalked.csv",
+      "bytes": 3073855,
+      "sha256": "52821349bcb1070dd4ea377d13f28d69d6d65964be376cd1575df9898c1f1e78"
+    },
+    {
+      "member": "reference/upstream/DATA_DICTIONARY.md",
+      "bytes": 26581,
+      "sha256": "99f5eabf6340f9f7d035827ed329c029969beb83c7f1cf5e9a500a288bff37b1"
+    },
+    {
+      "member": "reference/upstream/workflow_merge/m01_geography_keys.r",
+      "bytes": 4130,
+      "sha256": "f43df959a80d66d279866aa9cb096189481f9a8587e17ae3bab96f16b6392782"
+    },
+    {
+      "member": "reference/upstream/workflow_merge/m04_apply_crosswalk_review.sql",
+      "bytes": 14448,
+      "sha256": "0d3f434a5a0113af627a6fb7a5d64af5b5423d2393123005c2f8ed521363b419"
+    },
+    {
+      "member": "reference/upstream/workflow_merge/m05_expand_geographies.r",
+      "bytes": 9532,
+      "sha256": "6b1aefb1ed7262c8268f891f67b1e5845420d1671e944a7f2045b047dc6d5009"
+    },
+    {
+      "member": "reference/upstream/workflow_merge/m06_build_merged_dataset.r",
+      "bytes": 21948,
+      "sha256": "6738ab18155ad5a41cc605e21ef1236cfe1cc6b8184336d0da8455a7d0351e58"
+    },
+    {
+      "member": "reference/upstream/workflow_merge/m07_build_merged_dictionary.py",
+      "bytes": 19058,
+      "sha256": "21695580ad9e920389caee34e9420efe9929d14b97f60656f258c5ebd1d0c0ec"
+    },
+    {
+      "member": "surgo_pipeline/cotedivoire/wra_design_ready.rds",
+      "bytes": 4471100,
+      "sha256": "4e8334c09751c19a5d1b4be9bcab60207b99353497d07a119449742ea0625d29"
+    },
+    {
+      "member": "surgo_pipeline/lagos/wra_design_ready.rds",
+      "bytes": 1924547,
+      "sha256": "f934a21a6df51a3fc915614c611ec581c85e01df2ebc075a9a4542843a917abb"
+    },
+    {
+      "member": "surgo_pipeline/senegal/wra_design_ready.rds",
+      "bytes": 2997250,
+      "sha256": "2534db07f7a7a4fd29b6b2904113dd341eaf2586100a8bb0c2bf275f890945bd"
+    },
+    {
+      "member": "surgo_pipeline/sindh/sindh_wra_design_ready.rds",
+      "bytes": 3417507,
+      "sha256": "01147a8dbb65ecb7170782ae198b77f22143cd3b8b20267de443e699fbd0a2d7"
+    },
+    {
+      "member": "surgo_pipeline/sindh/wra_design_ready.rds",
+      "bytes": 3440292,
+      "sha256": "a792fe705f84da8582e114036de5ae1a4335384d0edb24e8da65b08210ea9939"
+    },
+    {
+      "member": "uom_pipeline/Facilities data with archetype assignments.csv",
+      "bytes": 5143162,
+      "sha256": "81db1390c3c24e4d6971b5407d74387b249e37c6e6700a32404b1dc26a72b0c3"
+    },
+    {
+      "member": "uom_pipeline/new_demand_vol_facility.csv",
+      "bytes": 1104270,
+      "sha256": "baf2d373523e347bfd6fb600147f71a50dcfe5585c690cc8d81917098c89c059"
+    },
+    {
+      "member": "uom_pipeline/uom_data.RData",
+      "bytes": 14075948,
+      "sha256": "b1b001b9cdd708fd428b37861c98f93c0dcf138038856846d2a80d47e116248f"
+    },
+    {
+      "member": "uom_pipeline/uom_summary_facility.csv",
+      "bytes": 2223967,
+      "sha256": "9268646689dbc278194803fd41919e6182624f2b41fa3b7122a289448be169cf"
+    }
+  ],
+  "note": "Original dataset bytes are preserved. Geographic lookup tables and source analytical RDS files are included for reconciliation.",
+  "filename_aliases": [
+    {
+      "member": "lookups/senegal_health_district_department.csv",
+      "identical_to": "lookups/senegal_health_district_department_evidence.csv",
+      "purpose": "Requested shorter filename; identical reviewed mapping and evidence. The original filename is retained for the existing join scripts."
+    }
+  ]
+}

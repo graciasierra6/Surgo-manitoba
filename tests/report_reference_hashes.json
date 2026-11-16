@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "purpose": "Exact reference hashes for supplementary outputs rebuilt from inputs but not included as published HTML in the build-only update. Published HTMLs must remain present for their full content comparison.",
+  "generated_only": {
+    "reports/Score_profile_examples.html": {
+      "sha256": "0a0c458db53596e62ff01c73e7be8c78cf685a66baf88412b38ee4ea6578b201"
+    },
+    "reports/Score_profile_contrasts.html": {
+      "sha256": "9b1b5b2cd9ae569dcfec6a66b5a6616feb5f061490aa9079bc07ec5930cee9da"
+    },
+    "reports/Demand_pair_comparisons.html": {
+      "sha256": "beff267b7c72f4f8858785101dbb1882d7f2271d7bd623b685895edbf1499e5d"
+    },
+    "reports/Method_awareness_check_Senegal_Lagos.html": {
+      "sha256": "bbfb445ded636dc840c96950fe14fe3c2eca6cdfda41a7817dcb8b8dc17351e1"
+    }
+  }
+}

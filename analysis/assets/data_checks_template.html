@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Data checks — Facility provision, demand completeness and supply coverage</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7f8;color:#243d49;font-family:Arial,Helvetica,sans-serif;line-height:1.6}main{max-width:1120px;margin:35px auto;padding:36px 40px;background:#fff;border:1px solid #dce5e9;border-radius:8px}h1{margin:0;color:#125563;font-size:31px;line-height:1.2}h2{font-size:20px;color:#125563;margin:26px 0 10px}.subtitle{font-size:19px;margin:9px 0 20px;color:#365765}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}th,td{padding:13px 12px;border-bottom:1px solid #dce5e9;text-align:right;vertical-align:top}th{background:#eaf2f4;color:#154f5b;font-size:13px}th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}tbody tr:nth-child(even){background:#f8fafb}.pct{color:#5c7380;white-space:nowrap}.note{font-size:13px;color:#5c7380;margin:10px 0}.decision{background:#edf5f5;border-left:4px solid #24858c;padding:14px 17px;margin-top:22px}.questions td:last-child,.questions th:last-child{text-align:left}.questions td:first-child{white-space:nowrap}code{font-size:13px}footer{margin-top:24px;border-top:1px solid #dce5e9;padding-top:12px;font-size:12px;color:#5c7380}@media(max-width:760px){main{margin:0;padding:25px 16px;border:0;border-radius:0}.distribution{min-width:900px}h1{font-size:27px}}@media print{body{background:#fff}main{border:0;padding:0;margin:0;max-width:none}tr{break-inside:avoid}}
+.missingness th:not(:first-child),.missingness td:not(:first-child){text-align:right}.total-row td{font-weight:bold;border-top:2px solid #c3d6dc;background:#edf4f5}
+.supply-coverage th:not(:first-child),.supply-coverage td:not(:first-child){text-align:right}.supply-coverage td:first-child{min-width:260px}.decision p{margin:8px 0}
+.daoukro-explanation h3{font-size:17px;color:#185664;margin:25px 0 8px}.daoukro-explanation .formula{background:#f4f8f9;border:1px solid #dce5e9;padding:15px 18px;margin:15px 0;line-height:1.9}.daoukro-counts th:not(:first-child),.daoukro-counts td:not(:first-child){text-align:right}.daoukro-examples th,.daoukro-examples td,.daoukro-responses th,.daoukro-responses td{text-align:left}
+</style></head><body><main>
+<h1>Data checks</h1>
+<p class="subtitle">Facility FP service provision, demand completeness and geographic supply coverage</p>
+<h2>Distribution of facilities by reported FP service provision</h2>
+<p>Counts include all records in each underlying facility file, before restricting to administrative areas represented in SURGO. Percentages are unweighted and use all records in the respective file as the denominator.</p>
+<div class="table-wrap"><table class="distribution" id="distribution"><thead><tr><th>Geography</th><th>Variable</th><th>Total records</th><th>Yes — N (%)</th><th>No — N (%)</th><th>Missing / unanswered — N (%)</th></tr></thead><tbody><tr><td>Lagos</td><td><code>q506</code></td><td>{{1_1_3}}</td><td>{{1_1_4}}</td><td>{{1_1_5}}</td><td>{{1_1_6}}</td></tr><tr><td>Senegal</td><td><code>s5_6</code></td><td>{{1_2_3}}</td><td>{{1_2_4}}</td><td>{{1_2_5}}</td><td>{{1_2_6}}</td></tr><tr><td>Sindh</td><td><code>q506</code></td><td>{{1_3_3}}</td><td>{{1_3_4}}</td><td>{{1_3_5}}</td><td>{{1_3_6}}</td></tr><tr><td>Côte d’Ivoire</td><td><code>s2_5_sp</code></td><td>{{1_4_3}}</td><td>{{1_4_4}}</td><td>{{1_4_5}}</td><td>{{1_4_6}}</td></tr></tbody></table></div>
+<p class="note">Observed responses: 1 = Yes; 2 = No. Missing responses are reported separately and are not classified as No. Percentages may sum to slightly more or less than 100% because of rounding.</p>
+<h2>Facility eligibility questions</h2>
+<div class="table-wrap"><table class="questions"><thead><tr><th>Geography</th><th>Variable</th><th>Question recorded in the facility dataset</th></tr></thead><tbody><tr><td>Lagos</td><td><code>q506</code></td><td>Does this facility provide any family planning services at the facility?</td></tr><tr><td>Senegal</td><td><code>s5_6</code></td><td>Does the facility offer family planning services on-site?</td></tr><tr><td>Sindh</td><td><code>q506</code></td><td>Does this facility provide any family planning services at the facility?</td></tr><tr><td>Côte d’Ivoire</td><td><code>s2_5_sp</code></td><td>Does the health facility provide FP services?</td></tr></tbody></table></div>
+<p class="note">For Côte d’Ivoire, <code>s2_5_sp</code> identifies FP service provision. Its <code>s5_6</code> question concerns outreach and is not used for this eligibility check.</p>
+<p class="decision"><strong>Planned eligibility rule:</strong> retain facilities answering <strong>Yes (1)</strong> before computing the revised LGA, department or district averages. Each indicator will then use valid values within that FP-provider group, including genuine zeros and FALSE values.</p>
+<section id="demand-missingness">
+<h2>Demand-indicator missingness among women in need of FP</h2>
+<p><strong>Current definition:</strong> Health / side-effect beliefs uses PB2A only. The other five demand definitions are unchanged.</p>
+<p>Each cell shows the number of women with an unavailable indicator, followed by the survey-weighted percentage of women in need. Counts are unweighted. Denominators match the current analysis populations; Sindh uses the agreed derived need classification.</p>
+<div class="table-wrap"><table class="distribution missingness" id="demand-missingness-table"><thead><tr><th>Demand indicator</th><th>Lagos<br>N = 2,159</th><th>Senegal<br>N = 1,905</th><th>Sindh<br>N = 3,274</th><th>Côte d’Ivoire<br>N = 4,292</th></tr></thead><tbody><tr><td>Healthcare permission barriers</td><td>{{3_1_2}}</td><td>{{3_1_3}}</td><td>{{3_1_4}}</td><td>{{3_1_5}}</td></tr><tr><td>Anticipated social stigma</td><td>{{3_2_2}}</td><td>{{3_2_3}}</td><td>{{3_2_4}}</td><td>{{3_2_5}}</td></tr><tr><td>Health / side-effect beliefs — PB2A only</td><td>{{3_3_2}}</td><td>{{3_3_3}}</td><td>{{3_3_4}}</td><td>{{3_3_5}}</td></tr><tr><td>Future-fertility concerns</td><td>{{3_4_2}}</td><td>{{3_4_3}}</td><td>{{3_4_4}}</td><td>{{3_4_5}}</td></tr><tr><td>Low method knowledge*</td><td>{{3_5_2}}</td><td>{{3_5_3}}</td><td>{{3_5_4}}</td><td>{{3_5_5}}</td></tr><tr><td>Opposes family planning</td><td>{{3_6_2}}</td><td>{{3_6_3}}</td><td>{{3_6_4}}</td><td>{{3_6_5}}</td></tr><tr class="total-row"><td>Missing at least one of the six</td><td>{{3_7_2}}</td><td>{{3_7_3}}</td><td>{{3_7_4}}</td><td>{{3_7_5}}</td></tr></tbody></table></div>
+<p class="note">Missingness includes blank, special-code or inconsistent responses that leave the constructed indicator unresolved. For indicators combining questions, any qualifying concern resolves the indicator to 1; without a qualifying concern, an unresolved required answer leaves the indicator missing. The last row accounts for overlap across indicators, so individual rows should not be added together.</p>
+<p class="note">* “Low method knowledge” is the current report label. The underlying MC5A and MC5B questions measure confidence in choosing a suitable method and managing side effects or switching methods.</p>
+<p class="note">Future-fertility concerns and health beliefs account for most demand-indicator missingness. The health values above reflect PB2A only. These figures describe demand-data completeness, not total regression exclusions.</p>
+</section>
+
+<section id="cdi-supply-profile-coverage">
+<h2>Côte d’Ivoire: women without a complete supply profile</h2>
+<p>This check covers <strong>all 10,859 SURGO source records</strong>, rather than only women in need of family planning. A total of <strong>309 records (2.85%)</strong> cannot receive a complete six-component supply score.</p>
+<div class="table-wrap"><table class="supply-coverage"><thead><tr><th>Area / reason</th><th>Women, N</th><th>% of all 10,859 records</th><th>Survey-weighted %*</th></tr></thead><tbody>
+<tr><td>Bonon — no facility match</td><td>{{4_1_2}}</td><td>{{4_1_3}}</td><td>{{4_1_4}}</td></tr>
+<tr><td>Facobly — no facility match</td><td>{{4_2_2}}</td><td>{{4_2_3}}</td><td>{{4_2_4}}</td></tr>
+<tr><td>Gohitafla — no facility match</td><td>{{4_3_2}}</td><td>{{4_3_3}}</td><td>{{4_3_4}}</td></tr>
+<tr><td>Taabo — no facility match</td><td>{{4_4_2}}</td><td>{{4_4_3}}</td><td>{{4_4_4}}</td></tr>
+<tr><td>Daoukro — undefined free-product proportion</td><td>{{4_5_2}}</td><td>{{4_5_3}}</td><td>{{4_5_4}}</td></tr>
+<tr><td>No geographic identifier</td><td>{{4_6_2}}</td><td>{{4_6_3}}</td><td>{{4_6_4}}</td></tr>
+<tr class="total-row"><td>Total without a complete supply profile</td><td>{{4_7_2}}</td><td>{{4_7_3}}</td><td>{{4_7_4}}</td></tr>
+</tbody></table></div>
+<p class="note">* Counts and sample percentages cover every source record. Weighted percentages use the 10,753 consenting respondents with positive WEIGHT, consistent with survey estimation. Their weighted numerator includes 306 respondents with incomplete supply profiles. The three records without geography are outside the weighted denominator; their weighted percentage is unavailable, not zero. Rounded rows may not sum exactly.</p>
+<p>The other <strong>10,550 source records (97.15%)</strong> have complete supply profiles; the corresponding survey-weighted percentage is <strong>97.36%</strong>. These figures concern supply completeness, not completeness of every regression variable. Missing or undefined supply is not coded as zero or interpreted as proof that services are absent.</p>
+<div class="decision"><strong>Were these gaps already present in the uploaded pipeline?</strong>
+<p>Yes. In the original uploaded <code>merged_supply_demand_department.csv</code>, Bonon, Facobly, Gohitafla and Taabo have <code>has_supply = FALSE</code> and <code>n_facilities = 0</code>. Their source counts are 59, 37, 23 and 34 respectively, matching this table.</p>
+<p>Daoukro is geographically matched in that export: <code>has_supply = TRUE</code>, 21 facilities and 153 source women. However, <code>mean_p_free_prod</code> is blank and <code>n_reporting_p_free_prod = 0</code>. The original crosswalked facility file also has 21 Daoukro records and no valid <code>p_free_prod</code> values. Our current FP-provider restriction retains 19 facilities there, and the undefined free-product measure persists.</p>
+<p class="note">The checked exports were confirmed identical to the corresponding members of the originally uploaded export and merge-pipeline ZIPs. Thus the gaps predate the updated FP-only aggregation and index. “Supply-unassessed” is our current analytical label for an incomplete selected supply score; the original pipeline distinguishes a missing geographic match from a matched area with an undefined indicator.</p>
+</div>
+</section>
+
+
+<section id="daoukro-free-product-explanation" class="daoukro-explanation">
+<h2>Daoukro: why free-product provision is undefined</h2>
+<p><strong>Undefined does not mean 0% free.</strong> It means there are no valid Yes/No product responses from which to calculate a free-product proportion. Daoukro is geographically matched; the problem is the information available for particular supply measures.</p>
+<div class="decision"><strong>Eligibility clarification</strong><p>The current Côte d’Ivoire filter uses <code>s2_5_sp = 1</code>, reporting FP services generally. This does not establish on-site FP provision. The separate <code>s5_1</code> question asks about on-site services. Earlier descriptions of the selected filter as confirming on-site provision were too broad.</p></div>
+<h3>1. What the included facilities reported</h3>
+<p>Daoukro has 21 source facility records. Nineteen answer Yes to <code>s2_5_sp</code> and are included in the current supply summaries; two answer No and are excluded.</p>
+<div class="table-wrap"><table class="daoukro-responses"><thead><tr><th>Question</th><th>Responses among the 19 included facilities</th></tr></thead><tbody>
+<tr><td><code>s2_5_sp</code>: Does the health facility provide FP services?</td><td>{{5_1_2}}</td></tr>
+<tr><td><code>s5_1</code>: Does the facility offer FP services on-site?</td><td>{{5_2_2}}</td></tr>
+<tr><td><code>s5_6</code>: Does the facility offer local FP services, such as outreach or awareness activities?</td><td>{{5_3_2}}</td></tr>
+</tbody></table></div>
+<p>The outreach responses help explain how some facilities could report FP services generally while reporting no on-site provision. These answers do not fully establish every facility’s circumstances.</p>
+<h3>2. What the free-product responses show</h3>
+<p>Product-specific Q5.3 items ask whether the item is provided free of charge. The recorded categories are <strong>1 = Yes, 2 = No, and −9 = Not applicable</strong>. A blank is also unresolved. These are different response categories.</p>
+<div class="table-wrap"><table class="daoukro-counts"><thead><tr><th>Example Q5.3 item</th><th>Yes</th><th>No</th><th>Not applicable</th><th>Blank</th></tr></thead><tbody>
+<tr><td>Pills — <code>s5_3a</code></td><td>{{6_1_2}}</td><td>{{6_1_3}}</td><td>{{6_1_4}}</td><td>{{6_1_5}}</td></tr>
+<tr><td>Male condoms — <code>s5_3c</code></td><td>{{6_2_2}}</td><td>{{6_2_3}}</td><td>{{6_2_4}}</td><td>{{6_2_5}}</td></tr>
+<tr><td>IUD — <code>s5_3f</code></td><td>{{6_3_2}}</td><td>{{6_3_3}}</td><td>{{6_3_4}}</td><td>{{6_3_5}}</td></tr>
+<tr><td>Fixed-day method — <code>s5_3l</code></td><td>{{6_4_2}}</td><td>{{6_4_3}}</td><td>{{6_4_4}}</td><td>{{6_4_5}}</td></tr>
+</tbody></table></div>
+<p>The other product-specific free-provision questions likewise contain no Yes or No responses from these 19 facilities. This pattern is consistent with the questions being inapplicable after no on-site FP provision was reported. Confirming the exact skip instruction, and whether it was applied correctly, requires the original routing instructions or data-team clarification.</p>
+<h3>3. How the UoM facility proportion is calculated</h3>
+<p>The original code counts recognized responses on its selected product items:</p>
+<ul><li><code>t_free_prod</code>: number recorded Yes.</li><li><code>t_not_free_prod</code>: number recorded No, or Never where applicable.</li></ul>
+<div class="formula">p_free_prod = Yes count ÷ (Yes count + No/Never count)<br><strong>For each Daoukro facility: 0 ÷ (0 + 0) = 0 ÷ 0 → undefined.</strong></div>
+<p>The zero numerator means no affirmative free-product answers were counted; without valid answers, it does not establish that no products are free. The zero denominator means there are <strong>no product responses classifiable as free or nonfree</strong>. It does not establish that the facility physically has zero products.</p>
+<p>Not applicable responses are not counted as No. The cleaned proportion is therefore undefined and represented as missing. The same absence of valid values is present in the originally uploaded cleaned facility file and geographic export.</p>
+<h3>4. A genuine zero is different</h3>
+<p>The following examples are hypothetical and illustrate the distinction:</p>
+<div class="table-wrap"><table class="daoukro-examples"><thead><tr><th>Recorded product answers</th><th>Calculation</th><th>Result and interpretation</th></tr></thead><tbody>
+<tr><td>0 Yes; 5 No</td><td>0 ÷ 5</td><td><strong>0%</strong>: valid evidence that none of the five classified items is free.</td></tr>
+<tr><td>3 Yes; 2 No</td><td>3 ÷ 5</td><td><strong>60%</strong>: three of five classified items are free.</td></tr>
+<tr><td>0 Yes; 0 No; all Not applicable</td><td>0 ÷ 0</td><td><strong>Undefined</strong>: the responses cannot establish a free-product percentage.</td></tr>
+</tbody></table></div>
+<p>Coding the third example as zero would turn inapplicable information into confirmed nonfree provision.</p>
+<h3>5. Why the département average is undefined</h3>
+<p>We average valid facility proportions among the eligible FP providers. In Daoukro there are <strong>19 eligible facilities, zero valid free-product proportions, and 19 undefined proportions</strong>. There are therefore no valid values to average.</p>
+<p>We do not calculate 0 ÷ 19, because that would incorrectly replace the 19 undefined proportions with zeros. Pooling the product-response counts would not recover the information either: the pooled denominator is still zero.</p>
+<h3>6. What this means for the supply profile</h3>
+<p><strong>Daily provision is also undefined in Daoukro.</strong> The frequency questions yield no recorded offered modern-method categories for the eligible facilities, so the daily/offered denominator is zero. The current assignment audit identifies both missing components: free-product provision and daily provision.</p>
+<p>Other supply measures can still have values. However, the main index requires all six components, so Daoukro remains <strong>supply-unassessed</strong>. Missing values are not recoded zero, and no partial five- or four-component index is substituted.</p>
+<p>Daoukro’s <strong>153 SURGO women, including 43 women in need of FP</strong>, remain in the joined data and overview. They cannot enter the common regression sample requiring a complete supply score. The overall incomplete-profile counts in the preceding table are unchanged.</p>
+<h3>7. The broader eligibility distinction</h3>
+<p>This distinction also occurs elsewhere in the country. Among the <strong>2,723 facilities reporting general FP services</strong>:</p>
+<div class="table-wrap"><table class="daoukro-counts"><thead><tr><th>Separate on-site FP response</th><th>Facilities</th><th>% of general FP providers</th></tr></thead><tbody>
+<tr><td>Yes</td><td>{{8_1_2}}</td><td>{{8_1_3}}</td></tr>
+<tr><td>No</td><td>{{8_2_2}}</td><td>{{8_2_3}}</td></tr>
+<tr class="total-row"><td>Total reporting general FP services</td><td>{{8_3_2}}</td><td>{{8_3_3}}</td></tr>
+</tbody></table></div>
+<p class="note">Facility counts and percentages above are unweighted. They describe the full underlying facility file, not only the areas represented in SURGO.</p>
+<div class="decision"><strong>Interpretation for the research team</strong><p>The aggregation follows the supplied UoM definitions and valid-response rule. The current eligibility filter identifies general FP-service providers; it does not require on-site method provision. Distinguish those populations when interpreting the supply index or considering a future eligibility revision. The present check explains the data; it does not change the selected eligibility rule, source responses, scores or fitted models.</p></div>
+<p class="note">Sources checked: raw Côte d’Ivoire facility question labels and responses; original cleaned UoM product counts/proportions; the supplied free-product construction code; and the current facility-to-département assignment audit. The questionnaire’s exact skip instruction has not been independently confirmed.</p>
+</section>
+
+<footer>Checked November 9, 2026. Sources: underlying pooled facility surveys and current woman-level SURGO analysis records for Lagos, Senegal, Sindh and Côte d’Ivoire. Data-check tables reflect the revised health definition and the Côte d’Ivoire supply-profile coverage check against original uploaded pipeline exports, and the Daoukro eligibility/routing explanation. Source survey files and previously rendered model results remain unchanged.</footer>
+</main></body></html>

@@ -25,6 +25,10 @@
       "file": "lagos_map_template.html",
       "sha256": "4282fe0a4d50e8b00b59c3b1d74c124c0234b44dbfae9da01d3cd8db18bc792a",
       "kind": "Archived display layout with aggregate facility-count dots; current results injected at render time"
+    },
+    {
+      "file": "data_checks_template.html",
+      "sha256": "61056febb16425bb18ae8d851a6502496717c93c03d257dafb7c68c7862fbb70"
     }
   ]
 }
