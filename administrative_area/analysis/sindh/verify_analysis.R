@@ -90,12 +90,12 @@ for(side in c("Demand","Supply")){
  mat<-sapply(fields,function(k){a<-p$heatmap[p$heatmap$side==side&p$heatmap$variable==k,];a$value[match(areas,a$geo)]})
  if(side=="Supply")mat[,"stockout_burden"]<-100-mat[,"stockout_burden"]
  zz<-scale(mat);expected<-rowMeans(zz);z<-p$scores[p$scores$method=="zscore",];z<-z[match(areas,z$geo),]
- observed<-if(side=="Demand")z$demand_score else z$supply_score
+ observed<-if(side=="Demand")z$demand_score else -z$supply_score
  verify(paste("Independent mean z-score",side),same(expected,observed)&&abs(mean(observed))<1e-12)
  flag<-if(side=="Demand")expected>1e-10 else expected< -1e-10
  verify(paste("Zero-mean classification",side),identical(as.logical(flag),if(side=="Demand")z$demand_flag else z$supply_flag))
  for(k in fields){t<-p$component_trace[p$component_trace$side==side&p$component_trace$variable==k,]
-  verify(paste("Aligned component z",side,k),same(t$zscore,zz[match(t$geo,areas),k]))}
+  verify(paste("Aligned component z",side,k),same(if(side=="Supply")-t$zscore else t$zscore,zz[match(t$geo,areas),k]))}
 }
 cut<-p$thresholds[p$thresholds$method=="zscore",];verify("Primary cutoffs zero",cut$demand_cutoff==0&&cut$supply_cutoff==0)
 z<-p$scores[p$scores$method=="zscore",]
@@ -105,7 +105,7 @@ for(g in areas){
  for(side in c("Demand","Supply")){
   fields<-if(side=="Demand")D else S
   t<-p$component_trace[p$component_trace$geo==g&p$component_trace$side==side,]
-  ordered<-if(side=="Demand")order(-t$zscore,match(t$variable,fields))else order(t$zscore,match(t$variable,fields))
+  ordered<-if(side=="Demand")order(-t$zscore,match(t$variable,fields))else order(-t$zscore,match(t$variable,fields))
   expected<-head(t$variable[ordered],3)
   observed<-if(side=="Demand")unlist(plan$top_demand)else unlist(plan$top_supply)
   verify(paste("Top three standardized components",g,side),identical(as.character(expected),as.character(observed)))
@@ -143,9 +143,9 @@ refs<-read.csv(file.path(data_dir,"models_zscore/individual_demand_score_referen
 zz<-sapply(D,function(k){v<-d[[k]];ii<-d$need&is.finite(v);mu<-weighted.mean(v[ii],d$weight[ii]);sd<-sqrt(weighted.mean((v[ii]-mu)^2,d$weight[ii]));(v-mu)/sd})
 verify("Personal demand score from own six answers",same(aa$demand_score,rowMeans(zz)[aa$row]))
 context_score<-z$supply_score[match(aa$geo,z$geo)]
-verify("Supply risk is negative district readiness",same(aa$supply_risk,-context_score))
+verify("Supply risk is negative district readiness",same(aa$supply_risk,context_score))
 verify("30 distinct district supply profiles",length(unique(aa$supply_risk))==30)
-verify("Only z-score geographic scoring",identical(unique(p$scores$method),"zscore"))
+verify("Z-score primary with four alternative scoring methods",setequal(unique(p$scores$method),c("zscore","rank","raw","robust","median_count")))
 verify("No zero-coded missing supply",all(complete.cases(frame$supply)))
 expected_common<-which(d$need&complete.cases(d[c("y_modern","age10","age10_sq","education","fertility_goal",D)]))
 verify("Common model rows independently recovered",identical(aa$row,expected_common))

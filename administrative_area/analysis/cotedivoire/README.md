@@ -131,8 +131,8 @@ for its side. Demand has 82 reference areas; supply has 77. This is completeness
 of the six geographic means, not a common complete-facility restriction.
 
 Average six z-scores per side. Each final index has mean zero over its own stated
-reference set. Demand > 0 means above-average concerns; readiness < 0 means
-below-average supply. Model supply risk is negative readiness. This is equivalent
+reference set. Demand > 0 means above-average concerns; supply constraints > 0 means
+below-average supply. Supply constraints are the negative of former readiness. This is equivalent
 to averaging six risk-aligned standardized inputs. Values within 1e-10 of zero
 are unflagged ties. Mean-based primary thresholds are zero; alternative rank,
 mean-percentage and Median/IQR methods retain separate final-score medians.
@@ -160,8 +160,8 @@ contextual geographic demand score.
 Adjust every model for age, age squared, education, partnership, fertility goal
 and rural/urban residence. Retain WEIGHT. Use département-clustered CR2 covariance,
 Satterthwaite coefficient intervals, HTZ block tests and Holm correction within
-each model's two demand/supply tests. Recorded IDZD sampling clusters support
-overview intervals and an inference check; original strata/FPC are unavailable.
+each model's two demand/supply tests. Overview intervals use a weights-only survey design (`ids = ~1`, no strata or FPC).
+No sampling-PSU inference check is fitted.
 No random effects or interactions are fitted. Low effective degrees of freedom
 and weight concentration are reported; convergence/VIF checks do not prove power.
 
@@ -176,3 +176,18 @@ thresholds, classifications, modern outcomes, coefficients, CR2 covariance, join
 tests and weighted-SVD PCA. HTML checks cover order, French labels, embedded assets,
 map completeness, aggregate downloads and artifact portability. These verify
 implementation, not perfect source data or causal identification.
+
+## Shared survey and scoring implementation
+
+Use `survey::svymean()` for SURGO weighted estimates and `survey::svyglm()`
+for the existing modern-use models, with `ids = ~1`, no strata or FPC, and
+the supplied weight. Report the separately calculated administrative-area CR2
+standard errors with Satterthwaite tests. Supply constraints are positive when
+above average; this reverses the former readiness sign without changing the
+primary flags or the supply-risk values already used in models.
+
+The final Sensitivity analyses section exposes the four earlier scoring
+alternatives. The map appendix includes the final-score distribution and zero,
+0.5, 1 and 1.5 SD thresholds. See the project-level
+[survey and scoring methods](../../../docs/SURVEY_AND_SCORING.md) for denominators,
+reference sets, inference details and publication-review requirements.

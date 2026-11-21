@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Read-only comparison of the authorized Sindh need rule with supplied FPN2.
 # Output contains aggregate cross-tabs and agreement statistics only.
 read_need_input <- function(path) {
@@ -39,9 +49,9 @@ check_need_concordance <- function(inputs,sindh_need_file,output_dir) {
       summaries[[country]]<-data.frame(geography=unname(names_country[country]),eligible_n=sum(eligible),
         supplied_binary_n=sum(valid),original_need_n=sum(valid&orig%in%1),reconstructed_need_n=sum(valid&calc$flag%in%1),
         both_need_n=sum(both),disagreement_n=sum(valid&!same),
-        agreement_pct=100*mean(same[valid]),weighted_agreement_pct=100*weighted.mean(same[valid],w[valid]),
+        agreement_pct=100*mean(same[valid]),weighted_agreement_pct=100*survey_weighted_mean(same[valid],w[valid]),
         original_need_retained_pct=100*sum(both)/sum(valid&orig%in%1),
-        weighted_original_need_retained_pct=100*sum(w[both])/sum(w[valid&orig%in%1]),
+        weighted_original_need_retained_pct=100*survey_weighted_mean(as.numeric(both[valid&orig%in%1]),w[valid&orig%in%1]),
         reconstructed_only_need_n=sum(valid&orig%in%0&calc$flag%in%1))
       tab<-as.data.frame(table(original=orig[valid],reconstructed=calc$flag[valid]))
       tab$geography<-unname(names_country[country]);cross_tabs[[country]]<-tab

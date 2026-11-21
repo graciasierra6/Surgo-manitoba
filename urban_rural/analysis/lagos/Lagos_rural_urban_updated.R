@@ -46,6 +46,8 @@ build_lagos_rural_urban <- function(root,join_dir="",cache_dir="data/cache",
   "--cleaned-facility",file.path(cache_dir,"uom_pipeline/uom_summary_facility.csv"),"--data-dir",data))
  native<-file.path(work_dir,"Lagos_rural_urban_updated.html")
  run(module,"render_analysis.py",c("--data-dir",data,"--reference-html",file.path(root,"analysis/assets/lagos_map_template.html"),"--output",native))
+  # Sensitivity analyses: alternative scores and final-composite SD maps.
+  render_score_threshold_appendix(root,"lagos",data,native,python,"urban_rural")
  run(module,"verify_html.py",c("--data-dir",data,"--html",native))
  fragment<-file.path(work_dir,"report_fragment.html")
  run_stage(file.path(root,"analysis/common/html_fragment.py"),c("--input",native,"--output",fragment),python)
@@ -75,4 +77,19 @@ if(sys.nframe()==0L){
   c("--data-dir",r$data_dir,"--html",file.path(output,"Lagos_rural_urban_updated.html")),
   value("--python",Sys.getenv("SURGO_MANITOBA_PYTHON","python3")))
  cat("Saved Lagos_rural_urban_updated.html\n")
+}
+
+# Sensitivity analyses ---------------------------------------------------------
+# Reproduce the earlier rank-average, mean-percentage, median/IQR and median-count
+# comparisons after the primary z-score analysis. PCA, where supported, is staged
+# above with the same svyglm/administrative-area CR2 model specification.
+lagos_rural_urban_scoring_sensitivities <- function(project_root, data_dir) {
+  source(file.path(project_root, "analysis/common/risk_scores.R"), local = TRUE)
+  payload <- jsonlite::fromJSON(file.path(data_dir, "report_data.json"))
+  result <- alternative_area_scores(payload)
+  write.csv(result$scores, file.path(data_dir, "scoring_sensitivity_methods.csv"),
+            row.names = FALSE, na = "")
+  write.csv(result$thresholds, file.path(data_dir, "scoring_sensitivity_thresholds.csv"),
+            row.names = FALSE, na = "")
+  invisible(result)
 }

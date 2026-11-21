@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Append reproducible, aggregate-only Senegal fallback tables to an existing report.
 args<-commandArgs(trailingOnly=TRUE)
 arg<-function(k,default=NULL){i<-match(k,args);if(is.na(i)){if(is.null(default))stop("Supply ",k);return(default)};if(i==length(args))stop("Supply ",k);args[i+1L]}
@@ -18,7 +28,7 @@ stopifnot(sum(positive)==7158,all(positive[d$need]))
 wm_share<-function(numerator,denominator){
  ii<-denominator&positive
  if(!any(ii))return(NA_real_)
- 100*sum(d$weight[numerator&ii])/sum(d$weight[ii])
+ 100*survey_weighted_mean(as.numeric(numerator[ii]),d$weight[ii])
 }
 stats<-function(pop,residence,geo=NULL){
  residence_group<-pop&d$residence==residence

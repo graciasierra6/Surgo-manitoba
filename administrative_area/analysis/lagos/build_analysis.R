@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Data for the standalone Lagos analysis: supplied FPN2, LGA planning summaries.
 # All locations are runtime parameters. No source data or historical report changes.
 args <- commandArgs(trailingOnly = TRUE)
@@ -16,7 +26,7 @@ hash_before <- tools::md5sum(c(input, facility_input))
 x <- readRDS(input); fac <- readRDS(facility_input); fac <- fac[fac$country %in% "lagos", ]
 nv <- function(k) as.numeric(x[[k]])
 key <- function(v) toupper(gsub("[^A-Za-z0-9]", "", as.character(v)))
-wm <- function(v, w) { ok <- is.finite(v) & is.finite(w) & w > 0; if (any(ok)) weighted.mean(v[ok], w[ok]) else NA_real_ }
+wm <- function(v, w) { ok <- is.finite(v) & is.finite(w) & w > 0; if (any(ok)) survey_weighted_mean(v[ok], w[ok]) else NA_real_ }
 mean_valid <- function(v) { v <- as.numeric(v); if (any(is.finite(v))) mean(v[is.finite(v)]) else NA_real_ }
 bool <- function(v) { a <- tolower(as.character(v)); ifelse(a %in% c("true", "1", "yes"), 1, ifelse(a %in% c("false", "0", "no"), 0, NA_real_)) }
 flag <- function(k, pos, valid) { v <- nv(k); ifelse(v %in% valid, as.numeric(v %in% pos), NA_real_) }
@@ -62,7 +72,7 @@ if (design_confirmed) {
 need_design <- subset(full, need)
 estimate <- function(des, field) {
   v <- des$variables[[field]]
-  p <- weighted.mean(as.numeric(v), des$variables$weight)
+  p <- survey_weighted_mean(as.numeric(v), des$variables$weight)
   ci <- c(NA_real_, NA_real_)
   if (design_confirmed && p > 0 && p < 1 && survey::degf(des) > 0) {
     des$variables$.event <- as.numeric(v)
@@ -108,7 +118,7 @@ savecsv(data.frame(geo=areas,total_facilities=vapply(areas,function(g)sum(fac$ge
 dn_complete <- complete.cases(dn[D])
 savecsv(do.call(rbind,lapply(c("LAGOS",areas),function(g){ii<-if(g=="LAGOS")rep(TRUE,nrow(dn))else dn$geo==g
  data.frame(geo=g,women_in_need=sum(ii),complete_demand=sum(ii & dn_complete),excluded=sum(ii & !dn_complete),
- complete_weight_share=sum(dn$weight[ii & dn_complete])/sum(dn$weight[ii]))})),"demand_complete_case_coverage.csv")
+ complete_weight_share=survey_weighted_mean(as.numeric(dn_complete[ii]),dn$weight[ii]))})),"demand_complete_case_coverage.csv")
 savecsv(do.call(rbind,lapply(D,function(k)data.frame(variable=k,missing=sum(!is.finite(dn[[k]])),
  total=nrow(dn),missing_pct=100*mean(!is.finite(dn[[k]])),weighted_missing_pct=100*wm(as.numeric(!is.finite(dn[[k]])),dn$weight)))),"demand_missingness.csv")
 savecsv(do.call(rbind,lapply(S,function(k){ii<-fac$geo%in%areas;data.frame(variable=k,valid=sum(is.finite(fac[[k]][ii])),
@@ -139,7 +149,7 @@ M<-list(); transforms<-list()
 for(side in c("Demand","Supply")){
  cols<-if(side=="Demand")D else S
  original<-sapply(cols,function(k){z<-cells[cells$side==side & cells$variable==k,];z$value[match(areas,z$geo)]})
- m<-if(side=="Supply")as.matrix(100*lagos_favorable_supply(as.data.frame(original/100)))else original
+ m<-if(side=="Supply")as.matrix(100*(1-lagos_favorable_supply(as.data.frame(original/100))))else original
  rownames(m)<-areas;reference<-complete.cases(m)
  means<-colMeans(m[reference,,drop=FALSE]);sds<-apply(m[reference,,drop=FALSE],2,sd)
  meds<-apply(m[reference,,drop=FALSE],2,median);iqrs<-apply(m[reference,,drop=FALSE],2,IQR)
@@ -156,18 +166,18 @@ classify<-function(df,sf)ifelse(is.na(df)|is.na(sf),"unassessed",ifelse(df&sf,"b
 scores<-thresholds<-list()
 for(id in c("rank","raw","robust","zscore")){
  ds<-rowMeans(M$Demand[[id]]);ss<-rowMeans(M$Supply[[id]]);dc<-if(id=="zscore")0 else median(ds,na.rm=TRUE);sc<-if(id=="zscore")0 else median(ss,na.rm=TRUE)
- df<-ds>dc+1e-10;sf<-ss<sc-1e-10
+ df<-ds>dc+1e-10;sf<-ss>sc+1e-10
  scores[[id]]<-data.frame(method=id,geo=areas,demand_score=ds,supply_score=ss,demand_flag=df,supply_flag=sf,
-   demand_priority_rank=rank(-ds,ties.method="average",na.last="keep"),supply_priority_rank=rank(ss,ties.method="average",na.last="keep"),category=classify(df,sf))
+   demand_priority_rank=rank(-ds,ties.method="average",na.last="keep"),supply_priority_rank=rank(-ss,ties.method="average",na.last="keep"),category=classify(df,sf))
  thresholds[[id]]<-data.frame(method=id,demand_cutoff=dc,supply_cutoff=sc,demand_rule=if(id=="zscore")"strictly above final-score mean (zero)"else"strictly above final-score median",
-  supply_rule=if(id=="zscore")"strictly below readiness-score mean (zero)"else"strictly below readiness-score median",demand_reference_n=sum(is.finite(ds)),supply_reference_n=sum(is.finite(ss)))
+  supply_rule=if(id=="zscore")"strictly above constraints-score mean (zero)"else"strictly above constraints-score median",demand_reference_n=sum(is.finite(ds)),supply_reference_n=sum(is.finite(ss)))
 }
 dc<-rowSums(sweep(M$Demand$raw,2,apply(M$Demand$raw,2,median,na.rm=TRUE),"-")>1e-10)
-sc<-rowSums(sweep(M$Supply$raw,2,apply(M$Supply$raw,2,median,na.rm=TRUE),"-")< -1e-10)
+sc<-rowSums(sweep(M$Supply$raw,2,apply(M$Supply$raw,2,median,na.rm=TRUE),"-")>1e-10)
 scores$median_count<-data.frame(method="median_count",geo=areas,demand_score=dc,supply_score=sc,demand_flag=dc>=4,supply_flag=sc>=4,
  demand_priority_rank=rank(-dc,ties.method="average",na.last="keep"),supply_priority_rank=rank(-sc,ties.method="average",na.last="keep"),category=classify(dc>=4,sc>=4))
 thresholds$median_count<-data.frame(method="median_count",demand_cutoff=4,supply_cutoff=4,demand_rule="4 or more of six above component medians",
- supply_rule="4 or more of six below component medians",demand_reference_n=sum(is.finite(dc)),supply_reference_n=sum(is.finite(sc)))
+ supply_rule="4 or more of six above constraint-component medians",demand_reference_n=sum(is.finite(dc)),supply_reference_n=sum(is.finite(sc)))
 scores<-do.call(rbind,scores);thresholds<-do.call(rbind,thresholds);trace<-do.call(rbind,transforms)
 exact <- cells[cells$geo %in% areas, c("geo", "side", "variable", "value")]
 exact$original_pct_exact <- sprintf("%.17g", exact$value)
@@ -177,7 +187,7 @@ savecsv(trace, "component_score_trace.csv")
 planning <- lapply(areas, function(g) {
   q <- scores[scores$method == "zscore" & scores$geo == g, ]
   dt <- trace[trace$geo == g & trace$side == "Demand", ]; st <- trace[trace$geo == g & trace$side == "Supply", ]
-  dt <- dt[order(-dt$zscore, match(dt$variable, D)), ]; st <- st[order(st$zscore, match(st$variable, S)), ]
+  dt <- dt[order(-dt$zscore, match(dt$variable, D)), ]; st <- st[order(-st$zscore, match(st$variable, S)), ]
   list(geo = g, category = q$category, demand_flag = q$demand_flag, supply_flag = q$supply_flag,
        demand_score = q$demand_score, supply_score = q$supply_score, n = meta[[g]]$n_need,
        top_demand = head(dt$variable, 3), top_supply = head(st$variable, 3))
@@ -188,7 +198,7 @@ savecsv(bar_table, "use_distribution_fpn2.csv")
 lga_rates <- do.call(rbind, lapply(rates, function(r) data.frame(geo = r$geo, n_need = r$n,
   cpr = r$cpr$estimate, mcpr = r$mcpr$estimate, intender = r$intender$estimate, no_intent = r$no_intent$estimate)))
 savecsv(lga_rates, "lga_use_rates_fpn2.csv")
-audit <- list(country="Lagos",source_rows=nrow(x),positive_weight_rows=sum(valid_weight),need_n=nrow(dn),
+audit <- list(supply_score_orientation="constraints",country="Lagos",source_rows=nrow(x),positive_weight_rows=sum(valid_weight),need_n=nrow(dn),
  need_eligibility="Original SURGO fpn2=1, unchanged; no additional need reconstruction.",women_weight="weight",
  weighted_need_share=wm(as.numeric(d$need[valid_weight]),d$weight[valid_weight]),
  linked_lgas=length(areas),supply_lgas=length(display_areas),all_facility_records=nrow(inventory),
@@ -238,3 +248,9 @@ cat("Built data:", nrow(dn), "women in need;", length(areas), "linked LGAs;", nr
 print(bar_table[, c("field", "n", "estimate")], row.names = FALSE)
 print(thresholds, row.names = FALSE)
 print(table(scores$method, scores$category))
+
+# Sensitivity analyses ---------------------------------------------------------
+# Rank average, mean percentages, median/IQR and median-count alternatives use
+# the same six components. Final-composite SD maps use 0.5, 1 and 1.5 SD cutoffs.
+source(file.path(.survey_root, "analysis/common/risk_scores.R"), local = TRUE)
+payload <- export_risk_scores(payload, out)

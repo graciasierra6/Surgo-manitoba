@@ -86,7 +86,7 @@ assert 'PB2A only' in text and 's5_6 = 1' in text
 assert p['audit']['daily_valid_linked']==1560 and p['audit']['daily_undefined_linked']==8
 assert p['audit']['stockout_valid_linked']==1568
 z=[r for r in p['scores'] if r['method']=='zscore']
-assert all(r['demand_flag']==(r['demand_score']>1e-10) and r['supply_flag']==(r['supply_score'] < -1e-10) for r in z)
+assert all(r['demand_flag']==(r['demand_score']>1e-10) and r['supply_flag']==(r['supply_score'] > 1e-10) for r in z)
 assert all(r['demand_cutoff']==0 and r['supply_cutoff']==0 for r in p['thresholds'] if r['method']=='zscore')
 for side in ('supply','demand'):
     fragment=source.split(f'<div id="{side}-département-components">',1)[1].split('</table>',1)[0]
@@ -95,7 +95,7 @@ for side in ('supply','demand'):
     assert observed==expected,(side,observed,expected)
 assert 'appendix-facilities' not in parsed.ids and 'appendix-demand' not in parsed.ids
 assert 'Daily provision of offered modern methods' in text and 'Stockout burden' in text
-assert 'higher = worse' in text and 'stock continuity = 1 − burden' in text
+assert 'higher = worse' in text and 'data-supply-score-orientation="constraints"' in source and 'complement' in text
 pc=json.loads((data/'pca_appendix/pca_results.json').read_text())
 if pc['audit'].get('negative_supply_PC1_loadings'): assert 'mixed signs' in text and 'pattern score' in text
 assert 'No random effects or interactions' in text

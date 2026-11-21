@@ -18,8 +18,9 @@ build_score_profile_examples<-function(data_dirs,work_dir){
     g<-sc$geo[i];tr<-p$component_trace[p$component_trace$side==side&p$component_trace$geo==g,];tr<-tr[match(fields,tr$variable),]
     stopifnot(nrow(tr)==6,identical(as.character(tr$variable),fields))
     if(any(!is.finite(tr$zscore)))next
-    z<-tr$zscore*if(side=="Demand")1 else -1
-    expected<-if(side=="Demand")sc$demand_score[i]else -sc$supply_score[i]
+    direction<-if(side=="Demand" || identical(p$audit$supply_score_orientation,"constraints"))1 else -1
+    z<-tr$zscore*direction
+    expected<-if(side=="Demand")sc$demand_score[i]else direction*sc$supply_score[i]
     stopifnot(abs(mean(z)-expected)<1e-9)
     hm<-p$heatmap[p$heatmap$geo==g&p$heatmap$side==side,];hm<-hm[match(fields,hm$variable),]
     stopifnot(max(abs(hm$value-tr$original_pct))<1e-8)
@@ -31,7 +32,7 @@ build_score_profile_examples<-function(data_dirs,work_dir){
     concentration<-if(sum(pos)>0)max(pos)/sum(pos)else 0
     key<-paste(country,side,g,sep="|")
     profiles[[key]]<-data.frame(country=country,country_label=unname(country_names[country]),side=side,geo=g,area=pretty(g,p),score=expected,unfavorable_components=breadth,components_z_at_least_half=sum(z>=.5),largest_positive_component=fields[top],largest_positive_share=concentration,positive_total=sum(pos)/6,negative_total=sum(neg)/6,n_need=n_need,fp_facilities=n_fac,min_valid=min(hm$n_valid),max_valid=max(hm$n_valid),reference_areas=if("reference_n"%in%names(tr))unique(tr$reference_n)else if(side=="Demand")sum(is.finite(sc$demand_score))else sum(is.finite(sc$supply_score)))
-    components[[key]]<-data.frame(country=country,side=side,geo=g,area=pretty(g,p),variable=fields,label=unname(component_labels[fields]),raw_pct=tr$original_pct,reference_raw_mean=ifelse(fields=="stockout_burden",100-tr$indicator_mean,tr$indicator_mean),risk_z=z,contribution=z/6,n_valid=hm$n_valid,n_total=hm$n_total,higher_raw_is_worse=side=="Demand"|fields=="stockout_burden")
+    components[[key]]<-data.frame(country=country,side=side,geo=g,area=pretty(g,p),variable=fields,label=unname(component_labels[fields]),raw_pct=tr$original_pct,reference_raw_mean=if(side=="Supply" && identical(p$audit$supply_score_orientation,"constraints"))ifelse(fields=="stockout_burden",tr$indicator_mean,100-tr$indicator_mean)else ifelse(fields=="stockout_burden",100-tr$indicator_mean,tr$indicator_mean),risk_z=z,contribution=z/6,n_valid=hm$n_valid,n_total=hm$n_total,higher_raw_is_worse=side=="Demand"|fields=="stockout_burden")
    }
   }
   source_checks[[country]]<-data.frame(country=country,source_rows=p$audit$source_rows,need_n=p$audit$need_n,source_report_md5=hashes[[country]])

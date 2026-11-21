@@ -1,3 +1,14 @@
+# Historical-definition module; current report entry points are in administrative_area/ and urban_rural/.
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Data for the standalone Lagos analysis: supplied FPN2, LGA planning summaries.
 # All locations are runtime parameters. No source data or historical report changes.
 args <- commandArgs(trailingOnly = TRUE)
@@ -12,7 +23,7 @@ hash_before <- tools::md5sum(c(input, facility_input))
 x <- readRDS(input); fac <- readRDS(facility_input); fac <- fac[fac$country %in% "lagos", ]
 nv <- function(k) as.numeric(x[[k]])
 key <- function(v) toupper(gsub("[^A-Za-z0-9]", "", as.character(v)))
-wm <- function(v, w) { ok <- is.finite(v) & is.finite(w) & w > 0; if (any(ok)) weighted.mean(v[ok], w[ok]) else NA_real_ }
+wm <- function(v, w) { ok <- is.finite(v) & is.finite(w) & w > 0; if (any(ok)) survey_weighted_mean(v[ok], w[ok]) else NA_real_ }
 mean_valid <- function(v) { v <- as.numeric(v); if (any(is.finite(v))) mean(v[is.finite(v)]) else NA_real_ }
 bool <- function(v) { a <- tolower(as.character(v)); ifelse(a %in% c("true", "1", "yes"), 1, ifelse(a %in% c("false", "0", "no"), 0, NA_real_)) }
 flag <- function(k, pos, valid) { v <- nv(k); ifelse(v %in% valid, as.numeric(v %in% pos), NA_real_) }
@@ -51,7 +62,7 @@ if (design_confirmed) {
 need_design <- subset(full, need)
 estimate <- function(des, field) {
   v <- des$variables[[field]]
-  p <- weighted.mean(as.numeric(v), des$variables$weight)
+  p <- survey_weighted_mean(as.numeric(v), des$variables$weight)
   ci <- c(NA_real_, NA_real_)
   if (design_confirmed && p > 0 && p < 1 && survey::degf(des) > 0) {
     des$variables$.event <- as.numeric(v)

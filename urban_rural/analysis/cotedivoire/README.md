@@ -94,7 +94,7 @@ component-specific facility denominators to reconstruct département means.
 
 Planning references are equal-area means and sample SDs: 82 complete-demand areas
 and the same 77 complete-supply areas for every supply component. Average six
-component z-scores; flag demand strictly above zero and favorable readiness below
+risk-aligned component z-scores; flag both demand and supply constraints strictly above
 zero (1e-10 tolerance). Missing supply stays unassessed. These are relative
 planning signals, not absolute adequacy standards or causal constraints.
 
@@ -110,12 +110,9 @@ Rural/Urban. Specifications use demand score; supply risk; both; six personal
 indicators; and six indicators plus supply risk. All share one complete sample.
 There are no random effects or interactions.
 
-Overview intervals use recorded `IDZD` census-district clusters, constructing the
-full consenting positive-weight design before need subgroup selection. Original
-strata/FPC are unavailable. Primary model covariance is département-clustered CR2,
+Overview intervals use the supplied weights and `ids = ~1`, without strata or FPC. Primary model covariance is département-clustered CR2,
 with Satterthwaite intervals and HTZ block tests. Holm adjustment covers the pair
-of block tests within each joint model. Recorded-PSU inference is exported as a
-sensitivity. Very low effective degrees of freedom in some tests require caution.
+of block tests within each joint model. No sampling-PSU sensitivity is fitted. Very low effective degrees of freedom in some tests require caution.
 
 PCA sensitivity uses separate final-weighted correlation PCAs for personal demand
 and assigned residence supply. Repeated supply profiles contribute their summed
@@ -178,3 +175,18 @@ Friday baseline and removal of one update from the final specification. Counts
 overlap and do not partition the total classification changes. These are
 classification sensitivity checks, not regression results or causal attribution.
 The reports, assignments and fitted models are unchanged by this diagnostic.
+
+## Shared survey and scoring implementation
+
+Use `survey::svymean()` for SURGO weighted estimates and `survey::svyglm()`
+for the existing modern-use models, with `ids = ~1`, no strata or FPC, and
+the supplied weight. Report the separately calculated administrative-area CR2
+standard errors with Satterthwaite tests. Supply constraints are positive when
+above average; this reverses the former readiness sign without changing the
+primary flags or the supply-risk values already used in models.
+
+The final Sensitivity analyses section exposes the four earlier scoring
+alternatives. The map appendix includes the final-score distribution and zero,
+0.5, 1 and 1.5 SD thresholds. See the project-level
+[survey and scoring methods](../../../docs/SURVEY_AND_SCORING.md) for denominators,
+reference sets, inference details and publication-review requirements.

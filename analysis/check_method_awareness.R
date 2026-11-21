@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Separate awareness diagnostic; source joins and working reports remain unchanged.
 args <- commandArgs(trailingOnly = TRUE)
 arg <- function(k, default = NULL) {
@@ -23,21 +33,13 @@ controls <- c("age10", "age10_sq", "education", "partnered", "fertility_goal", "
 other_demand <- c("agency", "stigma", "health", "fertility", "opposes")
 method_names <- c("Condoms", "Injectables", "Daily pill", "Emergency pill", "IUD", "Implant", "Male sterilization", "Female sterilization")
 ka1_order <- c(1, 2, 3, 8, 4, 5, 7, 6)
-wm <- function(v, w) { ok <- is.finite(v) & is.finite(w) & w > 0; weighted.mean(v[ok], w[ok]) }
+wm <- function(v, w) { ok <- is.finite(v) & is.finite(w) & w > 0; survey_weighted_mean(v[ok], w[ok]) }
 wcor <- function(x, y, w) {
   ok <- complete.cases(x, y, w); x <- x[ok]; y <- y[ok]; w <- w[ok]
   mx <- wm(x, w); my <- wm(y, w)
   wm((x - mx) * (y - my), w) / sqrt(wm((x - mx)^2, w) * wm((y - my)^2, w))
 }
-fit_model <- function(fo, d) {
-  d$.w <- d$weight / mean(d$weight)
-  warnings <- character()
-  f <- withCallingHandlers(glm(fo, d, weights = .w, family = quasibinomial(), control = glm.control(maxit = 100)),
-    warning = function(e) { warnings <<- c(warnings, conditionMessage(e)); invokeRestart("muffleWarning") })
-  stopifnot(f$converged, f$rank == length(coef(f)), all(is.finite(coef(f))))
-  attr(f, "fit_warnings") <- unique(warnings)
-  f
-}
+fit_model <- function(fo, d) fit_survey_logistic(fo, d)
 coef_table <- function(f, V) {
   z <- as.data.frame(clubSandwich::coef_test(f, vcov = V, test = "Satterthwaite"))
   data.frame(term = rownames(z), estimate = z$beta, se = z$SE, df = z$df_Satt, p = z$p_Satt,
@@ -56,8 +58,8 @@ margin <- function(f, V, d, changes) {
   for (k in names(changes)) a[[k]] <- changes[[k]]
   X <- model.matrix(delete.response(terms(f)), a, contrasts.arg = f$contrasts, xlev = f$xlevels)[, names(coef(f)), drop = FALSE]
   pp <- plogis(drop(X %*% coef(f))); w <- a$weight / sum(a$weight)
-  estimate <- sum(w * pp); gradient <- colSums(X * (w * pp * (1 - pp)))
-  direct <- weighted.mean(predict(f, a, type = "response"), w)
+  estimate <- survey_weighted_mean(pp, a$weight); gradient <- colSums(X * (w * pp * (1 - pp)))
+  direct <- survey_weighted_mean(predict(f, a, type = "response"), w)
   stopifnot(abs(estimate - direct) < 1e-10)
   list(estimate = estimate, gradient = gradient)
 }
@@ -95,21 +97,11 @@ for (country in c("lagos", "senegal")) {
   mc <- sapply(c("mc5a", "mc5b"), function(k) { v <- nv(x[[k]]); ifelse(v %in% 1:4, as.numeric(v %in% 3:4), NA_real_) })
   mc_flag <- ifelse(rowSums(mc == 1, na.rm = TRUE) > 0, 1, ifelse(rowSums(is.na(mc)) > 0, NA_real_, 0))
   stopifnot(identical(as.numeric(mc_flag), as.numeric(d$confidence)))
-  # Retain the exact current residence-specific supply score and reference areas.
-  zs <- sapply(p$supply_variables, function(k) {
-    ref <- p$component_trace[p$component_trace$side == "Supply" & p$component_trace$variable == k, ]
-    mu <- unique(ref$indicator_mean); sig <- unique(ref$indicator_SD)
-    stopifnot(length(mu) == 1, length(sig) == 1, sig > 0)
-    favorable <- if (k == "stockout_burden") 1 - frame$supply[[k]] else frame$supply[[k]]
-    100 * favorable
-  })
-  for (j in seq_along(p$supply_variables)) {
-    k <- p$supply_variables[j]; ref <- p$component_trace[p$component_trace$side == "Supply" & p$component_trace$variable == k, ]
-    zs[, j] <- (zs[, j] - unique(ref$indicator_mean)) / unique(ref$indicator_SD)
-  }
-  d$supply_risk <- -rowMeans(zs)
+  # Retain the exact assigned residence/fallback supply score on the risk scale.
+  source(file.path(root, "analysis/common/risk_scores.R"))
+  d$supply_risk <- supply_constraint_score(frame$supply, p$component_trace)
   d$eligible_description <- d$need
-  full <- survey::svydesign(ids = ~psu, weights = ~weight, data = d[d$positive, ], nest = TRUE)
+  full <- surgo_design(d[d$positive, ])
   need <- subset(full, eligible_description)
   prevalence <- function(v) {
     aa <- need; aa$variables$.v <- v[d$positive][d$eligible_description[d$positive]]
@@ -138,7 +130,7 @@ for (country in c("lagos", "senegal")) {
   overlap <- do.call(rbind, lapply(0:8, function(v) {
     ii <- d$need & d$awareness_count %in% v & is.finite(d$confidence)
     data.frame(country = summary$country, count = v, n = sum(ii), low_confidence_n = sum(d$confidence[ii] == 1),
-      low_confidence_pct = 100 * wm(d$confidence[ii], d$weight[ii]), weighted_sample_pct = 100 * sum(d$weight[ii]) / sum(d$weight[d$need & complete.cases(d[c("awareness_count", "confidence")])]))
+      low_confidence_pct = 100 * wm(d$confidence[ii], d$weight[ii]), weighted_sample_pct = 100 * wm(as.numeric(ii[d$need & complete.cases(d[c("awareness_count", "confidence")])]), d$weight[d$need & complete.cases(d[c("awareness_count", "confidence")])]))
   }))
   mean_by_confidence <- do.call(rbind, lapply(0:1, function(v) {
     vv <- d$awareness_count; vv[!d$confidence %in% v] <- NA_real_; e <- prevalence(vv)
@@ -149,18 +141,16 @@ for (country in c("lagos", "senegal")) {
   all_vars <- unique(c("y_modern", unlist(specs)))
   d$eligible <- d$need & complete.cases(d[all_vars]); cc <- droplevels(d[d$eligible, ])
   des <- subset(full, eligible_description)
-  # Re-create after adding the common-sample flag to preserve original PSU subsetting.
-  full_model <- survey::svydesign(ids = ~psu, weights = ~weight, data = d[d$positive, ], nest = TRUE)
+  # Re-create after adding the common-sample flag to preserve need-domain and common-sample selection.
+  full_model <- surgo_design(d[d$positive, ])
   des <- subset(full_model, eligible)
   coefficients <- diagnostics <- cv <- samples <- tests <- fits <- list()
   for (id in names(specs)) {
-    fo <- reformulate(specs[[id]], "y_modern"); f <- fit_model(fo, cc)
-    V <- clubSandwich::vcovCR(f, cluster = cc$geo, type = "CR2", inverse_var = FALSE)
-    sf <- survey::svyglm(fo, des, family = quasibinomial())
-    error <- max(abs(coef(f) - coef(sf))); stopifnot(error < 1e-7)
+    fo <- reformulate(specs[[id]], "y_modern"); f <- fit_survey_logistic(fo, cc, design=des)
+    V <- geographic_cr2(f, cc$geo)
     ct <- coef_table(f, V); ct$model <- id; ct$country <- summary$country; coefficients[[id]] <- ct
     vi <- vifs(f, cc); vi$model <- id; vi$country <- summary$country; diagnostics[[id]] <- vi
-    samples[[id]] <- data.frame(country = summary$country, model = id, n = nrow(cc), events = sum(cc$y_modern), clusters = length(unique(cc$geo)), parameters = length(coef(f)), max_vif = max(vi$vif), coefficient_error_vs_svyglm = error, warnings = paste(attr(f, "fit_warnings"), collapse = " | "))
+    samples[[id]] <- data.frame(country = summary$country, model = id, n = nrow(cc), events = sum(cc$y_modern), clusters = length(unique(cc$geo)), parameters = length(coef(f)), max_vif = max(vi$vif), warnings = paste(attr(f, "fit_warnings"), collapse = " | "))
     for (k in intersect(c("confidence", "awareness_count"), names(coef(f)))) {
       K <- diag(length(coef(f)))[match(k, names(coef(f))), , drop = FALSE]
       tt <- clubSandwich::Wald_test(f, constraints = K, vcov = V, test = "HTZ")
@@ -201,7 +191,7 @@ for (country in c("lagos", "senegal")) {
     if (check == "retain_named_conflicts") dd$awareness_count <- raw_count
     if (check == "quadratic_awareness") { dd$awareness_sq <- dd$awareness_count^2; fo <- reformulate(c(base, "confidence", "awareness_count", "awareness_sq"), "y_modern") }
     ii <- dd$need & complete.cases(dd[unique(c("y_modern", all.vars(fo)))]); aa <- droplevels(dd[ii, ])
-    ff <- fit_model(fo, aa); VV <- clubSandwich::vcovCR(ff, cluster = aa$geo, type = "CR2", inverse_var = FALSE)
+    ff <- fit_model(fo, aa); VV <- geographic_cr2(ff, aa$geo)
     ct <- coef_table(ff, VV); ct <- ct[ct$term %in% c("confidence", "awareness_count", "awareness_sq"), ]
     ct$check <- check; ct$n <- nrow(aa); ct$country <- summary$country; sensitivity[[check]] <- ct
   }

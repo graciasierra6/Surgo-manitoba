@@ -122,8 +122,8 @@ z<-sapply(D,function(k){v<-ind[[k]];ok<-need&is.finite(v);mu<-weighted.mean(v[ok
 personal<-rowSums(z)/6
 fav<-frame$supply[S];fav$stockout_burden<-1-fav$stockout_burden
 zs<-sapply(S,function(k){r<-p$component_trace[p$component_trace$side=="Supply"&p$component_trace$variable==k,];
- (100*fav[[k]]-unique(r$indicator_mean))/unique(r$indicator_SD)})
-supply<- -rowSums(zs)/6
+ (100*(1-fav[[k]])-unique(r$indicator_mean))/unique(r$indicator_SD)})
+supply<-rowSums(zs)/6
 pv<-readRDS(file.path(data_dir,"pca_appendix/pca_scores.rds"));max_svd<-0
 for(side in c("demand","supply")){
  f<-pv[[paste0(side,"_fit")]];mat<-if(side=="demand")as.matrix(d[D])else as.matrix(fav)
@@ -176,7 +176,7 @@ for(side in c("Demand","Supply")){
  ref<-complete.cases(mat)
  zz<-sweep(sweep(mat,2,colMeans(mat[ref,,drop=FALSE]),"-"),2,apply(mat[ref,,drop=FALSE],2,sd),"/")
  expected<-rowMeans(zz);ss<-p$scores[p$scores$method=="zscore",];ss<-ss[match(areas,ss$geo),]
- observed<-if(side=="Demand")ss$demand_score else ss$supply_score
+ observed<-if(side=="Demand")ss$demand_score else -ss$supply_score
  add(paste("Independent geographic score",side),same(expected,observed))
  cut<-0;add(paste("Final score mean and cutoff equal zero",side),abs(mean(expected[ref]))<1e-12&&p$thresholds[p$thresholds$method=="zscore",if(side=="Demand")"demand_cutoff"else"supply_cutoff"]==0);flag<-if(side=="Demand")expected>cut+1e-10 else expected<cut-1e-10
  add(paste("Independent geographic threshold",side),same(flag,if(side=="Demand")ss$demand_flag else ss$supply_flag))
@@ -210,7 +210,7 @@ rr<-frame$profiles[S];rr$stockout_burden<-1-rr$stockout_burden
 ref<-complete.cases(rr);risk_inputs<-1-rr[ref,,drop=FALSE]
 expected_risk<-rowMeans(scale(risk_inputs))
 ss<-p$scores[p$scores$method=="zscore",]
-add("Risk-first and readiness-first scores equivalent",max(abs(expected_risk+ss$supply_score[match(frame$profiles$geo[ref],ss$geo)]))<1e-10)
+add("Risk-first and readiness-first scores equivalent",max(abs(expected_risk-ss$supply_score[match(frame$profiles$geo[ref],ss$geo)]))<1e-10)
 add("Missing supply never classified as neither",all(ss$category[!is.finite(ss$supply_score)]=="unassessed"))
 add("Models already require complete demand",all(complete.cases(zm$score_joint$data[D])))
 save<-do.call(rbind,checks);write.csv(save,file.path(out,"audit_checks.csv"),row.names=FALSE)

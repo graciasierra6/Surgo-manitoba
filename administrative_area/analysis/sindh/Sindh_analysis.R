@@ -33,6 +33,8 @@ build_sindh_aggregate <- function(root, join_dir, cache_dir, work_dir,
   stage("save_updated_dataset.R",c("--input",file.path(prep,"sindh_women_manitoba_fp_providers.rds"),"--data-dir",data,"--output-dir",prep))
   native<-file.path(work_dir,"Sindh_analysis.html")
   stage("render_analysis.py",c("--data-dir",data,"--output",native))
+  # Sensitivity analyses: alternative scores and final-composite SD maps.
+  render_score_threshold_appendix(root,"sindh",data,native,python,"administrative_area")
   stage("verify_html.py",c("--data-dir",data,"--html",native))
   fragment<-file.path(work_dir,"report_fragment.html")
   run_stage(file.path(root,"analysis/common/html_fragment.py"),c("--input",native,"--output",fragment),python)
@@ -66,4 +68,19 @@ if(sys.nframe()==0L){
   run_stage(file.path(root,"administrative_area/analysis/sindh/verify_html.py"),
     c("--data-dir",r$data_dir,"--html",file.path(output,"Sindh_analysis.html")),python)
   cat("Saved Sindh_analysis.html\n")
+}
+
+# Sensitivity analyses ---------------------------------------------------------
+# Reproduce the earlier rank-average, mean-percentage, median/IQR and median-count
+# comparisons after the primary z-score analysis. PCA, where supported, is staged
+# above with the same svyglm/administrative-area CR2 model specification.
+sindh_aggregate_scoring_sensitivities <- function(project_root, data_dir) {
+  source(file.path(project_root, "analysis/common/risk_scores.R"), local = TRUE)
+  payload <- jsonlite::fromJSON(file.path(data_dir, "report_data.json"))
+  result <- alternative_area_scores(payload)
+  write.csv(result$scores, file.path(data_dir, "scoring_sensitivity_methods.csv"),
+            row.names = FALSE, na = "")
+  write.csv(result$thresholds, file.path(data_dir, "scoring_sensitivity_thresholds.csv"),
+            row.names = FALSE, na = "")
+  invisible(result)
 }

@@ -31,14 +31,14 @@ assert {k:len(set(v)) for k,v in f.maps.items()}=={'coverage':30,'zscore':30}
 assert len(f.images)==4
 assert p['audit']['need_n']==3274 and p['audit']['source_rows']==10364
 assert p['supply_variables']==['offering','free','training','daily_provision','larc_stock','stockout_burden']
-assert {r['method'] for r in p['scores']}=={'zscore'}
-assert len(p['scores'])==30 and p['thresholds'][0]['demand_cutoff']==0 and p['thresholds'][0]['supply_cutoff']==0
+assert {r['method'] for r in p['scores']}=={'zscore','rank','raw','robust','median_count'}
+assert len(p['scores'])==150 and p['thresholds'][0]['demand_cutoff']==0 and p['thresholds'][0]['supply_cutoff']==0
 assert m['audit']['common_n']==3115 and m['audit']['districts']==30
 assert all(r['n']==3115 for r in m['samples'])
-for value in ['2,823','3,274','3,115','10,364','Q506','PB2A only','Normalizedweights','clusterCode',
-              'No random effects or interactions','278 of 2,823','881','above zero','below zero']:
+for value in ['2,823','3,274','3,115','10,364','Q506','PB2A only','Normalizedweights','ids = ~1','svyglm',
+              'No random effects or interactions','278 of 2,823','881','above zero']:
     assert value in text,value
-assert not re.search(r'\b(?:PCA|Lagos|Senegal|rank average|Median/IQR)\b',text,re.I)
+assert not re.search(r'\b(?:PCA|Lagos|Senegal)\b',text,re.I)
 assert 'PB2A–C' not in text and 'Three-LARC' not in text
 for key in ['supply-component-summary','demand-component-summary','supply-department-components','demand-department-components']:
     assert key in f.ids
@@ -55,4 +55,4 @@ for blob in blobs:
     assert not re.search(r'/(?:[Uu]sers|[Hh]ome)/|bearer\s+[a-z0-9]',blob,re.I)
     assert not any(token in blob.lower() for token in ['co'+'dex','chat'+'gpt','open'+'ai','fi'+'le://'])
 assert not re.search(r'<(?:script|link|img)[^>]+(?:src|href)=["\']https?://',source,re.I)
-print('PASS: z-score only, zero cutoffs, 30-district maps, four model figures, FP restriction, need group, coverage caveat and clean embedded assets.')
+print('PASS: z-score primary, alternative scores, zero cutoffs, 30-district maps, four model figures, FP restriction, need group, coverage caveat and clean embedded assets.')

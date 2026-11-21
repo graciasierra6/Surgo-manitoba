@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Append aggregate-only Côte d’Ivoire residence fallback checks; preserve prior sections.
 args<-commandArgs(trailingOnly=TRUE)
 arg<-function(k,default=NULL){i<-match(k,args);if(is.na(i)){if(is.null(default))stop("Supply ",k);return(default)};if(i==length(args))stop("Supply ",k);args[i+1L]}
@@ -16,7 +26,7 @@ for(i in seq_len(nrow(coverage))){
 }
 # Counts are unweighted; percentages use the specified need-group denominator.
 percent<-function(selected,pop)if(sum(pop))100*sum(selected&pop)/sum(pop)else NA_real_
-wpercent<-function(selected,pop)if(sum(pop))100*sum(d$weight[selected&pop])/sum(d$weight[pop])else NA_real_
+wpercent<-function(selected,pop)if(sum(pop))100*survey_weighted_mean(as.numeric(selected[pop]),d$weight[pop])else NA_real_
 stat<-function(selected,pop)list(n=sum(selected&pop),denominator=sum(pop),
  sample_pct=percent(selected,pop),weighted_pct=wpercent(selected,pop),
  sample_pct_all=percent(selected,need),weighted_pct_all=wpercent(selected,need))

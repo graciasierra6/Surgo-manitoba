@@ -40,7 +40,7 @@ for label in ['882','2,159','4,555','PB2A only','Q506','No random effects or int
  assert label in text,label
 z=[r for r in p['thresholds'] if r['method']=='zscore'][0]
 assert z['demand_cutoff']==0 and z['supply_cutoff']==0
-assert 'demand <b>above zero</b>' in source and 'readiness <b>below zero</b>' in source
+assert 'demand <b>above zero</b>' in source and 'constraints <b>above zero</b>' in source
 assert 'PB2A–C' not in text and 'three_larc_stockin' not in text
 assert 'Both-flagged LGAs are included' in text
 for key in ['supply-component-summary','demand-component-summary','supply-department-components','demand-department-components']:

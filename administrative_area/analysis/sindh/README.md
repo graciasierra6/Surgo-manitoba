@@ -119,20 +119,20 @@ Calculate weighted district demand percentages among women in need with valid
 responses for each domain. Calculate unweighted valid FP-facility means for supply.
 Use the same **30 complete district profiles** as the reference on each side.
 For each component subtract the unweighted district mean and divide by sample SD.
-Average six component z-scores separately for demand and supply readiness.
+Average six risk-aligned component z-scores separately for demand and supply constraints.
 
-Raw stockout burden is higher = worse. Before supply standardization replace it
-with **stock continuity = 1 - burden**. All six scoring inputs then run higher =
-favorable. Heatmaps continue to display raw burden and color it accordingly.
+Raw stockout burden is higher = worse. Retain it as a constraint and complement
+the other five provision measures before supply standardization. All six index
+inputs run higher = worse. Heatmap percentages remain in their original units.
 
 Both final indices have mean zero across the 30 reference districts. Flag demand
-**> 0** and supply readiness **< 0**, with 1e-10 ties unflagged. Categories are
+**> 0** and supply constraints **> 0**, with 1e-10 ties unflagged. Categories are
 both, demand only, supply only or neither flagged. They describe relative concerns
 and provision, not causal binding constraints or absolute service adequacy. Equal
 weighting permits offsetting strengths/weaknesses and can emphasize correlated
 components. Component correlations and valid denominators remain available.
 
-Top-three selected components use the largest demand or smallest favorable supply component
+Top-three selected components use the largest demand or supply-constraint component
 z-scores. Recurrence and detail tables include every district flagged on that side,
 including both-flagged districts; the two groups overlap. Percentages describe
 districts, not women, facilities or attributable causes of nonuse.
@@ -154,16 +154,14 @@ coefficient. Rural/Urban is unavailable and is not inferred from facility data.
 
 Each woman's demand score averages her own six responses standardized against
 item-specific final-weighted means and population SDs in the need group. It is not
-a district demand score. Her supply risk is negative district readiness; all
+a district demand score. Her supply risk is district constraints; all
 residents share the district score. Scores enter per original average-z point.
 
-Retain **Normalizedweights**. Overview intervals use recorded unrounded
-**clusterCode**, building the full consenting positive-weight design before need
-subsetting. Do not substitute the lower-precision `rb0e` copy or invent strata/FPC.
+Retain **Normalizedweights**. Overview intervals use `ids = ~1`, without strata or FPC.
+Neither `clusterCode` nor `rb0e` is specified as a sampling PSU in this analysis.
 Primary model inference uses **district-clustered CR2** covariance, Satterthwaite
 coefficient intervals, HTZ block tests and Holm correction within each joint model's
-two block tests. A sampling-cluster survey-GLM inference check is exported; point
-estimates agree. Original strata, FPC and full design documentation remain unavailable.
+two block tests. No additional sampling-cluster survey-GLM sensitivity is fitted. Original strata, FPC and full design documentation remain unavailable.
 
 No random effects or interactions. Thirty district contexts limit supply inference;
 convergence and VIF checks do not establish power or causality. Intervals condition
@@ -185,3 +183,18 @@ direction alignment, zero cutoffs, top priorities, individual scores, common mod
 rows, weighted coefficients, district CR2 covariance and joint tests. HTML checks
 inspect section order, maps, definitions, figures and decoded aggregate downloads.
 These verify implementation, not source-data validity or causal identification.
+
+## Shared survey and scoring implementation
+
+Use `survey::svymean()` for SURGO weighted estimates and `survey::svyglm()`
+for the existing modern-use models, with `ids = ~1`, no strata or FPC, and
+the supplied weight. Report the separately calculated administrative-area CR2
+standard errors with Satterthwaite tests. Supply constraints are positive when
+above average; this reverses the former readiness sign without changing the
+primary flags or the supply-risk values already used in models.
+
+The final Sensitivity analyses section exposes the four earlier scoring
+alternatives. The map appendix includes the final-score distribution and zero,
+0.5, 1 and 1.5 SD thresholds. See the project-level
+[survey and scoring methods](../../../docs/SURVEY_AND_SCORING.md) for denominators,
+reference sets, inference details and publication-review requirements.

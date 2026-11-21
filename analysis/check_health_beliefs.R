@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Compare the current PB2A indicator with the prior three-item definition.
 # Inputs are caller-supplied; only aggregate statistics are written.
 args <- commandArgs(trailingOnly = TRUE)
@@ -52,19 +62,19 @@ for (country in names(spec)) {
   results[[country]] <- data.frame(
     geography = country, n_in_need = sum(use),
     prior_missing_n = sum(old_missing),
-    prior_missing_weighted_pct = 100 * weighted.mean(old_missing, w),
+    prior_missing_weighted_pct = 100 * survey_weighted_mean(old_missing, w),
     current_missing_n = sum(new_missing),
-    current_missing_weighted_pct = 100 * weighted.mean(new_missing, w),
+    current_missing_weighted_pct = 100 * survey_weighted_mean(new_missing, w),
     prior_any_domain_missing_n = sum(old_any),
-    prior_any_domain_missing_weighted_pct = 100 * weighted.mean(old_any, w),
+    prior_any_domain_missing_weighted_pct = 100 * survey_weighted_mean(old_any, w),
     current_any_domain_missing_n = sum(new_any),
-    current_any_domain_missing_weighted_pct = 100 * weighted.mean(new_any, w),
-    reduction_pp = 100 * (weighted.mean(old_missing, w) - weighted.mean(new_missing, w)),
+    current_any_domain_missing_weighted_pct = 100 * survey_weighted_mean(new_any, w),
+    reduction_pp = 100 * (survey_weighted_mean(old_missing, w) - survey_weighted_mean(new_missing, w)),
     prior_missing_now_valid_n = sum(old_missing & !new_missing),
     prior_valid_now_missing_n = sum(!old_missing & new_missing),
     prior_concern_now_no_concern_n = sum(prior[use] %in% 1 & current[use] %in% 0),
-    prior_concern_weighted_pct = 100 * weighted.mean(prior[use][!old_missing], w[!old_missing]),
-    current_concern_weighted_pct = 100 * weighted.mean(current[use][!new_missing], w[!new_missing])
+    prior_concern_weighted_pct = 100 * survey_weighted_mean(prior[use][!old_missing], w[!old_missing]),
+    current_concern_weighted_pct = 100 * survey_weighted_mean(current[use][!new_missing], w[!new_missing])
   )
 }
 stopifnot(identical(before, unname(tools::md5sum(inputs))))

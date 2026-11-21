@@ -106,7 +106,7 @@ Heatmaps display raw stockout burden, higher = worse. Before every score, rankin
 and PCA, replace burden with **continuity = 1 - burden**. The six supply inputs
 then run higher = favorable. For each component subtract the LGA mean and divide
 by the sample SD. Average six component z-scores separately by side; each final
-score has mean zero. Demand > 0 flags above-average concerns; readiness < 0 flags
+score has mean zero. Demand > 0 flags above-average concerns; supply constraints > 0 flags
 below-average provision. Values within 1e-10 of zero are unflagged ties. These are
 relative planning signals, not validated absolute thresholds or causal constraints.
 
@@ -133,15 +133,15 @@ estimates wherever their required responses are valid.
 
 Personal demand scores standardize each woman's six responses using item-specific
 weighted mean and population SD among women in need, then average. Do not assign
-her an LGA-level demand score. Supply risk is negative LGA readiness, so higher
+her an LGA-level demand score. Supply risk is LGA constraints, so higher
 values mean weaker provision; all women within an LGA share it.
 
-Retain original `weight`, weighted logistic point estimates, LGA-clustered CR2
+Retain original `weight`, survey-weighted logistic point estimates, LGA-clustered CR2
 covariance, Satterthwaite coefficient intervals, HTZ block tests and Holm adjustment
 within each joint model's two block tests. No random effects or interactions.
 Official survey EA/PSU and strata remain unconfirmed; do not infer them from
-household IDs or probability fields. Overview intervals are withheld. LGA Taylor
-comparisons are geographic inference checks, not the full original survey design.
+household IDs or probability fields. Overview intervals are withheld. The model uses `ids = ~1`, no strata or FPC, with a separate LGA CR2
+covariance; the full original sampling design is not reconstructed.
 Seventeen contextual values and low effective degrees of freedom limit supply
 inference. Convergence and VIF checks do not establish adequate power or causality.
 
@@ -162,3 +162,18 @@ LGA CR2 covariance/HTZ tests and PCA through weighted SVD. HTML checks inspect
 maps, section order, definitions, embedded assets and aggregate downloads.
 These verify implementation; source-data quality and identification limitations
 remain explicit. Shared files contain no respondent-level data or personal paths.
+
+## Shared survey and scoring implementation
+
+Use `survey::svymean()` for SURGO weighted estimates and `survey::svyglm()`
+for the existing modern-use models, with `ids = ~1`, no strata or FPC, and
+the supplied weight. Report the separately calculated administrative-area CR2
+standard errors with Satterthwaite tests. Supply constraints are positive when
+above average; this reverses the former readiness sign without changing the
+primary flags or the supply-risk values already used in models.
+
+The final Sensitivity analyses section exposes the four earlier scoring
+alternatives. The map appendix includes the final-score distribution and zero,
+0.5, 1 and 1.5 SD thresholds. See the project-level
+[survey and scoring methods](../../../docs/SURVEY_AND_SCORING.md) for denominators,
+reference sets, inference details and publication-review requirements.

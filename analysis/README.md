@@ -123,7 +123,7 @@ requires review of definitions/reference checks, rather than bypassing assertion
 
 | Country | Need group and assigned supply |
 |---|---|
-| Lagos | Original `fpn2 = 1`. Main sample, exact LGA–residence supply. Retain the approved Ibeju-Lekki Urban free-provision exception and the LGA fallback for its popular-stock component only. |
+| Lagos | Original `fpn2 = 1`. Main sample, exact LGA–residence FP-provider supply where available. Ibeju-Lekki–Urban has no confirmed FP provider and receives a flagged LGA-wide profile; the former free-provision exception is not used. |
 | Sindh | Delegates to the current district module, using the authorized `fpn2_derived`, checked district assignments and FP-provider-only supply. See its [README](../administrative_area/analysis/sindh/README.md). No woman's residence field is invented. |
 | Senegal | Original `FPN2 = 1`. Checked department–residence supply, with flagged department-wide fallback only where a residence profile is absent: 1,815 source women, including 522 in need. Facility residence is a health-district lookup proxy; Mbacke's Urban-labelled facilities do not establish absence of Rural services. |
 | Côte d’Ivoire | Original `FPN2 = 1`. Exact checked department–residence supply, with no geographic or component fallback. Four departments have no facility match; other undefined components, including Daoukro free provision, remain missing. |
@@ -139,13 +139,13 @@ used in these reports.
 Six demand domains retain missing-aware coding: any known positive establishes a
 concern; zero requires valid negatives on every included item; other combinations
 remain unresolved. Planning heatmaps use weighted valid-domain prevalence among
-women in need. Supply planning summaries combine all included facilities in each
-administrative area using original valid-response means and no facility weights.
+women in need. Supply planning summaries combine confirmed FP-providing facilities in each
+administrative area using valid-response means and no facility weights.
 
 Five geographic scoring methods are compared: rank average, mean percentages,
 median/IQR, median count and average z-score. The primary z-score classification
-flags demand above its score median and favorable supply readiness below its
-score median; exact ties are unflagged. Median count flags at least four of six
+flags both demand and supply constraints strictly above zero, the equal-area
+reference mean; numerical ties within 1e-10 are unflagged. Median count flags at least four of six
 unfavorable components. Missing components prevent a complete score. These are
 relative planning categories, not causal diagnoses or absolute adequacy standards.
 
@@ -166,10 +166,10 @@ Rural/Urban residence is included where available. Z-score and PCA models share
 one complete-case sample per country. No random effects or interactions are fitted.
 
 Final women's weights are retained: Lagos `weight`, Sindh `Normalizedweights`,
-Senegal/CDI `WEIGHT`. Available sampling identifiers inform overview intervals:
-Sindh `clusterCode`, Senegal `RB0H`, CDI `IDZD`. Lagos official PSUs remain
-unconfirmed; full-design overview intervals are withheld. Original strata/FPC are
-not documented. Model uncertainty uses administrative-area clustered CR2,
+Senegal/CDI `WEIGHT`. SURGO weighted estimates use the survey package with
+`ids = ~1`, no strata and no FPC. Original sampling identifiers are not specified.
+Lagos overview intervals remain withheld. Models use `survey::svyglm()` followed
+by administrative-area clustered CR2,
 Satterthwaite intervals and small-sample block tests; Holm correction covers the
 two block tests within a joint model. These are associations, not intervention
 effects or shares of nonuse attributable to each side. Country reports retain
@@ -316,9 +316,8 @@ Bongouanou–M’Bahiakro, Ajeromi-Ifelodun–Ojo, Bongouanou–Tanda and
 Biankouma–Méagui and Divo–Bongouanou. Bongouanou–Tanda emphasizes different service weaknesses;
 Biankouma–Méagui emphasizes broader modest-to-moderate shortfalls versus two
 pronounced shortfalls offset by four above-average components. A finding appears
-directly beneath every figure. The script restores the original
-readiness direction from the diagnostic input's negative-readiness values:
-negative displayed scores indicate weaker readiness. Every supply row displays
+directly beneath every figure. Composite scores are constraint-aligned: positive means greater constraints.
+Every supply row displays
 a favorable percentage, with stock continuity equal to 100 minus stockout
 burden. Bold and orange indicate below-reference supply values; the demand
 figures retain above-reference bolding. This display transformation preserves
@@ -333,10 +332,10 @@ shortfalls in Divo versus two pronounced and one moderate shortfall in
 Bongouanou, partly offset by three above-average components.
 
 The script searches within all four geographies and writes an aggregate
-candidate-pair table to the working output. Selected pairs have readiness
-scores below zero with absolute differences no larger than 0.10, at least
+candidate-pair table to the working output. Selected pairs have supply-constraint
+scores above zero with absolute differences no larger than 0.10, at least
 20 valid FP facilities per component and no displayed 0%/100% value. These
-illustration screens do not establish statistical precision. No negative-score
+illustration screens do not establish statistical precision. No positive-constraint-score
 area has exactly one below-reference supply component. The Matam example
 instead has one large and two marginal shortfalls; the text makes that
 distinction explicit. Valid-facility counts by component are written to the
@@ -517,3 +516,7 @@ working output. The shared report is standalone and contains no microdata.
 helper, including an optional caller-specified population restriction. Additional
 checks can extend the cumulative report without changing the main analyses or
 the earlier `Data_checks.html`.
+
+Current script and publication editions are distinguished in [REPRODUCIBILITY.md](../REPRODUCIBILITY.md).
+The current code adds zero, +0.5, +1 and +1.5 final-composite SD maps and distributions
+and is reflected in the current published HTMLs. See [survey and scoring](../docs/SURVEY_AND_SCORING.md).

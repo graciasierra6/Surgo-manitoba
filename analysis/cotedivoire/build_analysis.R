@@ -1,3 +1,14 @@
+# Historical-definition module; current report entry points are in administrative_area/ and urban_rural/.
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Côte d’Ivoire: exact department-residence facility profiles; original SURGO FPN2.
 args<-commandArgs(trailingOnly=TRUE)
 opt<-function(k){i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k);args[i+1L]}
@@ -10,7 +21,7 @@ inputs<-c(input,admin_input,facility_file,raw_file,raw_facility,codebook)
 hash<-unname(tools::md5sum(inputs));savecsv<-function(v,name)write.csv(v,file.path(out,name),row.names=FALSE,na="")
 key<-cdi_key;lab<-function(v)if(inherits(v,"haven_labelled"))as.character(haven::as_factor(v))else as.character(v)
 valid_mean<-function(v)if(any(is.finite(v)))mean(v[is.finite(v)])else NA_real_
-wm<-function(v,w){ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))weighted.mean(v[ok],w[ok])else NA_real_}
+wm<-function(v,w){ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))survey_weighted_mean(v[ok],w[ok])else NA_real_}
 bool<-function(v)ifelse(tolower(v)%in%c("true","1"),1,ifelse(tolower(v)%in%c("false","0"),0,NA_real_))
 x<-readRDS(input);admin<-readRDS(admin_input)
 stopifnot(nrow(x)==10859,nrow(admin)==nrow(x),identical(x$IDW,admin$IDW),
@@ -84,7 +95,7 @@ issues<-do.call(rbind,lapply(seq_len(nrow(ctx)),function(i){q<-ctx[i,];missing<-
  reason=if(!q$matched_supply)"No included facility profile in this department"else"Matched facilities but component has no valid reporting denominator")
 }));savecsv(issues,"supply_assignment_issues.csv")
 options(survey.lonely.psu="adjust")
-full <- survey::svydesign(ids=~psu,weights=~weight,data=d[d$positive,],nest=TRUE)
+full <- surgo_design(d[d$positive, ])
 need_design <- subset(full,need)
 estimate <- function(des,k){
  v<-as.numeric(des$variables[[k]]); p<-wm(v,des$variables$weight); ci<-c(NA_real_,NA_real_)

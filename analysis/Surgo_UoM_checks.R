@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Rebuild aggregate coverage checks from caller-supplied analysis joins and surveys.
 coverage_key <- function(v) {
   v <- iconv(as.character(v), to = "ASCII//TRANSLIT")
@@ -79,7 +89,7 @@ prepare_country_coverage <- function(root, country, input, facility_input, raw_f
   share<-function(selected,denominator) {
     den<-denominator&eligible
     if(!any(den))return(NA_real_)
-    100*sum(w[selected&den])/sum(w[den])
+    100*survey_weighted_mean(as.numeric(selected[den]),w[den])
   }
   work<-project_path(work_dir,root);dir.create(work,recursive=TRUE,showWarnings=FALSE)
   population_frames<-list()

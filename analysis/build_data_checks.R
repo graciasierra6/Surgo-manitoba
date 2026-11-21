@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Recalculate the cumulative checks from the input bundle and current report frames.
 args <- commandArgs(trailingOnly=TRUE)
 arg <- function(k) {i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k);args[i+1L]}
@@ -30,7 +40,7 @@ for(i in seq_along(countries)) {
  for(j in 1:7) {
   fields<-c("agency","stigma","health","fertility","confidence","opposes")
   missing<-if(j==7)!complete.cases(d[fields])else !is.finite(d[[fields[j]]])
-  put(3,j,i+1,count_pct(sum(use&missing),100*weighted.mean(missing[use],d$weight[use])))
+  put(3,j,i+1,count_pct(sum(use&missing),100*survey_weighted_mean(missing[use],d$weight[use])))
  }
 }
 d<-frames$cotedivoire$women;supply<-frames$cotedivoire$supply
@@ -39,7 +49,7 @@ keys<-c("BONON","FACOBLY","GOHITAFLA","TAABO","DAOUKRO")
 for(i in 1:7) {
  selected<-if(i<=5)d$geo%in%keys[i]else if(i==6)!d$geo%in%unique(fac$assigned_join_area[fac$country=="cotedivoire"])&unknown else unknown
  if(i==6)selected<-unknown&!d$geo%in%keys
- n<-sum(selected);wp<-100*sum(d$weight[selected&positive])/sum(d$weight[positive])
+ n<-sum(selected);wp<-100*survey_weighted_mean(as.numeric(selected[positive]),d$weight[positive])
  put(4,i,2,num(n));put(4,i,3,pct(100*n/nrow(d)));put(4,i,4,if(i==6)"—"else pct(wp))
 }
 r<-raw$cotedivoire;f<-fac[fac$country=="cotedivoire",]

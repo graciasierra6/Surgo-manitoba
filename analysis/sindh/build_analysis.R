@@ -1,3 +1,14 @@
+# Historical-definition module; current report entry points are in administrative_area/ and urban_rural/.
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Build Sindh's weighted need-group summaries and district planning scores.
 args <- commandArgs(trailingOnly = TRUE)
 opt <- function(k) { i <- match(k,args); if(is.na(i)||i==length(args)) stop("Supply ",k); args[i+1L] }
@@ -19,7 +30,7 @@ fac$offering <- bool(fac$one_larc_3_sa_offer); fac$free <- as.numeric(fac$p_free
 fac$training <- as.numeric(fac$p_train); fac$counselor <- as.numeric(fac$counselor_available)
 fac$larc_stock <- bool(fac$one_larc_stockin); fac$popular_stock <- bool(fac$mp_in_stock)
 valid_mean <- function(v) if(any(is.finite(v))) mean(v[is.finite(v)]) else NA_real_
-wm <- function(v,w) {ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))weighted.mean(v[ok],w[ok]) else NA_real_}
+wm <- function(v,w) {ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))survey_weighted_mean(v[ok],w[ok]) else NA_real_}
 savecsv <- function(v,name) write.csv(v,file.path(out,name),row.names=FALSE,na="")
 areas <- sort(profiles$geo); names_map <- setNames(profiles$district,profiles$geo)
 reconcile <- list()
@@ -34,7 +45,7 @@ for(g in areas) {
 }
 reconcile<-do.call(rbind,reconcile);stopifnot(all(reconcile$passed));savecsv(reconcile,"supply_input_reconciliation.csv")
 options(survey.lonely.psu="adjust")
-full <- survey::svydesign(ids=~psu,weights=~weight,data=d[d$positive,],nest=TRUE)
+full <- surgo_design(d[d$positive, ])
 need_design <- subset(full,need)
 estimate <- function(des,k){
  v<-as.numeric(des$variables[[k]]); p<-wm(v,des$variables$weight); ci<-c(NA_real_,NA_real_)

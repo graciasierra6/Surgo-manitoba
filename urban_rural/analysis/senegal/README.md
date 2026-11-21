@@ -92,7 +92,7 @@ not an objective knowledge test.
 
 Planning z-scores use equal-département reference means and sample SDs across the
 33 linked départements. Average six components on each side; flag demand > 0 and
-favorable supply readiness < 0, with 1e-10 tie tolerance. These are relative
+supply constraints > 0, with 1e-10 tie tolerance. These are relative
 signals, not causal diagnoses or absolute adequacy thresholds.
 
 Personal demand scores standardize each woman's six responses using item-specific
@@ -115,12 +115,12 @@ users and 433 women with flagged fallback assignments. All 522 women in need who
 require fallback receive supply values; the other 89 have incomplete demand or
 adjustment information.
 
-Available survey summaries use recorded `RB0H` census districts and `WEIGHT`,
+Survey summaries use `WEIGHT` with `ids = ~1`, no strata or FPC,
 building the full consenting positive-weight design before need-group selection.
-Original strata and FPC are unavailable. Primary model uncertainty uses
+Original sampling PSUs are not specified. Primary model uncertainty uses
 département-clustered CR2 covariance, Satterthwaite intervals and HTZ block tests;
-Holm adjusts the pair of block tests within each joint model. Recorded-PSU
-inference is exported as a sensitivity comparison. Scores are estimated inputs;
+Holm adjusts the pair of block tests within each joint model. No additional sampling-PSU
+sensitivity is fitted. Scores are estimated inputs;
 their construction uncertainty is not propagated into the regression intervals.
 
 Independent checks reproduce raw survey fields, eligibility, the facility
@@ -148,3 +148,18 @@ from this module. The script reports all-women and need-group Rural fallback
 counts, sample percentages and final-weighted percentages, plus the Urban check
 for both populations. It uses full source/need denominators rather than model
 complete cases. An optional `--audit-json` saves aggregate calculation checks.
+
+## Shared survey and scoring implementation
+
+Use `survey::svymean()` for SURGO weighted estimates and `survey::svyglm()`
+for the existing modern-use models, with `ids = ~1`, no strata or FPC, and
+the supplied weight. Report the separately calculated administrative-area CR2
+standard errors with Satterthwaite tests. Supply constraints are positive when
+above average; this reverses the former readiness sign without changing the
+primary flags or the supply-risk values already used in models.
+
+The final Sensitivity analyses section exposes the four earlier scoring
+alternatives. The map appendix includes the final-score distribution and zero,
+0.5, 1 and 1.5 SD thresholds. See the project-level
+[survey and scoring methods](../../../docs/SURVEY_AND_SCORING.md) for denominators,
+reference sets, inference details and publication-review requirements.

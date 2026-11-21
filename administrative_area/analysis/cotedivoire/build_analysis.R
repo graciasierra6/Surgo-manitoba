@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Côte d’Ivoire: department-wide facility profiles; original SURGO FPN2.
 args<-commandArgs(trailingOnly=TRUE)
 opt<-function(k){i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k);args[i+1L]}
@@ -13,7 +23,7 @@ inputs<-c(input,admin_input,facility_file,raw_file,raw_facility,codebook)
 hash<-unname(tools::md5sum(inputs));savecsv<-function(v,name)write.csv(v,file.path(out,name),row.names=FALSE,na="")
 key<-cdi_key;lab<-function(v)if(inherits(v,"haven_labelled"))as.character(haven::as_factor(v))else as.character(v)
 valid_mean<-function(v)if(any(is.finite(v)))mean(v[is.finite(v)])else NA_real_
-wm<-function(v,w){ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))weighted.mean(v[ok],w[ok])else NA_real_}
+wm<-function(v,w){ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))survey_weighted_mean(v[ok],w[ok])else NA_real_}
 bool<-function(v)ifelse(tolower(v)%in%c("true","1"),1,ifelse(tolower(v)%in%c("false","0"),0,NA_real_))
 x<-readRDS(input);admin<-readRDS(admin_input)
 stopifnot(nrow(x)==10859,nrow(admin)==nrow(x),identical(x$IDW,admin$IDW),
@@ -100,7 +110,7 @@ issues<-do.call(rbind,lapply(seq_len(nrow(ctx)),function(i){q<-ctx[i,];missing<-
  reason=if(!q$matched_supply)"No included facility profile in this department"else"Matched facilities but component has no valid reporting denominator")
 }));savecsv(issues,"supply_assignment_issues.csv")
 options(survey.lonely.psu="adjust")
-full <- survey::svydesign(ids=~psu,weights=~weight,data=d[d$positive,],nest=TRUE)
+full <- surgo_design(d[d$positive, ])
 need_design <- subset(full,need)
 estimate <- function(des,k){
  v<-as.numeric(des$variables[[k]]); p<-wm(v,des$variables$weight); ci<-c(NA_real_,NA_real_)
@@ -117,7 +127,7 @@ dn<-d[d$need,];cells<-list();coverage<-list()
 dn_complete<-complete.cases(dn[D])
 savecsv(do.call(rbind,lapply(c("CDI",areas),function(g){ii<-if(g=="CDI")rep(TRUE,nrow(dn))else dn$geo%in%g
  data.frame(geo=g,department=if(g=="CDI")"Côte d’Ivoire"else names_map[[g]],women_in_need=sum(ii),complete_demand=sum(ii & dn_complete),
- excluded=sum(ii & !dn_complete),complete_weight_share=sum(dn$weight[ii & dn_complete])/sum(dn$weight[ii]))})),"demand_complete_case_coverage.csv")
+ excluded=sum(ii & !dn_complete),complete_weight_share=survey_weighted_mean(as.numeric(dn_complete[ii]),dn$weight[ii]))})),"demand_complete_case_coverage.csv")
 for(g in c("CDI",areas)){
  wi<-if(g=="CDI")rep(TRUE,nrow(dn)) else dn$geo%in%g
  fi<-mapped & (if(g=="CDI")rep(TRUE,nrow(fac)) else fac$geo%in%g)
@@ -141,7 +151,7 @@ M<-list(); transforms<-list()
 for(side in c("Demand","Supply")){
  cols<-if(side=="Demand")D else S
  original<-sapply(cols,function(k){z<-cells[cells$side==side & cells$variable==k,];z$value[match(areas,z$geo)]})
- m<-if(side=="Supply")as.matrix(100*cdi_favorable_supply(as.data.frame(original/100)))else original
+ m<-if(side=="Supply")as.matrix(100*(1-cdi_favorable_supply(as.data.frame(original/100))))else original
  rownames(m)<-areas;reference<-complete.cases(m)
  means<-colMeans(m[reference,,drop=FALSE]);sds<-apply(m[reference,,drop=FALSE],2,sd)
  meds<-apply(m[reference,,drop=FALSE],2,median);iqrs<-apply(m[reference,,drop=FALSE],2,IQR)
@@ -158,23 +168,23 @@ classify<-function(df,sf)ifelse(is.na(df)|is.na(sf),"unassessed",ifelse(df&sf,"b
 scores<-thresholds<-list()
 for(id in c("rank","raw","robust","zscore")){
  ds<-rowMeans(M$Demand[[id]]);ss<-rowMeans(M$Supply[[id]]);dc<-if(id=="zscore")0 else median(ds,na.rm=TRUE);sc<-if(id=="zscore")0 else median(ss,na.rm=TRUE)
- df<-ds>dc+1e-10;sf<-ss<sc-1e-10
+ df<-ds>dc+1e-10;sf<-ss>sc+1e-10
  scores[[id]]<-data.frame(method=id,geo=areas,demand_score=ds,supply_score=ss,demand_flag=df,supply_flag=sf,
-   demand_priority_rank=rank(-ds,ties.method="average",na.last="keep"),supply_priority_rank=rank(ss,ties.method="average",na.last="keep"),category=classify(df,sf))
+   demand_priority_rank=rank(-ds,ties.method="average",na.last="keep"),supply_priority_rank=rank(-ss,ties.method="average",na.last="keep"),category=classify(df,sf))
  thresholds[[id]]<-data.frame(method=id,demand_cutoff=dc,supply_cutoff=sc,demand_rule=if(id=="zscore")"strictly above final-score mean (zero)"else"strictly above final-score median",
-  supply_rule=if(id=="zscore")"strictly below readiness-score mean (zero)"else"strictly below readiness-score median",demand_reference_n=sum(is.finite(ds)),supply_reference_n=sum(is.finite(ss)))
+  supply_rule=if(id=="zscore")"strictly above constraints-score mean (zero)"else"strictly above constraints-score median",demand_reference_n=sum(is.finite(ds)),supply_reference_n=sum(is.finite(ss)))
 }
 dc<-rowSums(sweep(M$Demand$raw,2,apply(M$Demand$raw,2,median,na.rm=TRUE),"-")>1e-10)
-sc<-rowSums(sweep(M$Supply$raw,2,apply(M$Supply$raw,2,median,na.rm=TRUE),"-")< -1e-10)
+sc<-rowSums(sweep(M$Supply$raw,2,apply(M$Supply$raw,2,median,na.rm=TRUE),"-")>1e-10)
 scores$median_count<-data.frame(method="median_count",geo=areas,demand_score=dc,supply_score=sc,demand_flag=dc>=4,supply_flag=sc>=4,
  demand_priority_rank=rank(-dc,ties.method="average",na.last="keep"),supply_priority_rank=rank(-sc,ties.method="average",na.last="keep"),category=classify(dc>=4,sc>=4))
 thresholds$median_count<-data.frame(method="median_count",demand_cutoff=4,supply_cutoff=4,demand_rule="4 or more of six above component medians",
- supply_rule="4 or more of six below component medians",demand_reference_n=sum(is.finite(dc)),supply_reference_n=sum(is.finite(sc)))
+ supply_rule="4 or more of six above constraint-component medians",demand_reference_n=sum(is.finite(dc)),supply_reference_n=sum(is.finite(sc)))
 scores<-do.call(rbind,scores);thresholds<-do.call(rbind,thresholds);trace<-do.call(rbind,transforms)
 planning<-lapply(areas,function(g){q<-scores[scores$method=="zscore" & scores$geo==g,];dt<-trace[trace$geo==g & trace$side=="Demand",];st<-trace[trace$geo==g & trace$side=="Supply",]
  list(geo=g,name=names_map[[g]],category=q$category,demand_flag=q$demand_flag,supply_flag=q$supply_flag,demand_score=q$demand_score,supply_score=q$supply_score,
   top_demand=head(dt$variable[order(-dt$zscore,match(dt$variable,D),na.last=TRUE)],3),
-  top_supply=if(all(is.finite(st$zscore)))head(st$variable[order(st$zscore,match(st$variable,S))],3) else character(),
+  top_supply=if(all(is.finite(st$zscore)))head(st$variable[order(-st$zscore,match(st$variable,S))],3) else character(),
   n_need=sum(dn$geo==g),facility_count=profiles$n_facilities[match(g,profiles$geo)])})
 missing<-do.call(rbind,lapply(areas,function(g)do.call(rbind,lapply(D,function(k){a<-dn[dn$geo==g,];data.frame(geo=g,variable=k,n=nrow(a),valid=sum(is.finite(a[[k]])),missing=sum(!is.finite(a[[k]])),weighted_pct=100*wm(a[[k]],a$weight))}))))
 savecsv(missing,"demand_missingness_by_department.csv")
@@ -188,7 +198,7 @@ savecsv(comparison,"classification_comparison.csv")
 plan_table<-do.call(rbind,lapply(planning,function(q)data.frame(department=q$name,category=q$category,demand_flag=q$demand_flag,supply_flag=q$supply_flag,
  top_demand=paste(q$top_demand,collapse="; "),top_supply=paste(q$top_supply,collapse="; "),n_need=q$n_need,facility_count=q$facility_count)))
 savecsv(plan_table,"planning_priorities.csv")
-audit<-list(country="Côte d’Ivoire",source_rows=nrow(x),consenting_positive_weight=sum(d$positive),need_n=sum(d$need),
+audit<-list(supply_score_orientation="constraints",country="Côte d’Ivoire",source_rows=nrow(x),consenting_positive_weight=sum(d$positive),need_n=sum(d$need),
  need_variable="Original SURGO FPN2 = 1, unchanged. No old need_n reconstruction or permanent-protection additions.",
  need_qualification="Original SURGO current-need classification, not the DHS unmet-need algorithm.",
  weight_field="WEIGHT",psu_field="IDZD: documented unique census-district / enumeration-zone identifier",
@@ -224,3 +234,9 @@ jsonlite::write_json(audit,file.path(out,"analysis_audit.json"),auto_unbox=TRUE,
 saveRDS(list(women=d,supply=sp,profiles=profiles,assigned_profiles=ctx),file.path(out,"analysis_frame.rds"))
 cat('Built',sum(d$need),'women in need across',length(areas),'departments; complete assigned supply',sum(d$need&complete.cases(sp)),'facility sample',facility_sample,'demand sample',demand_sample,'\n')
 print(table(scores$method,scores$category));print(data.frame(field=bar_defs$field,n=vapply(bars,`[[`,numeric(1),"n"),pct=100*vapply(bars,`[[`,numeric(1),"estimate")))
+
+# Sensitivity analyses ---------------------------------------------------------
+# Rank average, mean percentages, median/IQR and median-count alternatives use
+# the same six components. Final-composite SD maps use 0.5, 1 and 1.5 SD cutoffs.
+source(file.path(.survey_root, "analysis/common/risk_scores.R"), local = TRUE)
+payload <- export_risk_scores(payload, out)

@@ -1,3 +1,14 @@
+# Historical-definition module; current report entry points are in administrative_area/ and urban_rural/.
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Senegal main analysis: exact department-residence profiles, flagged department fallback.
 args<-commandArgs(trailingOnly=TRUE)
 opt<-function(k){i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k);args[i+1L]}
@@ -12,7 +23,7 @@ hash<-unname(tools::md5sum(inputs));savecsv<-function(v,name)write.csv(v,file.pa
 key<-senegal_key
 lab<-function(v)if(inherits(v,"haven_labelled"))as.character(haven::as_factor(v))else as.character(v)
 valid_mean<-function(v)if(any(is.finite(v)))mean(v[is.finite(v)])else NA_real_
-wm<-function(v,w){ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))weighted.mean(v[ok],w[ok])else NA_real_}
+wm<-function(v,w){ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))survey_weighted_mean(v[ok],w[ok])else NA_real_}
 bool<-function(v)ifelse(tolower(v)%in%c("true","1"),1,ifelse(tolower(v)%in%c("false","0"),0,NA_real_))
 x0<-readRDS(input);admin<-readRDS(admin_input);x<-x0
 stopifnot(nrow(x)==7169,!anyDuplicated(x$IDW),!anyDuplicated(admin$IDW))
@@ -88,7 +99,7 @@ fallback_table<-do.call(rbind,lapply(areas,function(g){ff<-fac[fac$geo==g,];w<-d
  urban_classified_facilities=sum(ff$rurb=="Urban",na.rm=TRUE),unknown_residence_facilities=sum(is.na(ff$rurb)))
 }));savecsv(fallback_table,"department_residence_assignment_summary.csv")
 options(survey.lonely.psu="adjust")
-full <- survey::svydesign(ids=~psu,weights=~weight,data=d[d$positive,],nest=TRUE)
+full <- surgo_design(d[d$positive, ])
 need_design <- subset(full,need)
 estimate <- function(des,k){
  v<-as.numeric(des$variables[[k]]); p<-wm(v,des$variables$weight); ci<-c(NA_real_,NA_real_)

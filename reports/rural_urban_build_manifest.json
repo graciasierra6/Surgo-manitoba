@@ -1,8 +1,8 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "workflow": "updated_residence_specific_analysis",
-  "release_date": "2026-11-10",
-  "input_sha256": "fb7ec76ed7c5dcb4aba50c99640c3c168316d8a692e3f8a905272ae2d5ea3fca",
+  "release_date": "2026-11-20",
+  "input_sha256": "f525ccffbefad4e3b00aea72e01a47e837d9ade2c6e3d5c15aad7d23cc439dd2",
   "source_bundle_verified": true,
   "r_version": "4.6.0",
   "packages": {
@@ -26,7 +26,7 @@
       "file": "Lagos_rural_urban_updated.html",
       "entry_script": "Lagos_rural_urban_updated.R",
       "rmd": "Lagos_rural_urban_updated.Rmd",
-      "sha256": "ff4a9d107d10a8d2faba949266a785a4eac3e2e7bb4d7a121195b23e0fdcb8ab",
+      "sha256": "253c4c97929078bb80dca2c513e8e844ae1bcd4c63fa9c60397ccfa3da6258d6",
       "source_women": 4555,
       "need_n": 2159,
       "model_n": 1896,
@@ -39,7 +39,6 @@
       "fp_providers_only": true,
       "health_PB2A_only": true,
       "primary_demand_cutoff": 0,
-      "primary_readiness_cutoff": 0,
       "survey_weights_used": true,
       "random_effects": false,
       "numerical_checks_passed": true,
@@ -47,23 +46,37 @@
       "planning_supply_resolution": "Administrative area, pooling Rural/Urban FP providers",
       "model_supply_resolution": "Matching administrative area-residence FP-provider profile; flagged whole-area fallback only for zero-provider cells when available",
       "source_files": {
-        "urban_rural/analysis/lagos/Lagos_rural_urban_updated.R": "a94800fbd6fabd30c23baf62742c70f99fbc746ee147079cd965de8b92ded934",
+        "urban_rural/analysis/lagos/Lagos_rural_urban_updated.R": "46a782700acd2c967a50ffd6a4c51922d85b8c2bbe970abf7be8f4182ad8b37e",
         "urban_rural/analysis/lagos/Lagos_rural_urban_updated.Rmd": "5a81ea65e947b7db9c683e27649dc61bb88f51a87dbf3b834b5f6261a14196df",
-        "urban_rural/analysis/lagos/README.md": "3505aa36030524e5b6c32867e5084f11d298363ee9a423f748d040d5d7057f2e",
+        "urban_rural/analysis/lagos/README.md": "30de9759c89d723591bca457acbe47af307abd4eb85f65ec611ff991c12e65c6",
         "urban_rural/analysis/lagos/assign_residence_supply.R": "4b8896bd23de2f4d1b69bc6bcaf0718a669b1a3804d00f47358d249c7b60a1c1",
         "urban_rural/analysis/lagos/build_pca_scores.R": "c309ec7c09dd4d11761c255d18169aa1f01d4532d65abf31dcf2b84aafabc4ea",
-        "urban_rural/analysis/lagos/fit_models.R": "849ef73ce686e82cb6e263eaa19400898926b16f42abd80afe09ae11b5076d29",
-        "urban_rural/analysis/lagos/render_analysis.py": "176dffec86e8772f00e8fcf4cce5b7a232dada15689d66604a1c7715968a020f",
-        "urban_rural/analysis/lagos/verify_analysis.R": "eb920ce4671c930083508a47eadcba9abe0e600ee924c876c25bc53d41f8b6b5",
-        "urban_rural/analysis/lagos/verify_html.py": "ec719f493679f62c9dabedab4590682fada4140f072708f155df232596902975"
+        "urban_rural/analysis/lagos/fit_models.R": "f0b0b37b70413d7b74075e10ed7a7cbc1b9b8943dc667f1bb6f42363134d25cb",
+        "urban_rural/analysis/lagos/render_analysis.py": "753d0ae37c9957c0a14b5213a424887f56081dd8845a0cef6b9993cefa35a7ae",
+        "urban_rural/analysis/lagos/verify_analysis.R": "974e7ccc792f71803bdd697dbc4a0749f873486ba7173c367bb7ad00c3088297",
+        "urban_rural/analysis/lagos/verify_html.py": "2ebbc32577e2865bfae701993f0d8c174c4ffe8f77a42ce90f8d2e1f42ceb151",
+        "analysis/common/survey_methods.R": "1bfe1455387089229ceda5343dc1ded7ebe43e3349044a26afbec07dc844a97f",
+        "analysis/common/risk_scores.R": "827095f7acb94bdd61f284e77fe6c3c20c1b0518f3aed3b559193c128c92589c",
+        "analysis/common/pipeline.R": "49a567595a18fe1934f2ed398aab5e5b3809dbadd0d4832b2a72206bc1e3f5a9",
+        "analysis/build_threshold_map_report.py": "3d97f482d25c9da495d3aab14237d850a262f979508d360693f87b2cc49f36f7"
       },
-      "wording_only_revision_verified": true
+      "primary_supply_constraints_cutoff": 0,
+      "supply_score_orientation": "constraints",
+      "sd_map_thresholds": [
+        0,
+        0.5,
+        1,
+        1.5
+      ],
+      "regression_function": "survey::svyglm",
+      "design_ids": "~1",
+      "design_strata": "None"
     },
     "senegal": {
       "file": "Senegal_rural_urban_updated.html",
       "entry_script": "Senegal_rural_urban_updated.R",
       "rmd": "Senegal_rural_urban_updated.Rmd",
-      "sha256": "8c8f5daf4ac00468f1ec529c000f6de2a405b8d3150e998c6b24eeba42940974",
+      "sha256": "3ee6fe629c7de620f70310c8cd28afd0cdb079f378409e1472577774a5d896ab",
       "source_women": 7169,
       "need_n": 1905,
       "model_n": 1558,
@@ -76,7 +89,6 @@
       "fp_providers_only": true,
       "health_PB2A_only": true,
       "primary_demand_cutoff": 0,
-      "primary_readiness_cutoff": 0,
       "survey_weights_used": true,
       "random_effects": false,
       "numerical_checks_passed": true,
@@ -84,25 +96,39 @@
       "planning_supply_resolution": "Administrative area, pooling Rural/Urban FP providers",
       "model_supply_resolution": "Matching administrative area-residence FP-provider profile; flagged whole-area fallback only for zero-provider cells when available",
       "source_files": {
-        "urban_rural/analysis/senegal/README.md": "753cf38585ca4f8cc7f4a51f5aaa407b6c9f5e2e3462f66c0c4f2fdf57a20e1f",
-        "urban_rural/analysis/senegal/Senegal_rural_urban_updated.R": "79d0863f0191863be22716f90ec0768108ab2a3b3f2df1e7912e5edcea62ecaa",
+        "urban_rural/analysis/senegal/README.md": "944aa68b50c53ed1db7b99e366acb963a47334a3371bec4bc29cc681057fcb4d",
+        "urban_rural/analysis/senegal/Senegal_rural_urban_updated.R": "c1291d8689574a03fcfee94c70c39e5159412c581e1a27147810644d404ca555",
         "urban_rural/analysis/senegal/Senegal_rural_urban_updated.Rmd": "51141bfc766ce8397c347e6f5be19c09ff33d299c1b95c9f6990f21bb95a4085",
         "urban_rural/analysis/senegal/assign_residence_supply.R": "828d7dda87b8fdf5a8ed45d549d70973915327bf1b1cdfa38ee9bdf8ca90b63e",
         "urban_rural/analysis/senegal/build_pca_scores.R": "c2ad595ae6e372ffbe8a6d5cbeadd925556e3fad8c91356a435ee1a4cc603a47",
-        "urban_rural/analysis/senegal/fit_models.R": "cdc33c362f2bc2abdb3d88566ccef5e037e21135c92d34784fa6a6d026cf928d",
-        "urban_rural/analysis/senegal/render_analysis.py": "d674d65da83fff46e288607c62fb3814edeff10a68f70c5c74af5662f52c000c",
+        "urban_rural/analysis/senegal/fit_models.R": "99d8d9bbf48aa41d11d7dda7fa9d114fb7913002e72434954d0cdc7bf10c7b7f",
+        "urban_rural/analysis/senegal/render_analysis.py": "4999ea0aa7dd352b4ddff3eda2e3247d1427503adb2125d1c0f40825f530c38f",
         "urban_rural/analysis/senegal/supply_definitions.R": "2cf26133026e1ba575fa477169c0d35734f976ce30e58496595c12dcbffe4e88",
-        "urban_rural/analysis/senegal/update_data_checks.R": "3e0bae9d93a450358fa880fe89ef1c60226a800231419f4e1e2cfc2e9fc3fc87",
-        "urban_rural/analysis/senegal/verify_analysis.R": "6249818727a9d4d47a937d91a02f7d05fcedd2d60ccf7eae56112bdc85112fa5",
-        "urban_rural/analysis/senegal/verify_html.py": "52ad47dcccbcac3b80e996d1a31a516e63cc7523c77ca32ea7c1f8692436b636"
+        "urban_rural/analysis/senegal/update_data_checks.R": "a267e9d88c6531453b6c406005a7867a341db5235076ca15c956bb5bb6ca8cfc",
+        "urban_rural/analysis/senegal/verify_analysis.R": "3a11ef3554ca4fe2399e1970e683a1277e866ab1c1334f324f6d078edc24160c",
+        "urban_rural/analysis/senegal/verify_html.py": "b4a2e75f1623685a3aae6fa8e8d951a261f30a9b1aa159095a04ce11096f8711",
+        "analysis/common/survey_methods.R": "1bfe1455387089229ceda5343dc1ded7ebe43e3349044a26afbec07dc844a97f",
+        "analysis/common/risk_scores.R": "827095f7acb94bdd61f284e77fe6c3c20c1b0518f3aed3b559193c128c92589c",
+        "analysis/common/pipeline.R": "49a567595a18fe1934f2ed398aab5e5b3809dbadd0d4832b2a72206bc1e3f5a9",
+        "analysis/build_threshold_map_report.py": "3d97f482d25c9da495d3aab14237d850a262f979508d360693f87b2cc49f36f7"
       },
-      "wording_only_revision_verified": true
+      "primary_supply_constraints_cutoff": 0,
+      "supply_score_orientation": "constraints",
+      "sd_map_thresholds": [
+        0,
+        0.5,
+        1,
+        1.5
+      ],
+      "regression_function": "survey::svyglm",
+      "design_ids": "~1",
+      "design_strata": "None"
     },
     "cotedivoire": {
       "file": "CotedIvoire_rural_urban_updated.html",
       "entry_script": "CotedIvoire_rural_urban_updated.R",
       "rmd": "CotedIvoire_rural_urban_updated.Rmd",
-      "sha256": "2c585cdd4245053029cb8832cd5fd6f26a88cd9bcfb8caa3c7f3992d1296da53",
+      "sha256": "f0626143af7f57f2cc52552bc40e43058e6c6c4a38ca03f179cb07c6fdb73518",
       "source_women": 10859,
       "need_n": 4292,
       "model_n": 3951,
@@ -115,7 +141,6 @@
       "fp_providers_only": true,
       "health_PB2A_only": true,
       "primary_demand_cutoff": 0,
-      "primary_readiness_cutoff": 0,
       "survey_weights_used": true,
       "random_effects": false,
       "numerical_checks_passed": true,
@@ -123,173 +148,107 @@
       "planning_supply_resolution": "Administrative area, pooling Rural/Urban FP providers",
       "model_supply_resolution": "Matching administrative area-residence FP-provider profile; flagged whole-area fallback only for zero-provider cells when available",
       "source_files": {
-        "urban_rural/analysis/cotedivoire/CotedIvoire_rural_urban_updated.R": "43a52d82f9c6b6353991e6dbc94c68d3f0d36ee996711a8379083756530c454e",
+        "urban_rural/analysis/cotedivoire/CotedIvoire_rural_urban_updated.R": "1a01284066a53cd564ba29f254503b1b577233ee5352dfb1eb4414f7a37140bb",
         "urban_rural/analysis/cotedivoire/CotedIvoire_rural_urban_updated.Rmd": "86a2657c20e66a09948c8fbfea679e5cbb5cfe4f5b7c2c5c1fefd67e552548c1",
-        "urban_rural/analysis/cotedivoire/README.md": "c4e1b28d6251af3cd059b001030c5c4b232cb0080a2cffb0d9a7737d23c73a45",
+        "urban_rural/analysis/cotedivoire/README.md": "5b9697c91a4d5a04377cc9554d038ac63451e08e9eb8ff3e58b6b6a3f5984c7a",
         "urban_rural/analysis/cotedivoire/assign_residence_supply.R": "3c08ecf00839c5d4a896d11c7b5b81ff59f2f37c8f6bb33d03906419bedf91ee",
         "urban_rural/analysis/cotedivoire/build_pca_scores.R": "16945c4bbc7f3bb4d7cc109f71106f4111955c04dc37f81a220ccf96b4653767",
         "urban_rural/analysis/cotedivoire/check_classification_changes.R": "d7f14c642df700811c311ac02ae6bbc71e615a618f8fcb7b717ee54929367059",
-        "urban_rural/analysis/cotedivoire/fit_models.R": "2bd8cb659ce4d9cd40db1106624b3d5978199dd5c412815f2bab0f0d64d997e3",
-        "urban_rural/analysis/cotedivoire/render_analysis.py": "cf04e97a39c6b820da50887f9df2bacd25413a283e16ba96c251fba17643d8b8",
+        "urban_rural/analysis/cotedivoire/fit_models.R": "92e58203fc59a9d24220029d3cd0b1d29e6a83944908535a09a298a3b7cee279",
+        "urban_rural/analysis/cotedivoire/render_analysis.py": "cd81986d9d72e5c2913fcb4eea4dc46574072bca1a8245ef9c5df7a0b92d0ebe",
         "urban_rural/analysis/cotedivoire/supply_definitions.R": "e15a6407d087a613a564f4a54f07e0fe4827eba248314ae82a9b95e490870b9a",
-        "urban_rural/analysis/cotedivoire/update_data_checks.R": "c7be1cf3345211c1afe191c444b3665ce4a91d02eeccedb6c4627d344eadbd37",
-        "urban_rural/analysis/cotedivoire/verify_analysis.R": "c5e242a211fb11146d2477daf46d761f775353319d7a28db9fc94244e239364f",
-        "urban_rural/analysis/cotedivoire/verify_html.py": "036da9f5e098c74f42562ad58fb55699cb0e9c27f6322bc34f3122f3da76d4e5"
+        "urban_rural/analysis/cotedivoire/update_data_checks.R": "b1bc603f7543a4be4673ef5b0a43d865663b8341b1c20d7ce16c41c0147ee3c8",
+        "urban_rural/analysis/cotedivoire/verify_analysis.R": "e745e5c7cff47cb2050237c6ea4ccdc37e1d5a0d944185cf18606696d6510712",
+        "urban_rural/analysis/cotedivoire/verify_html.py": "036da9f5e098c74f42562ad58fb55699cb0e9c27f6322bc34f3122f3da76d4e5",
+        "analysis/common/survey_methods.R": "1bfe1455387089229ceda5343dc1ded7ebe43e3349044a26afbec07dc844a97f",
+        "analysis/common/risk_scores.R": "827095f7acb94bdd61f284e77fe6c3c20c1b0518f3aed3b559193c128c92589c",
+        "analysis/common/pipeline.R": "49a567595a18fe1934f2ed398aab5e5b3809dbadd0d4832b2a72206bc1e3f5a9",
+        "analysis/build_threshold_map_report.py": "3d97f482d25c9da495d3aab14237d850a262f979508d360693f87b2cc49f36f7"
       },
-      "wording_only_revision_verified": true
+      "primary_supply_constraints_cutoff": 0,
+      "supply_score_orientation": "constraints",
+      "sd_map_thresholds": [
+        0,
+        0.5,
+        1,
+        1.5
+      ],
+      "regression_function": "survey::svyglm",
+      "design_ids": "~1",
+      "design_strata": "None"
     }
   },
   "sindh": "No residence-specific report; SURGO lacks Rural/Urban and the existing district report remains current.",
   "validation": {
     "recorded_source_input_checks_passed": true,
     "fresh_bundle_rebuild_for_this_release": true,
-    "relocated_project_check": true,
-    "all_three_reports_identical_to_saved_versions": true,
-    "recomputed_residence_coverage_sections_match": true,
-    "population_comparison_report_identical": true,
-    "data_checks_earlier_sections_preserved": true,
-    "dependency_environment": "Existing installed R/Python/Pandoc dependencies; no fresh operating-system provisioning was attempted.",
-    "narrative_revision": {
-      "date": "2026-11-10",
-      "scope": "Replace advisory sentences with neutral findings descriptions and standardize Classification summary and Interpretation of results labels in the three residence-specific reports.",
-      "source_renderers_updated": true,
-      "re_rendered_from_verified_aggregate_outputs": true,
-      "fresh_bundle_aggregate_render_matches_current": true,
-      "only_approved_text_replacements": true,
-      "embedded_figures_downloads_and_maps_unchanged": true,
-      "analysis_inputs_and_calculated_outputs_unchanged": true,
-      "no_model_refitting_needed": "No analytical code changed. Previously verified numerical outputs were reused for this wording-only revision."
-    },
-    "cumulative_review": {
-      "date": "2026-11-10",
-      "public_baseline_commit": "464cffe1a67ec0024dbdd2a83e545676a514f5b1",
-      "fresh_external_bundle_rebuild": true,
-      "relocated_project": true,
-      "current_country_reports_rebuilt": [
-        {
-          "workflow": "residence_specific",
-          "country": "lagos",
-          "file": "Lagos_rural_urban_updated.html",
-          "sha256": "ff4a9d107d10a8d2faba949266a785a4eac3e2e7bb4d7a121195b23e0fdcb8ab",
-          "independent_checks": 2143,
-          "identical_to_saved": true
-        },
-        {
-          "workflow": "residence_specific",
-          "country": "senegal",
-          "file": "Senegal_rural_urban_updated.html",
-          "sha256": "8c8f5daf4ac00468f1ec529c000f6de2a405b8d3150e998c6b24eeba42940974",
-          "independent_checks": 1158,
-          "identical_to_saved": true
-        },
-        {
-          "workflow": "residence_specific",
-          "country": "cotedivoire",
-          "file": "CotedIvoire_rural_urban_updated.html",
-          "sha256": "2c585cdd4245053029cb8832cd5fd6f26a88cd9bcfb8caa3c7f3992d1296da53",
-          "independent_checks": 2979,
-          "identical_to_saved": true
-        },
-        {
-          "workflow": "administrative_area",
-          "country": "lagos",
-          "file": "Lagos_analysis_aggregate.html",
-          "sha256": "d937c45f28f52c1b667a12240556f5941c9acca81e4c7a19323c0f89299b57cc",
-          "independent_checks": 2018,
-          "identical_to_saved": true
-        },
-        {
-          "workflow": "administrative_area",
-          "country": "senegal",
-          "file": "Senegal_analysis_aggregate.html",
-          "sha256": "868d01d122960b1d589157da787a973d65cdc279d09fcd6b60a58c2e4a6400c9",
-          "independent_checks": 567,
-          "identical_to_saved": true
-        },
-        {
-          "workflow": "administrative_area",
-          "country": "cotedivoire",
-          "file": "Cote_dIvoire_analysis_aggregate.html",
-          "sha256": "d0482cb1d080b08fe4dc7357da3b3e478fca91d0e77f8ea79ae2b76c675de3b3",
-          "independent_checks": 1140,
-          "identical_to_saved": true
-        },
-        {
-          "workflow": "administrative_area",
-          "country": "sindh",
-          "file": "Sindh_analysis.html",
-          "sha256": "88dc4a9f85c61750554cb128ecaa68d4b2273847ab7ffffb273bac8b4217a18f",
-          "independent_checks": 2423,
-          "identical_to_saved": true
-        }
-      ],
-      "supplementary_checks_rebuilt": 2,
-      "population_comparison_rebuilt_all_four_geographies": true,
-      "data_check_residence_tables_reproduced": true,
-      "data_check_previous_sections_preserved": true,
-      "data_check_rendering_difference": "Only blank-line spacing differs after reapplying the section updaters; content is identical.",
-      "earlier_report_snapshots_preserved": true,
-      "no_input_survey_datasets_in_upload": true,
-      "runtime_dependency_scope": "Rebuild verified with the documented installed R, Python and Pandoc dependencies; a fresh operating-system installation was not tested."
-    },
-    "coverage_report_rebuilt_and_identical_to_uploaded": true
+    "all_three_reports_match_validated_content": true,
+    "all_current_and_historical_report_comparisons_passed": true,
+    "complete_runner_report_count": 18,
+    "before_after_numerical_comparisons_passed": 1116,
+    "dependency_environment": "Recorded R/package/Pandoc versions verified; a fresh operating-system installation was not tested."
   },
   "limitations": [
-    "Original strata and FPC are not fully available; geographic CR2 inference and recorded-PSU sensitivity are documented.",
-    "Categories are relative planning signals, not causal diagnoses.",
-    "Data-check updaters recalculate their residence sections and preserve earlier sections from a caller-supplied HTML."
+    "Weights-only SURGO designs specify ids = ~1 with no strata or FPC; original sampling PSUs are not reconstructed. Regression inference is separately clustered by administrative area using CR2/Satterthwaite.",
+    "Categories are relative planning signals, not causal diagnoses or validated severity thresholds.",
+    "Facility proportions retain approved upstream definitions and valid-response denominators; score-construction uncertainty is not propagated into regression intervals.",
+    "Senegal facility residence uses a health-district lookup proxy; flagged whole-area fallbacks and remaining geographic-review qualifications are retained."
   ],
   "supplementary_checks": {
     "score_profile_examples": {
       "file": "Score_profile_examples.html",
       "path": "reports/Score_profile_examples.html",
-      "sha256": "0a0c458db53596e62ff01c73e7be8c78cf685a66baf88412b38ee4ea6578b201",
+      "sha256": "4398c1cd8a59e3184c1236ab5cdffd2bf64d122da875e4f87070256a3e3996a6",
       "source_files": {
-        "analysis/score_profile_examples.R": "c8321c6abbb73dbfdb3b8f7b4936687ae1ba41b0faf840aa45ccac03c498ed0d",
-        "analysis/score_profile_examples.Rmd": "6c044bab4accf44af154c8919cbcf313ebadea8453214734f25c1ec58712f55c"
+        "analysis/score_profile_examples.R": "2eefc2a8869920703c6db863a610410be20b62724a639673e8272efb7c43ffa9",
+        "analysis/score_profile_examples.Rmd": "94c9cd2af74defa0464d54547d313300e65df2676cbacc6d9e956a108fb85943"
       },
       "embedded_figure_count": 6,
-      "validation_basis": "fresh country outputs verified earlier; saved aggregate inputs reconciled again",
-      "main_analyses_unchanged": true
+      "validation_basis": "Rebuilt from freshly verified country outputs in the complete input-ZIP run; report content signatures, component values and source-file fingerprints checked.",
+      "primary_estimates_and_classifications_unchanged": true,
+      "report_updated_date": "2026-11-20"
     },
     "check_method_awareness": {
       "file": "Method_awareness_check_Senegal_Lagos.html",
       "path": "reports/Method_awareness_check_Senegal_Lagos.html",
-      "sha256": "bbfb445ded636dc840c96950fe14fe3c2eca6cdfda41a7817dcb8b8dc17351e1",
+      "sha256": "b48b119e47af1802bc2c7ea31c52bce5e3d9324151f64dea1b931c749e1d6f50",
       "source_files": {
-        "analysis/check_method_awareness.R": "2d6d5c9872a5a231d0046abc7d1a79f207481d5ca428ff0484d116ec97bde1b5",
-        "analysis/check_method_awareness.Rmd": "f407c7d51555b7409bce8c1c11b75db1d5df9e54f83ca9a65c4f0fb44f557940"
+        "analysis/check_method_awareness.R": "e2c1f82bbe66b3100b6b7408b4f97b3bc1deeb887dc7a8244b892d6c20f949bb",
+        "analysis/check_method_awareness.Rmd": "ef0d0c871c6bd5c45319cdea9fc0d8ed2948cd9872807adf8196a7ac36e3ffcd"
       },
       "embedded_figure_count": 3,
-      "validation_basis": "report and sources exactly match the earlier fresh rebuild",
-      "main_analyses_unchanged": true
+      "validation_basis": "Rebuilt from freshly verified country outputs in the complete input-ZIP run; report content signatures, component values and source-file fingerprints checked.",
+      "primary_estimates_and_classifications_unchanged": true,
+      "report_updated_date": "2026-11-20"
     },
     "score_profile_contrasts": {
       "file": "Score_profile_contrasts.html",
       "path": "reports/Score_profile_contrasts.html",
-      "sha256": "9b1b5b2cd9ae569dcfec6a66b5a6616feb5f061490aa9079bc07ec5930cee9da",
+      "sha256": "545f1675f6e0c11d4e9ba33c140e05f4c2f527bed9479b90882da8e84ac8f906",
       "source_files": {
-        "analysis/score_profile_contrasts.R": "baec97486ce883cb809896e184e52537b10ee0bed66c5984edbe63efd419cf57",
+        "analysis/score_profile_contrasts.R": "17f8c294b197d98259ab4e86171c058f91cc14d2f2caa9997ddfa159665fcc01",
         "analysis/score_profile_contrasts.Rmd": "fc2a36b058f78d968688fca7b1444453c1058a59685d846f263bd8d191cda3a2",
-        "analysis/score_profile_examples.R": "c8321c6abbb73dbfdb3b8f7b4936687ae1ba41b0faf840aa45ccac03c498ed0d",
-        "analysis/plot_score_profiles_combined.R": "0605fb09009dd2578144af8b51e0d790068b27db8b9191b6ac1d01f184445c3f"
+        "analysis/score_profile_examples.R": "2eefc2a8869920703c6db863a610410be20b62724a639673e8272efb7c43ffa9",
+        "analysis/plot_score_profiles_combined.R": "f6c288372ccf7754eec8e5229c1c6db939fe639ed8a734745bd6be36eeb103be"
       },
       "embedded_figure_count": 4,
-      "validation_basis": "re-rendered from current verified country aggregates in a relocated project",
-      "main_analyses_unchanged": true
+      "validation_basis": "Rebuilt from freshly verified country outputs in the complete input-ZIP run; report content signatures, component values and source-file fingerprints checked.",
+      "primary_estimates_and_classifications_unchanged": true,
+      "report_updated_date": "2026-11-20"
     },
     "surgo_uom_checks": {
       "file": "Surgo_UoM_checks.html",
       "path": "data_checks/Surgo_UoM_checks.html",
       "sha256": "0207a44e5dc2e5f9d8bc99587ab6a25f60642b58d7898f97ca9d0d9059f0fb06",
       "source_files": {
-        "analysis/Surgo_UoM_checks.R": "3fe7342b330bb2de6a9d1a49a97e25053001ed0ccd6f296008bff8fc2ee61812",
+        "analysis/Surgo_UoM_checks.R": "dcd273de96f4488f0db20d8275c8d4422af91f598bbc35ec658cb35065d9c94f",
         "analysis/Surgo_UoM_checks.Rmd": "baa1701b744a183094975fc150fcdd13bdaba5a1a6c8e225815f6232a1df8599",
-        "analysis/tabulate_women_residence.R": "af43987b08a9965fca91602b5ca8499815e592eba8913f6b0cf3273319fba4fe"
+        "analysis/tabulate_women_residence.R": "2d0eb6e01856e24500402cb67f4116cdb9b59dc143548bddccdbfe0993bb5011"
       },
       "embedded_figure_count": 0,
-      "validation_basis": "rebuilt in a relocated project from parameterized joins and raw facility inputs",
-      "main_analyses_unchanged": true
+      "validation_basis": "Rebuilt from freshly verified country outputs in the complete input-ZIP run; report content signatures, component values and source-file fingerprints checked.",
+      "primary_estimates_and_classifications_unchanged": true,
+      "report_updated_date": "2026-11-20"
     },
     "demand_pair_comparisons": {
       "file": "Demand_pair_comparisons.html",
@@ -299,22 +258,22 @@
         "analysis/plot_demand_pair_table.R": "87f8ca59a85f6b0a67198a1518db296e557e064a032ee6bf9c7cf7c7ea8327f9"
       },
       "embedded_figure_count": 4,
-      "validation_basis": "All 48 raw component percentages and 24 pair differences reconciled to saved country outputs; bolding verified, requested subtitle and footnote removals checked in each SVG; standalone HTML tested offline.",
-      "main_analyses_unchanged": true,
-      "report_updated_date": "2026-11-11"
+      "validation_basis": "Rebuilt from freshly verified country outputs in the complete input-ZIP run; report content signatures, component values and source-file fingerprints checked.",
+      "report_updated_date": "2026-11-20",
+      "primary_estimates_and_classifications_unchanged": true
     },
     "demand_and_supply_regional_comparisons": {
       "file": "Composite score_comparisons.html",
       "path": "data_checks/Composite score_comparisons.html",
-      "sha256": "7b869d88de8b709ee4a222be7fcdc4a7eab487510321906948c4688f830e21c9",
+      "sha256": "a4c91f21e99e0e62936441887dc1f9a2eb8f3e870ef3c071b64c51643acea6b4",
       "source_files": {
         "analysis/plot_demand_pair_table.R": "87f8ca59a85f6b0a67198a1518db296e557e064a032ee6bf9c7cf7c7ea8327f9",
-        "analysis/plot_supply_pair_table.R": "e8e787cd2395219d2482bd82ca826b3f01c7099a3a8fd5f086ccf2e8e92ed022"
+        "analysis/plot_supply_pair_table.R": "3aa621da88621dbaacb5060951ba8c6bf12f955a58af231f141235d39d6bb9b7"
       },
       "embedded_figure_count": 13,
-      "validation_basis": "Presentation cleanup removed the context/navigation block, all thirteen Definitions and accessible values sections, and the specified supply-introduction sentence. All thirteen figures, comparison labels, key findings and the opening paragraph retained byte-for-byte. Original numerical reconciliations remain applicable; rebuilt HTML checked offline at desktop and mobile widths.",
-      "main_analyses_unchanged": true,
-      "report_updated_date": "2026-11-11"
+      "validation_basis": "Rebuilt from freshly verified country outputs in the complete input-ZIP run; report content signatures, component values and source-file fingerprints checked.",
+      "report_updated_date": "2026-11-20",
+      "primary_estimates_and_classifications_unchanged": true
     }
   }
 }

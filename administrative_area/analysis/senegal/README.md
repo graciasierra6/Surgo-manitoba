@@ -107,13 +107,13 @@ Numerical completeness does not establish complete underlying responses or
 independently validate upstream missing-data rules. This revision changes the
 selected indicator, not the approved upstream construction.
 
-Heatmaps show raw burden, higher = worse. Before all supply scoring, ranking and
-PCA, replace burden with `stock continuity = 1 - burden`, leaving the other five
-favorable inputs unchanged. All six now run higher = better. Average their z-scores
-for readiness and negate that average for supply risk. This is algebraically the
-same as reversing the other five inputs to risks, keeping burden as a risk, and
-averaging their z-scores. Raw and aligned percentages are both saved in the score
-trace, with explicit direction flags.
+Heatmaps show raw burden, higher = worse. Geographic scoring and ranking use
+stockout burden directly and the complements of the other five provision measures.
+All six index inputs therefore run higher = greater constraints. Average their
+z-scores for supply constraints, exactly the negative of former readiness. Raw
+and risk-aligned percentages are both saved in the trace. The PCA sensitivity
+retains its favorable input axes and explicitly reverses the oriented projection
+for the model; mixed loadings remain a pattern-score limitation.
 
 ### Geography retained
 
@@ -136,7 +136,7 @@ precision; the SD of their average need not be one. Their sum would yield the
 same ranking and zero-based classification, but six times the numerical values.
 
 - Demand flag: final demand score > 0.
-- Supply flag: final favorable-readiness score < 0.
+- Supply flag: final supply-constraints score > 0.
 - Both: both flags; neither: neither flag.
 - Absolute values within 1e-10 of zero are treated as ties and unflagged.
 
@@ -189,3 +189,18 @@ component standardization, zero-based flags,
 coefficient and CR2 reproduction, PCA SVD equivalence, map coverage, table counts,
 embedded figures/downloads and artifact portability. These checks do not prove
 unbiased nonresponse, adequate power or causal binding constraints.
+
+## Shared survey and scoring implementation
+
+Use `survey::svymean()` for SURGO weighted estimates and `survey::svyglm()`
+for the existing modern-use models, with `ids = ~1`, no strata or FPC, and
+the supplied weight. Report the separately calculated administrative-area CR2
+standard errors with Satterthwaite tests. Supply constraints are positive when
+above average; this reverses the former readiness sign without changing the
+primary flags or the supply-risk values already used in models.
+
+The final Sensitivity analyses section exposes the four earlier scoring
+alternatives. The map appendix includes the final-score distribution and zero,
+0.5, 1 and 1.5 SD thresholds. See the project-level
+[survey and scoring methods](../../../docs/SURVEY_AND_SCORING.md) for denominators,
+reference sets, inference details and publication-review requirements.

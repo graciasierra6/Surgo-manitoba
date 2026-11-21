@@ -14,8 +14,8 @@ for(k in D)x[[paste0("demand_",k)]]<-d[[k]]
 Z<-sapply(D,function(k){r<-ref[ref$variable==k,];(d[[k]]-r$weighted_mean)/r$weighted_SD})
 x$demand_risk_score<-rowMeans(Z);x$demand_risk_score[!d$need]<-NA_real_
 z<-p$scores[p$scores$method=="zscore",]
-x$supply_readiness_score<-z$supply_score[match(d$geo,z$geo)]
-x$supply_risk_score<- -x$supply_readiness_score
+x$supply_risk_score<-z$supply_score[match(d$geo,z$geo)]
+x$supply_readiness_score<- -x$supply_risk_score
 x$model_complete_case<-d$row%in%models$score_joint$data$row
 stopifnot(all(vapply(original_fields,function(k)identical(x[[k]],original[[k]]),logical(1))))
 ii<-models$score_joint$data$row

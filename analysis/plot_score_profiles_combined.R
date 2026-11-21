@@ -154,7 +154,7 @@ plot_score_profile_percentages <- function(input,case_id,output_dir,supply_score
   for(i in 1:2) {
     xx<-c(.03,.49)[i]
     grid::grid.rect(x=xx,y=.17,width=.012,height=.11,gp=grid::gpar(fill=colors[i],col=NA))
-    grid::grid.text(sprintf(if(side=='Demand')'%s  |  overall concern score %+.3f'else if(supply_score=='readiness')'%s  |  supply readiness score %+.3f'else'%s  |  supply challenge score %+.3f',area_names[i],display_scores[i]),
+    grid::grid.text(sprintf(if(side=='Demand')'%s  |  overall concern score %+.3f'else if(supply_score=='readiness')'%s  |  supply readiness score %+.3f'else'%s  |  supply constraint score %+.3f',area_names[i],display_scores[i]),
       x=xx+.014,y=.17,just='left',gp=grid::gpar(fontsize=13,col='#294D5D'))
   }
   grid::popViewport();grid::pushViewport(grid::viewport(layout.pos.row=2));grid::grid.draw(ggplot2::ggplotGrob(g));grid::popViewport()

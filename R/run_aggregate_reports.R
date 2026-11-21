@@ -44,12 +44,16 @@ for(country in countries){
   source_women=audit$source_rows,women_in_need=audit$need_n,model_women=model$common_n,
   supply_resolution="Administrative area only",counseling_in_main=FALSE,
   fp_providers_only=TRUE,primary_scoring_method="mean component z-score",
-  demand_cutoff=0,supply_readiness_cutoff=0,PCA_in_appendix=country!="sindh",
+  demand_cutoff=0,supply_constraints_cutoff=0,supply_score_orientation="constraints",
+  sd_map_thresholds=c(0,0.5,1,1.5),
+  regression_function="survey::svyglm",design_ids="~1",design_strata="None",
+  inference="Administrative-area CR2; Satterthwaite coefficient intervals and HTZ block tests",
+  PCA_in_appendix=country!="sindh",
   complete_case_sensitivity_sections_in_report=FALSE,numerical_checks_passed=check$all_passed)
 }
 packages<-c("rmarkdown","knitr","haven","dplyr","readr","readxl","jsonlite","digest","sf","survey","clubSandwich","ggplot2","svglite")
 versions<-setNames(lapply(packages,function(p)as.character(utils::packageVersion(p))),packages)
-jsonlite::write_json(list(schema_version=2,workflow="administrative_area_aggregate",
+jsonlite::write_json(list(schema_version=3,workflow="administrative_area_aggregate",
  input_sha256=context$bundle_sha256,source_bundle_verified=nzchar(opts$input_zip),
  r_version=as.character(getRversion()),packages=versions,pandoc_version=as.character(rmarkdown::pandoc_version()),reports=records),
  file.path(output,"aggregate_build_manifest.json"),auto_unbox=TRUE,pretty=TRUE,na="null")

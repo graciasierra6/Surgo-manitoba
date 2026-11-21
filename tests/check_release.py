@@ -36,9 +36,18 @@ for name, expected in reference['_existing_join_files'].items():
     assert hashlib.sha256((root/name).read_bytes()).hexdigest() == expected, ('existing join changed', name)
 report_names = ['Lagos_analysis','Sindh_analysis','Senegal_analysis','Cote_dIvoire_analysis']
 countries = ['lagos','sindh','senegal','cotedivoire']
+generated = json.loads((root/'tests/report_reference_hashes.json').read_text())['generated_only']
+published_count = 0
 for country, name in zip(countries, report_names):
     assert (root/'analysis'/country/(name+'.Rmd')).is_file()
-    text = (root/'reports'/(name+'.html')).read_text()
+    report = root/'reports'/(name+'.html')
+    if not report.is_file():
+        relative = report.relative_to(root).as_posix()
+        assert relative in generated and re.fullmatch(r'[0-9a-f]{64}',generated[relative]['sha256']),relative
+        print('Archived report source present; full rebuild checks registered hash: '+relative)
+        continue
+    published_count += 1
+    text = report.read_text()
     assert text.lower().startswith('<!doctype html>') and '<script>' in text
     assert not re.search(r'<(?:script|img)[^>]+(?:src)=["\']https?://', text)
     assert len(re.findall(r'data:image/svg\+xml;base64,', text)) == (4 if country == 'sindh' else 10)
@@ -46,4 +55,17 @@ for module in ['administrative_area','urban_rural']:
     assert (root/module/'R'/('run_join.R' if module == 'administrative_area' else 'run_join_urban_rural.R')).is_file()
     assert (root/module/'R/00_config.R').is_file()
     assert (root/module/'README.md').is_file()
-print(f'Checked {len(files)} upload files: four offline reports/Rmds, separate joins, asset checksums, portable paths and source syntax.')
+current = ['Lagos_analysis_aggregate','Senegal_analysis_aggregate',
+           'Cote_dIvoire_analysis_aggregate','Sindh_analysis',
+           'Lagos_rural_urban_updated','Senegal_rural_urban_updated',
+           'CotedIvoire_rural_urban_updated']
+obsolete = ['Capped whiskers use recorded IDZD',
+            'using the available RB0H census-district design',
+            'and recorded clusterCode, with no documented strata',
+            'A separate survey-GLM inference check uses recorded clusterCode']
+for name in current:
+    report = root/'reports'/(name+'.html')
+    assert report.is_file(), ('Current published report missing',name)
+    for phrase in obsolete:
+        assert phrase not in report.read_text(), ('Obsolete design caption',name,phrase)
+print(f'Checked {len(files)} upload files: {published_count} retained legacy-name report(s), archived report sources, separate joins, asset checksums, portable paths and source syntax.')

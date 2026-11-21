@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Build Sindh's weighted need-group summaries and district planning scores.
 args <- commandArgs(trailingOnly = TRUE)
 opt <- function(k) { i <- match(k,args); if(is.na(i)||i==length(args)) stop("Supply ",k); args[i+1L] }
@@ -27,7 +37,7 @@ fac$training<-as.numeric(fac$p_train);fac$larc_stock<-bool(fac$one_larc_stockin)
 fac$stockout_burden<-as.numeric(fac$p_any_stockout)
 stopifnot(nrow(fac)==2823,all(mapped),length(unique(fac$geo))==30)
 valid_mean <- function(v) if(any(is.finite(v))) mean(v[is.finite(v)]) else NA_real_
-wm <- function(v,w) {ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))weighted.mean(v[ok],w[ok]) else NA_real_}
+wm <- function(v,w) {ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))survey_weighted_mean(v[ok],w[ok]) else NA_real_}
 savecsv <- function(v,name) write.csv(v,file.path(out,name),row.names=FALSE,na="")
 areas <- sort(profiles$geo); names_map <- setNames(profiles$district,profiles$geo)
 savecsv(fac[c("fid","geo",names(frequency))],"daily_provision_facility_audit.csv")
@@ -43,7 +53,7 @@ for(g in areas) {
 }
 reconcile<-do.call(rbind,reconcile);stopifnot(all(reconcile$passed));savecsv(reconcile,"supply_input_reconciliation.csv")
 options(survey.lonely.psu="adjust")
-full <- survey::svydesign(ids=~psu,weights=~weight,data=d[d$positive,],nest=TRUE)
+full <- surgo_design(d[d$positive, ])
 need_design <- subset(full,need)
 estimate <- function(des,k){
  v<-as.numeric(des$variables[[k]]); p<-wm(v,des$variables$weight); ci<-c(NA_real_,NA_real_)
@@ -75,7 +85,8 @@ M<-list();transforms<-list()
 for(side in c("Demand","Supply")){
  fields<-if(side=="Demand")D else S
  original<-sapply(fields,function(k){rr<-cells[cells$side==side&cells$variable==k,];rr$value[match(areas,rr$geo)]})
- aligned<-original;if(side=="Supply")aligned[,"stockout_burden"]<-100-aligned[,"stockout_burden"]
+ aligned<-original
+ if(side=="Supply")for(k in setdiff(fields,"stockout_burden"))aligned[,k]<-100-aligned[,k]
  rownames(aligned)<-areas;reference<-complete.cases(aligned)
  mu<-colMeans(aligned[reference,,drop=FALSE]);sd0<-apply(aligned[reference,,drop=FALSE],2,sd)
  stopifnot(all(sd0>0),sum(reference)==30)
@@ -85,18 +96,18 @@ for(side in c("Demand","Supply")){
   original_pct=original[,k],aligned_pct=aligned[,k],higher_raw_is_worse=side=="Supply"&&k=="stockout_burden",
   reference_included=reference,reference_n=sum(reference),indicator_mean=mu[k],indicator_SD=sd0[k],zscore=zz[,k])
 }
-ds<-rowMeans(M$Demand$zscore);ss<-rowMeans(M$Supply$zscore);df<-ds>1e-10;sf<-ss< -1e-10
+ds<-rowMeans(M$Demand$zscore);ss<-rowMeans(M$Supply$zscore);df<-ds>1e-10;sf<-ss>1e-10
 scores<-data.frame(method="zscore",geo=areas,demand_score=ds,supply_score=ss,demand_flag=df,supply_flag=sf,
- demand_priority_rank=rank(-ds,ties.method="average"),supply_priority_rank=rank(ss,ties.method="average"),
+ demand_priority_rank=rank(-ds,ties.method="average"),supply_priority_rank=rank(-ss,ties.method="average"),
  category=ifelse(df&sf,"both",ifelse(df,"demand",ifelse(sf,"supply","neither"))))
 thresholds<-data.frame(method="zscore",demand_cutoff=0,supply_cutoff=0,demand_rule="strictly above final-score mean (zero)",
- supply_rule="strictly below readiness-score mean (zero)",demand_reference_n=30,supply_reference_n=30)
+ supply_rule="strictly above constraints-score mean (zero)",demand_reference_n=30,supply_reference_n=30)
 trace<-do.call(rbind,transforms)
 stopifnot(abs(mean(ds))<1e-12,abs(mean(ss))<1e-12)
 planning<-lapply(areas,function(g){q<-scores[scores$method=="zscore" & scores$geo==g,];dt<-trace[trace$geo==g & trace$side=="Demand",];st<-trace[trace$geo==g & trace$side=="Supply",]
  list(geo=g,name=names_map[[g]],category=q$category,demand_flag=q$demand_flag,supply_flag=q$supply_flag,demand_score=q$demand_score,supply_score=q$supply_score,
   top_demand=head(dt$variable[order(-dt$zscore,match(dt$variable,D),na.last=TRUE)],3),
-  top_supply=if(all(is.finite(st$zscore)))head(st$variable[order(st$zscore,match(st$variable,S))],3) else character(),
+  top_supply=if(all(is.finite(st$zscore)))head(st$variable[order(-st$zscore,match(st$variable,S))],3) else character(),
   n_need=sum(dn$geo==g),facility_count=profiles$n_facilities[match(g,profiles$geo)])})
 missing<-do.call(rbind,lapply(areas,function(g)do.call(rbind,lapply(D,function(k){a<-dn[dn$geo==g,];data.frame(geo=g,variable=k,n=nrow(a),valid=sum(is.finite(a[[k]])),missing=sum(!is.finite(a[[k]])),weighted_pct=100*wm(a[[k]],a$weight))}))))
 savecsv(missing,"demand_missingness_by_district.csv")
@@ -118,13 +129,13 @@ for(side in c("Demand","Supply")){
  for(pair in combn(fields,2,simplify=FALSE)){
   ok<-complete.cases(mat[pair]);a<-mat[[pair[1]]][ok];b<-mat[[pair[2]]][ok]
   w<-if(side=="Demand")dn$weight[ok]else rep(1,sum(ok))
-  cv<-sum(w*(a-weighted.mean(a,w))*(b-weighted.mean(b,w)))/sum(w)
-  den<-sqrt(weighted.mean((a-weighted.mean(a,w))^2,w)*weighted.mean((b-weighted.mean(b,w))^2,w))
+  cv<-survey_weighted_mean((a-survey_weighted_mean(a,w))*(b-survey_weighted_mean(b,w)),w)
+  den<-sqrt(survey_weighted_mean((a-survey_weighted_mean(a,w))^2,w)*survey_weighted_mean((b-survey_weighted_mean(b,w))^2,w))
   correlations[[length(correlations)+1L]]<-data.frame(side=side,first=pair[1],second=pair[2],correlation=cv/den,paired_records=sum(ok))
  }
 }
 savecsv(do.call(rbind,correlations),"component_correlations.csv")
-audit<-list(country="Sindh",source_rows=nrow(x),positive_weight_rows=sum(d$positive),consenting_positive_weight=sum(d$positive),need_n=sum(d$need),
+audit<-list(supply_score_orientation="constraints",country="Sindh",source_rows=nrow(x),positive_weight_rows=sum(d$positive),consenting_positive_weight=sum(d$positive),need_n=sum(d$need),
  need_variable="Authorized fpn2_derived matched by col_id; original source fpn2 is entirely code 95 and is not used as a need flag.",
  need_qualification="Retain the approved upstream instrument-based rule, including SA1=95/97 exclusions. Not a DHS unmet-need algorithm; no need_n permanent-protection additions.",
  women_weight="Normalizedweights",weight_field="Normalizedweights",psu_field="Recorded unrounded clusterCode",
@@ -149,3 +160,9 @@ jsonlite::write_json(audit,file.path(out,"analysis_audit.json"),auto_unbox=TRUE,
 saveRDS(list(women=d,supply=sp,profiles=profiles),file.path(out,"analysis_frame.rds"))
 cat("Built",sum(d$need),"women in need;",nrow(fac),"FP facilities in 30 districts.\n")
 print(table(scores$category));print(data.frame(field=bar_defs$field,n=vapply(bars,`[[`,numeric(1),"n"),pct=100*vapply(bars,`[[`,numeric(1),"estimate")))
+
+# Sensitivity analyses ---------------------------------------------------------
+# Rank average, mean percentages, median/IQR and median-count alternatives use
+# the same six components. Final-composite SD maps use 0.5, 1 and 1.5 SD cutoffs.
+source(file.path(.survey_root, "analysis/common/risk_scores.R"), local = TRUE)
+payload <- export_risk_scores(payload, out)

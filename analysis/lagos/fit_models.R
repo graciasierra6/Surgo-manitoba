@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Modern-use associations with the report's LGA z-scores and individual concerns.
 # Runtime paths only; original joins and the historical summary are not modified.
 args <- commandArgs(trailingOnly = TRUE)
@@ -32,8 +42,8 @@ demand_reference <- list()
 if (demand_resolution == "individual" && score_method == "zscore") {
   demand_z <- sapply(D, function(k) {
     ok <- d$need & is.finite(d[[k]]) & is.finite(d$weight) & d$weight > 0
-    mu <- weighted.mean(d[[k]][ok], d$weight[ok])
-    sd <- sqrt(weighted.mean((d[[k]][ok] - mu)^2, d$weight[ok]))
+    mu <- survey_weighted_mean(d[[k]][ok], d$weight[ok])
+    sd <- sqrt(survey_weighted_mean((d[[k]][ok] - mu)^2, d$weight[ok]))
     stopifnot(sd > 0)
     demand_reference[[k]] <<- data.frame(variable = k, weighted_mean = mu, weighted_SD = sd,
       n_valid_need = sum(ok), n_need = sum(d$need))
@@ -43,7 +53,7 @@ if (demand_resolution == "individual" && score_method == "zscore") {
   d$demand_score <- rowMeans(demand_z)
   write.csv(do.call(rbind, demand_reference), file.path(out, "individual_demand_score_reference.csv"), row.names = FALSE)
 }
-d$supply_readiness_lga <- z$supply_score[match(d$geo, z$geo)]
+d$supply_readiness_lga <- (if(identical(p$audit$supply_score_orientation,"constraints"))-1 else 1)*z$supply_score[match(d$geo, z$geo)]
 d$supply_readiness <- d$supply_readiness_lga
 d$supply_component_fallback <- FALSE
 supply_map <- c(offering = "share_offer_larc_and_3_sa", free = "mean_p_free_prod", training = "mean_p_train",
@@ -62,13 +72,9 @@ if (resolution == "urban_rural") {
     analysis_supply$popular_stock[unknown] <- hm$value[match(d$geo[unknown], hm$geo)] / 100
     d$supply_component_fallback[unknown] <- TRUE
   }
-  standardized <- sapply(p$supply_variables, function(k) {
-    ref <- p$component_trace[p$component_trace$side == "Supply" & p$component_trace$variable == k, ]
-    mu <- unique(ref$indicator_mean); sd <- unique(ref$indicator_SD)
-    stopifnot(length(mu) == 1, length(sd) == 1, sd > 0)
-    (100 * analysis_supply[[k]] - mu) / sd
-  })
-  d$supply_readiness <- rowMeans(standardized)
+  source(file.path(.survey_root, "analysis/common/risk_scores.R"), local=TRUE)
+  d$supply_readiness <- -supply_constraint_score(analysis_supply, p$component_trace,
+    constraints_reference=identical(p$audit$supply_score_orientation,"constraints"))
 }
 d$supply_risk <- -d$supply_readiness
 if (score_method == "pca") {
@@ -96,7 +102,7 @@ max_prevalence_error <- 0
 for (g in z$geo) for (k in D) {
   a <- d[d$need & d$geo == g & is.finite(d[[k]]), ]
   q <- p$heatmap$value[p$heatmap$geo == g & p$heatmap$side == "Demand" & p$heatmap$variable == k]
-  max_prevalence_error <- max(max_prevalence_error, abs(100 * weighted.mean(a[[k]], a$weight) - q))
+  max_prevalence_error <- max(max_prevalence_error, abs(100 * survey_weighted_mean(a[[k]], a$weight) - q))
 }
 stopifnot(max_prevalence_error < 1e-8)
 controls <- c("age10", "age10_sq", "education", "partnered", "fertility_goal", "urban")
@@ -112,19 +118,9 @@ cc <- d[d$eligible, ]
 stopifnot(length(unique(cc$geo)) == 17, all(cc$y_modern %in% 0:1))
 # LGA is a known geographic cluster, not an asserted official survey PSU.
 # No official EA/stratum identifiers or finite-population correction are inferred.
-full_design <- survey::svydesign(ids = ~geo, weights = ~weight, data = d[positive, ], nest = TRUE)
+full_design <- surgo_design(d[positive, ])
 des <- subset(full_design, eligible)
-fit_glm <- function(fo, a) {
-  a$.fit_wt <- a$weight / mean(a$weight)
-  warnings <- character()
-  f <- withCallingHandlers(glm(fo, data = a, weights = .fit_wt, family = quasibinomial(),
-    control = glm.control(maxit = 100)), warning = function(e) {
-      warnings <<- c(warnings, conditionMessage(e)); invokeRestart("muffleWarning")
-    })
-  stopifnot(f$converged, f$rank == length(coef(f)), all(is.finite(coef(f))))
-  attr(f, "fit_warnings") <- unique(warnings)
-  f
-}
+fit_survey_model <- function(fo, a) fit_survey_logistic(fo, a)
 coef_table <- function(f, V) {
   a <- as.data.frame(clubSandwich::coef_test(f, vcov = V, test = "Satterthwaite"))
   lo <- a$beta - qt(.975, a$df_Satt) * a$SE; hi <- a$beta + qt(.975, a$df_Satt) * a$SE
@@ -141,16 +137,14 @@ vifs <- function(f, a) {
   X <- model.matrix(f)[, -1, drop = FALSE]
   do.call(rbind, lapply(seq_len(ncol(X)), function(j) {
     r <- lm.wfit(cbind(1, X[, -j, drop = FALSE]), X[, j], w = a$weight)
-    total <- sum(a$weight * (X[, j] - weighted.mean(X[, j], a$weight))^2)
+    total <- sum(a$weight * (X[, j] - survey_weighted_mean(X[, j], a$weight))^2)
     data.frame(term = colnames(X)[j], vif = 1 / (sum(a$weight * r$residuals^2) / total))
   }))
 }
 fits <- coefficients <- samples <- tests <- diagnostics <- leaveout <- list()
 for (id in names(specs)) {
-  fo <- reformulate(specs[[id]], "y_modern"); f <- fit_glm(fo, cc)
-  V <- clubSandwich::vcovCR(f, cluster = cc$geo, type = "CR2", inverse_var = FALSE)
-  sf <- survey::svyglm(fo, des, family = quasibinomial())
-  point_error <- max(abs(coef(f) - coef(sf))); stopifnot(point_error < 1e-7)
+  fo <- reformulate(specs[[id]], "y_modern"); f <- fit_survey_logistic(fo, cc, design = des)
+  V <- geographic_cr2(f, cc$geo)
   a <- coef_table(f, V); a$model <- id; coefficients[[id]] <- a
   vv <- vifs(f, cc); vv$model <- id; diagnostics[[id]] <- vv
   for (block in c(if (id != "supply") "Demand", if (id %in% c("supply", "score_joint", "components_joint")) "Supply")) {
@@ -159,15 +153,14 @@ for (id in names(specs)) {
     tests[[length(tests) + 1L]] <- t
   }
   samples[[id]] <- data.frame(model = id, n = nrow(cc), events = sum(cc$y_modern),
-    non_events = sum(cc$y_modern == 0), weighted_modern_use = weighted.mean(cc$y_modern, cc$weight),
+    non_events = sum(cc$y_modern == 0), weighted_modern_use = survey_weighted_mean(cc$y_modern, cc$weight),
     lgas = length(unique(cc$geo)), parameters = length(coef(f)), design_rank = f$rank,
     max_vif = max(vv$vif), minimum_df = min(a$df[a$term != "(Intercept)"]),
     min_fitted = min(fitted(f)), max_fitted = max(fitted(f)), converged = f$converged,
-    coefficient_error_vs_svyglm = point_error,
     warnings = paste(attr(f, "fit_warnings"), collapse = " | "))
   fields <- intersect(c("demand_score", "supply_risk", D), names(coef(f)))
   for (g in sort(unique(cc$geo))) {
-    ff <- fit_glm(fo, cc[cc$geo != g, ])
+    ff <- fit_survey_model(fo, cc[cc$geo != g, ])
     leaveout[[length(leaveout) + 1L]] <- data.frame(model = id, omitted_lga = g, term = fields,
       estimate = coef(ff)[fields], full_estimate = coef(f)[fields], row.names = NULL)
   }
@@ -191,8 +184,8 @@ savecsv(z[, c("geo", "demand_score", "supply_score")], "model_lga_scores.csv")
 available <- d$need & positive & complete.cases(d[c("y_modern", controls, "demand_score", "supply_risk")])
 sensitivity <- list()
 for (id in c("score_demand", "supply", "score_joint")) {
-  aa <- d[available, ]; f <- fit_glm(fits[[id]]$formula, aa)
-  V <- clubSandwich::vcovCR(f, cluster = aa$geo, type = "CR2", inverse_var = FALSE)
+  aa <- d[available, ]; f <- fit_survey_model(fits[[id]]$formula, aa)
+  V <- geographic_cr2(f, aa$geo)
   t <- coef_table(f, V); t$model <- id; t$n <- nrow(aa); sensitivity[[id]] <- t
 }
 sensitivity <- bind(sensitivity); savecsv(sensitivity, "broader_score_sample_sensitivity.csv")
@@ -202,7 +195,7 @@ margin <- function(ob, changes = list()) {
   a <- ob$data
   for (k in names(changes)) a[[k]] <- changes[[k]]
   X <- Xmat(ob$fit, a); pp <- plogis(as.numeric(X %*% coef(ob$fit))); w <- a$weight / sum(a$weight)
-  list(estimate = sum(w * pp), gradient = colSums(X * (w * pp * (1 - pp))))
+  list(estimate = survey_weighted_mean(pp, a$weight), gradient = colSums(X * (w * pp * (1 - pp))))
 }
 ci <- function(ob, estimate, gradient, probability = FALSE) {
   g <- matrix(gradient, nrow = 1)
@@ -236,7 +229,7 @@ for (k in D) {
   gaps[[k]] <- t
   for (value in 0:1) {
     aa <- ob$data; aa[[k]] <- value
-    direct <- weighted.mean(predict(ob$fit, newdata = aa, type = "response"), aa$weight)
+    direct <- survey_weighted_mean(predict(ob$fit, newdata = aa, type = "response"), aa$weight)
     max_prediction_error <- max(max_prediction_error, abs(direct - if (value == 0) low$estimate else high$estimate))
   }
   a0 <- ob$data; a1 <- ob$data; a0[[k]] <- 0; a1[[k]] <- 1

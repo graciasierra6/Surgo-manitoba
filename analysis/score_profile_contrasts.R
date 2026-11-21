@@ -67,7 +67,7 @@ build_score_profile_contrasts <- function(data_dirs, work_dir, project_root) {
   write.csv(pairs,file.path(work_dir,'all_positive_profile_pairs.csv'),row.names=FALSE,na='')
   write.csv(overview,file.path(work_dir,'four_geography_demand_overview.csv'),row.names=FALSE,na='')
   for(id in names(selected))plot_score_profile_percentages(file.path(work_dir,'score_profile_contrasts.rds'),id,work_dir,
-    supply_score=if(selected[[id]]$case$side=='Supply')'readiness'else'challenge',
+    supply_score='challenge',
     supply_percentages=if(selected[[id]]$case$side=='Supply')'original'else'gaps')
   jsonlite::write_json(x$audit,file.path(work_dir,'verification.json'),pretty=TRUE,auto_unbox=TRUE,dataframe='rows',digits=12)
   cat('Verified four-geography contrasts without refitting or changing source reports.\n')

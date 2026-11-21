@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Compare geographic classification using all eligible women versus women in need.
 # Read-only with respect to report inputs, source data and main classifications.
 args<-commandArgs(trailingOnly=TRUE)
@@ -9,7 +19,7 @@ current<-p$scores[p$scores$method=="zscore",];areas<-current$geo
 stopifnot(!anyDuplicated(areas),length(D)==6,all(d$need<=d$positive))
 selected<-d$positive&is.finite(d$weight)&d$weight>0&d$geo%in%areas
 source_hash<-unname(tools::md5sum(file.path(data_dir,c("analysis_frame.rds","report_data.json"))))
-wm<-function(v,w){ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))weighted.mean(v[ok],w[ok])else NA_real_}
+wm<-function(v,w){ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))survey_weighted_mean(v[ok],w[ok])else NA_real_}
 classify<-function(df,sf)ifelse(is.na(df)|is.na(sf),"unassessed",ifelse(df&sf,"both",ifelse(df,"demand",ifelse(sf,"supply","neither"))))
 cells<-list();result<-list();refs<-list()
 for(group in c("all_eligible","in_need")){

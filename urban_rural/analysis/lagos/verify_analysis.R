@@ -86,12 +86,12 @@ for(side in c("Demand","Supply")){
  mat<-sapply(fields,function(k){a<-p$heatmap[p$heatmap$side==side&p$heatmap$variable==k,];a$value[match(areas,a$geo)]})
  if(side=="Supply")mat[,"stockout_burden"]<-100-mat[,"stockout_burden"]
  zz<-scale(mat);expected<-rowMeans(zz);z<-p$scores[p$scores$method=="zscore",];z<-z[match(areas,z$geo),]
- observed<-if(side=="Demand")z$demand_score else z$supply_score
+ observed<-if(side=="Demand")z$demand_score else -z$supply_score
  verify(paste("Independent mean z-score",side),same(expected,observed)&&abs(mean(observed))<1e-12)
  flag<-if(side=="Demand")expected>1e-10 else expected< -1e-10
  verify(paste("Zero-mean classification",side),identical(as.logical(flag),if(side=="Demand")z$demand_flag else z$supply_flag))
  for(k in fields){t<-p$component_trace[p$component_trace$side==side&p$component_trace$variable==k,]
-  verify(paste("Aligned component z",side,k),same(t$zscore,zz[match(t$geo,areas),k]))}
+  verify(paste("Aligned component z",side,k),same(if(side=="Supply")-t$zscore else t$zscore,zz[match(t$geo,areas),k]))}
 }
 cut<-p$thresholds[p$thresholds$method=="zscore",];verify("Primary cutoffs zero",cut$demand_cutoff==0&&cut$supply_cutoff==0)
 z<-p$scores[p$scores$method=="zscore",]
@@ -123,16 +123,16 @@ refs<-read.csv(file.path(data_dir,"models_zscore/individual_demand_score_referen
 zz<-sapply(D,function(k){v<-d[[k]];ii<-d$need&is.finite(v);mu<-weighted.mean(v[ii],d$weight[ii]);sd<-sqrt(weighted.mean((v[ii]-mu)^2,d$weight[ii]));(v-mu)/sd})
 verify("Personal demand score from own six answers",same(aa$demand_score,rowMeans(zz)[aa$row]))
 sup<-sapply(S,function(k){ref<-p$component_trace[p$component_trace$side=="Supply"&p$component_trace$variable==k,]
- v<-frame$supply[[k]];if(k=="stockout_burden")v<-1-v
+ v<-frame$supply[[k]];if(k!="stockout_burden")v<-1-v
  (100*v-unique(ref$indicator_mean))/unique(ref$indicator_SD)})
-verify("Supply risk uses exact residence inputs and fixed LGA reference",same(aa$supply_risk,-rowMeans(sup)[aa$row]))
+verify("Supply risk uses exact residence inputs and fixed LGA reference",same(aa$supply_risk,rowMeans(sup)[aa$row]))
 verify("18 assigned supply profiles in 17 modeled LGAs",length(unique(aa$supply_risk))==18&&length(unique(aa$geo))==17)
 verify("All 4555 women retained; 62 need women use fallback",nrow(x)==4555&&all(d$has_fp_supply)&&sum(d$fallback)==157&&sum(d$fallback&d$need)==62)
 verify("Fallback explicitly flagged without changing residence",all(d$fallback==(d$geo=="IBEJULEKKI"&d$residence=="Urban"))&&all(d$residence==as.character(raw$settlement)))
 expected_model<-d$need&d$positive&complete.cases(d[c("y_modern","age10","age10_sq","education","partnered","fertility_goal","urban",D)])
 verify("Fallback women included when other predictors complete",sum(aa$fallback)==sum(expected_model&d$fallback)&&identical(aa$row,d$row[expected_model]))
 verify("Badagry women all rural; Epe has both",all(d$residence[d$geo=="BADAGRY"]=="Rural")&&length(unique(d$residence[d$geo=="EPE"]))==2)
-verify("Fallback supply score equals LGA-wide readiness on fixed scale",same(aa$supply_risk[aa$fallback],rep(-z$supply_score[z$geo=="IBEJULEKKI"],sum(aa$fallback))))
+verify("Fallback supply risk equals LGA-wide constraints on fixed scale",same(aa$supply_risk[aa$fallback],rep(z$supply_score[z$geo=="IBEJULEKKI"],sum(aa$fallback))))
 for(k in S)verify(paste("No supply missing after approved fallback",k),all(is.finite(frame$supply[[k]])))
 pca<-readRDS(file.path(data_dir,"pca_appendix/pca_scores.rds"))
 for(side in c("demand","supply")){

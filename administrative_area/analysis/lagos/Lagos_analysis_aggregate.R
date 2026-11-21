@@ -1,6 +1,6 @@
 # Lagos updated aggregate analysis: original FPN2, Q506 Yes facility summaries.
 # Health beliefs use PB2A only. Six supply components include daily provision and
-# original cleaned p_any_stockout; stockouts become continuity before scoring.
+# original cleaned p_any_stockout; stockout burden and complemented provision measures are constraint-aligned before scoring.
 # Geography: LGA-wide, without Rural/Urban supply splitting; residence is a covariate.
 # Primary geographic mean z-score cutoffs are zero; individual models retain personal
 # demand responses and assigned LGA supply. Original weights; LGA CR2 inference.
@@ -35,6 +35,8 @@ build_lagos_aggregate <- function(root, join_dir, cache_dir, work_dir,
     file.path(context$cache_dir,"uom_pipeline/uom_summary_facility.csv"),"--data-dir",data))
   native<-file.path(work_dir,"Lagos_analysis_aggregate.html")
   stage("render_analysis.py",c("--data-dir",data,"--reference-html",file.path(root,"analysis/assets/lagos_map_template.html"),"--output",native))
+  # Sensitivity analyses: alternative scores and final-composite SD maps.
+  render_score_threshold_appendix(root,"lagos",data,native,python,"administrative_area")
   stage("verify_html.py",c("--data-dir",data,"--html",native))
   fragment<-file.path(work_dir,"report_fragment.html")
   run_stage(file.path(root,"analysis/common/html_fragment.py"),c("--input",native,"--output",fragment),python)
@@ -68,4 +70,19 @@ if(sys.nframe()==0L){
   run_stage(file.path(root,"administrative_area/analysis/lagos/verify_html.py"),
     c("--data-dir",r$data_dir,"--html",file.path(output,"Lagos_analysis_aggregate.html")),python)
   cat("Saved Lagos_analysis_aggregate.html\n")
+}
+
+# Sensitivity analyses ---------------------------------------------------------
+# Reproduce the earlier rank-average, mean-percentage, median/IQR and median-count
+# comparisons after the primary z-score analysis. PCA, where supported, is staged
+# above with the same svyglm/administrative-area CR2 model specification.
+lagos_aggregate_scoring_sensitivities <- function(project_root, data_dir) {
+  source(file.path(project_root, "analysis/common/risk_scores.R"), local = TRUE)
+  payload <- jsonlite::fromJSON(file.path(data_dir, "report_data.json"))
+  result <- alternative_area_scores(payload)
+  write.csv(result$scores, file.path(data_dir, "scoring_sensitivity_methods.csv"),
+            row.names = FALSE, na = "")
+  write.csv(result$thresholds, file.path(data_dir, "scoring_sensitivity_thresholds.csv"),
+            row.names = FALSE, na = "")
+  invisible(result)
 }

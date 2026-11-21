@@ -39,7 +39,13 @@ for country, name in reports:
     assert record['sha256'] == hashlib.sha256(path.read_bytes()).hexdigest()
     assert record['numerical_checks_passed'] is True
     assert record['fp_providers_only'] is True
-    assert record['demand_cutoff'] == record['supply_readiness_cutoff'] == 0
+    assert record['demand_cutoff'] == record['supply_constraints_cutoff'] == 0
+    assert record['supply_score_orientation'] == 'constraints'
+    assert record['sd_map_thresholds'] == [0, 0.5, 1, 1.5]
+    assert record['regression_function'] == 'survey::svyglm'
+    assert record['design_ids'] == '~1' and record['design_strata'] == 'None'
+    assert 'id="score-thresholds"' in text
+    assert 'data-supply-score-orientation="constraints"' in text
     assert record['counseling_in_main'] is False
     assert record['complete_case_sensitivity_sections_in_report'] is False
 print('Checked all four current administrative-area reports, independent source files and build hashes.')

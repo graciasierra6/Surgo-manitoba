@@ -133,14 +133,14 @@ z<-sapply(D,function(k){v<-ind[[k]];ok<-need&is.finite(v);mu<-weighted.mean(v[ok
 personal<-rowSums(z)/6
 favorable_supply<-frame$supply[S];favorable_supply$stockout_burden<-1-favorable_supply$stockout_burden
 zs<-sapply(S,function(k){r<-p$component_trace[p$component_trace$side=="Supply"&p$component_trace$variable==k,];
- (100*favorable_supply[[k]]-unique(r$indicator_mean))/unique(r$indicator_SD)})
-supply<- -rowSums(zs)/length(S)
+ (100*(1-favorable_supply[[k]])-unique(r$indicator_mean))/unique(r$indicator_SD)})
+supply<-rowSums(zs)/length(S)
 risk_raw<-frame$profiles[S]
 for(k in setdiff(S,"stockout_burden"))risk_raw[[k]]<-1-risk_raw[[k]]
 risk_check<-rowMeans(scale(risk_raw))
 reported<-p$scores[p$scores$method=="zscore",]
-add("Risk-first and readiness-first standardization equivalent",max(abs(risk_check+reported$supply_score[match(frame$profiles$geo,reported$geo)]))<1e-10)
-add("Stockout high-is-worse sign applied before scoring",all(p$component_trace$higher_raw_is_worse[p$component_trace$variable=="stockout_burden"])&&max(abs(p$component_trace$aligned_pct[p$component_trace$variable=="stockout_burden"]-(100-p$component_trace$original_pct[p$component_trace$variable=="stockout_burden"])))<1e-10)
+add("Risk-first and readiness-first standardization equivalent",max(abs(risk_check-reported$supply_score[match(frame$profiles$geo,reported$geo)]))<1e-10)
+add("Stockout high-is-worse sign applied before scoring",all(p$component_trace$higher_raw_is_worse[p$component_trace$variable=="stockout_burden"])&&max(abs(p$component_trace$aligned_pct[p$component_trace$variable=="stockout_burden"]-p$component_trace$original_pct[p$component_trace$variable=="stockout_burden"]))<1e-10)
 pv<-readRDS(file.path(data_dir,"pca_appendix/pca_scores.rds"));max_svd<-0
 for(side in c("demand","supply")){
  f<-pv[[paste0(side,"_fit")]];mat<-if(side=="demand")as.matrix(d[D])else as.matrix(favorable_supply)
@@ -188,7 +188,7 @@ for(side in c("Demand","Supply")){
   zz<-sapply(seq_along(fields),function(j){rr<-tt[tt$variable==fields[j],];(mat[,j]-unique(rr$indicator_mean))/unique(rr$indicator_SD)})
  }else zz<-scale(mat)
  expected<-rowMeans(zz);rr<-p$scores[p$scores$method=="zscore",];rr<-rr[match(areas,rr$geo),]
- observed<-if(side=="Demand")rr$demand_score else rr$supply_score
+ observed<-if(side=="Demand")rr$demand_score else -rr$supply_score
  add(paste("Independent department z-score",side),max(abs(expected-observed))<1e-9)
  threshold<-p$thresholds[p$thresholds$method=="zscore",if(side=="Demand")"demand_cutoff"else"supply_cutoff"]
  add(paste("Final score is centered and primary threshold is zero",side),abs(mean(expected))<1e-12&&threshold==0)

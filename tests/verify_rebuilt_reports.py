@@ -50,11 +50,12 @@ def tables_equal(a, b):
 
 class Content(HTMLParser):
     def __init__(self):
-        super().__init__(); self.skip = []; self.text = []; self.scripts = []; self.images = []; self.csv = []
+        super().__init__(); self.skip = []; self.text = []; self.scripts = []; self.images = []; self.csv = []; self.frames = []
     def handle_starttag(self, tag, attributes):
         a = dict(attributes)
         if tag in ['script', 'style']: self.skip.append(tag)
         if tag == 'img': self.images.append(a.get('src', ''))
+        if tag == 'iframe' and 'srcdoc' in a: self.frames.append(a['srcdoc'])
         href = a.get('href', '')
         if href.startswith('data:text/csv;base64,'):
             self.csv.append(list(csv.reader(io.StringIO(base64.b64decode(href.split(',',1)[1]).decode()))))
@@ -101,25 +102,73 @@ def compare_report(reference, rebuilt, expected_generated_sha256=None):
             'comparison_basis': 'Exact SHA-256 of validated generated-only supplement',
             'expected_sha256': expected_generated_sha256}
 
+def content_signature(text):
+    """Portable analytical signature, including embedded threshold-map documents.
+
+    Preserve labels and integer counts exactly. Normalize floating-point tokens
+    to seven significant digits; layout encodings and SVG drawing coordinates
+    are not numerical references. Existing pairwise comparisons retain their
+    stricter tolerances and remain available for published report audits.
+    """
+    parsed = Content(); parsed.feed(text)
+    def rounded(value):
+        # A caption change alters the native HTML digest embedded in a derived
+        # map. That provenance digest is not an analytical result. Actual source
+        # files and published report bytes have separate SHA-256 checks.
+        value = re.sub(r'("source_sha256"\s*:\s*")[0-9a-f]{64}(")',
+                       r'\1SOURCE_DIGEST\2', value)
+        def token(m):
+            x = m.group()
+            return x if re.fullmatch(r'[-+]?\d+', x) else format(float(x), '.7g')
+        return NUMBER.sub(token, value)
+    values = {
+        'visible_text': parsed.text,
+        'scripts': [rounded(x) for x in parsed.scripts],
+        'downloadable_values': [[[rounded(cell) for cell in row] for row in table] for table in parsed.csv],
+        'figure_values': [svg_values(x) for x in parsed.images],
+        'embedded_documents': [content_signature(x) for x in parsed.frames],
+    }
+    return {key: hashlib.sha256(json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()
+            for key, value in values.items()}
+
+def compare_validated_update(reference, rebuilt, record):
+    """Check the release's published file and independently validated content."""
+    if not rebuilt.is_file(): return {'passed': False, 'reason': 'Rebuilt report missing'}
+    if reference.is_file():
+        frozen = hashlib.sha256(reference.read_bytes()).hexdigest()
+        if frozen != record['published_sha256']:
+            return {'passed': False, 'reason': 'Published reference differs from its registered release hash'}
+    actual = content_signature(rebuilt.read_text())
+    checks = {key: actual[key] == value for key, value in record['content_signature'].items()}
+    return dict(passed=all(checks.values()), comparison_basis='Validated release content, including embedded threshold-map documents',
+                signature_checks=checks, sha256=hashlib.sha256(rebuilt.read_bytes()).hexdigest())
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument('--reference-root', required=True)
     ap.add_argument('--rebuilt-root', required=True)
     ap.add_argument('--include-historical', choices=['true','false'], default='true')
+    ap.add_argument('--selection', choices=['all','main'], default='all')
     ap.add_argument('--output', required=True)
     args = ap.parse_args()
     reference = Path(args.reference_root); rebuilt = Path(args.rebuilt_root)
     registry_path = reference/'tests/report_reference_hashes.json'
     generated = json.loads(registry_path.read_text()).get('generated_only', {}) if registry_path.is_file() else {}
-    files = CURRENT + (HISTORICAL if args.include_historical == 'true' else [])
+    update_path = reference/'tests/current_build_reference.json'
+    update = json.loads(update_path.read_text()) if update_path.is_file() else {}
+    for name, expected in update.get('source_files', {}).items():
+        if hashlib.sha256((reference/name).read_bytes()).hexdigest() != expected:
+            raise SystemExit('Source changed since code-edition validation: '+name)
+    files = CURRENT[:7] if args.selection == 'main' else CURRENT + (HISTORICAL if args.include_historical == 'true' else [])
     records = {}
     for name in files:
         a=reference/name; b=rebuilt/name
-        records[name]=compare_report(a, b, generated.get(name, {}).get('sha256'))
+        revised = update.get('reports', {}).get(name)
+        records[name] = compare_validated_update(a,b,revised) if revised else compare_report(a, b, generated.get(name, {}).get('sha256'))
         print(name+': '+('PASS' if records[name]['passed'] else 'FAIL'))
     result = {'report_count':len(files), 'all_passed':all(x['passed'] for x in records.values()),
               'byte_identical_count':sum(x.get('byte_identical',False) for x in records.values()),
-              'comparison':'Published HTML references: visible text and SVG labels exact; scripts and downloadable values allow 1e-9 absolute / 1e-7 relative floating-point tolerance. Integer strings, identifiers and other text remain exact. Generated-only supplementary outputs without published HTML require exact registered SHA-256. PNG layout is not a numerical test.',
+              'comparison':'Current reports use the validated release signatures and published HTML hashes in current_build_reference.json, including embedded map documents. Previous reference hashes are retained for provenance. Historical reports use their original reference comparison. Numerical model/score equivalence is checked separately by compare_analysis_update.R. PNG layout is not a numerical test.',
               'reports':records}
     out=Path(args.output);out.parent.mkdir(parents=True,exist_ok=True)
     out.write_text(json.dumps(result,indent=2)+'\n')

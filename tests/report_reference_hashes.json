@@ -1,18 +1,33 @@
 {
   "schema_version": 1,
-  "purpose": "Exact reference hashes for supplementary outputs rebuilt from inputs but not included as published HTML in the build-only update. Published HTMLs must remain present for their full content comparison.",
+  "purpose": "Exact reference hashes for generated diagnostic and archived historical outputs that are not published as current HTMLs. All current published report HTMLs remain required for their full content comparison.",
   "generated_only": {
     "reports/Score_profile_examples.html": {
-      "sha256": "0a0c458db53596e62ff01c73e7be8c78cf685a66baf88412b38ee4ea6578b201"
+      "sha256": "4398c1cd8a59e3184c1236ab5cdffd2bf64d122da875e4f87070256a3e3996a6"
     },
     "reports/Score_profile_contrasts.html": {
-      "sha256": "9b1b5b2cd9ae569dcfec6a66b5a6616feb5f061490aa9079bc07ec5930cee9da"
+      "sha256": "545f1675f6e0c11d4e9ba33c140e05f4c2f527bed9479b90882da8e84ac8f906"
     },
     "reports/Demand_pair_comparisons.html": {
       "sha256": "beff267b7c72f4f8858785101dbb1882d7f2271d7bd623b685895edbf1499e5d"
     },
     "reports/Method_awareness_check_Senegal_Lagos.html": {
-      "sha256": "bbfb445ded636dc840c96950fe14fe3c2eca6cdfda41a7817dcb8b8dc17351e1"
+      "sha256": "b48b119e47af1802bc2c7ea31c52bce5e3d9324151f64dea1b931c749e1d6f50"
+    },
+    "reports/Lagos_analysis.html": {
+      "sha256": "002214c804e746de77138fbb3516b6e360b8b6761804316a86d599c809ef0ac5"
+    },
+    "reports/Senegal_analysis.html": {
+      "sha256": "c670a27528665ba2fd7f7e87128f64e4e335f5a5aa2811b974bac2bdca6d85ab"
+    },
+    "reports/Cote_dIvoire_analysis.html": {
+      "sha256": "86159bbfa7974d6fbeaea6139dc032aa65d0604cf0cfd083e34ba45fc90cc591"
+    },
+    "reports/Data_checks.html": {
+      "sha256": "92d87cffba2edb44e2d87bd2ab81e1820a484731042d2192843accf48afa4ed9"
+    },
+    "reports/Demand_population_classification_check.html": {
+      "sha256": "8fbc1e1360659958d3f4e9ef8cca742ab02b67b276c3016df7296876e409ab8e"
     }
   }
 }

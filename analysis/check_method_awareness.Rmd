@@ -127,7 +127,7 @@ The eight-method mapping is matched across KA1 and KA2, including the different 
 table_out(do.call(rbind,lapply(r,function(a){s<-a$summary;data.frame(Setting=s$country,`None plus named contradictions`=s$contradictions,`Unnamed but skipped picture cells`=s$skipped_unnamed_method_cells,`Named but picture also answered (cells)`=s$named_but_prompted_cells,`Description PSUs`=s$descriptive_psus,check.names=FALSE)})))
 ```
 
-Descriptive estimates use original final weights and the currently available sampling clusters: the recorded 118 Senegal PSUs in the need group, and 17 geographic Lagos clusters because official Lagos EA/PSU identifiers remain unconfirmed. The original strata and finite-population corrections are unavailable. This is the available design specification, not a claim to reconstruct the full original survey design. Confidence intervals for descriptive means use Taylor linearization and design degrees of freedom.
+Descriptive estimates use the original SURGO weights with ids = ~1 and no strata or FPC. Sampling PSU identifiers are not specified. Model standard errors are separately clustered by LGA or département using CR2 and Satterthwaite tests.
 
 Model coefficients reproduce `survey::svyglm` weighted estimates. Primary model inference uses LGA/département-clustered CR2 covariance, coefficient-specific Satterthwaite intervals and HTZ tests, matching the current reports. Full rank, convergence, finite coefficients and weighted design-column VIFs are checked. This geographic clustering also accounts for the common assigned supply profile within areas; the limited number of LGAs particularly constrains Lagos precision.
 

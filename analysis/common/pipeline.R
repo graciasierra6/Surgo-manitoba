@@ -32,6 +32,20 @@ run_stage <- function(script, args = character(), python = "python3") {
   invisible(TRUE)
 }
 
+# Sensitivity analyses ---------------------------------------------------------
+# Area-score alternatives and SD cutoffs are computed in risk_scores.R. This
+# stage renders their distributions and the zero, 0.5, 1 and 1.5 SD maps using
+# the existing boundaries and palette, then embeds a self-contained appendix.
+render_score_threshold_appendix <- function(root, country, data_dir, html,
+                                            python = "python3", workflow = "administrative_area") {
+  run_stage(file.path(root, "analysis/build_threshold_map_report.py"),
+    c("--countries", country, "--workflow", workflow,
+      "--source-report", html, "--data-file", file.path(data_dir, "report_data.json"),
+      "--output", file.path(data_dir, "score_threshold_maps.html"),
+      "--embed-in-source"), python)
+  invisible(TRUE)
+}
+
 verify_report_assets <- function(root) {
   base <- file.path(root, "analysis/assets")
   manifest <- jsonlite::read_json(file.path(base, "manifest.json"), simplifyVector = TRUE)

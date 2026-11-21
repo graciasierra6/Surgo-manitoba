@@ -1,3 +1,13 @@
+# Shared survey-weighted estimation and geographic regression inference.
+.survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
+.survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
+while (!file.exists(file.path(.survey_root, "analysis/common/survey_methods.R"))) {
+  .survey_parent <- dirname(.survey_root)
+  if (identical(.survey_parent, .survey_root)) stop("Run this script within the complete project")
+  .survey_root <- .survey_parent
+}
+source(file.path(.survey_root, "analysis/common/survey_methods.R"), local = TRUE)
+
 # Tabulate source women by administrative area and residence, optionally selecting
 # a caller-specified survey category without recoding the source definition.
 # Counts retain every source row; percentages require a positive final weight and,
@@ -37,7 +47,7 @@ if (nzchar(consent_var)) eligible <- eligible & as.numeric(haven::zap_labels(x[[
 percentage <- function(selected, denominator) {
   denominator <- denominator & eligible
   if (!any(denominator)) return(NA_real_)
-  100 * sum(weight[selected & denominator]) / sum(weight[denominator])
+  100 * survey_weighted_mean(as.numeric(selected[denominator]), weight[denominator])
 }
 tabulate <- function(selected, name) {
   rural <- selected & residence == "Rural"; urban <- selected & residence == "Urban"

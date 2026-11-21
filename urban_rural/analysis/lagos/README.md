@@ -73,8 +73,8 @@ confidence; FP1 opposition. The retained label "Low method knowledge" refers to
 confidence and is not an objective knowledge test.
 
 Geographic planning scores average six component z-scores against the 17 linked
-LGA means and sample SDs. Supply is favorable-aligned, replacing burden with
-continuity = 1 − burden. Demand > 0 and readiness < 0 are flagged, with 1e-10 tie
+LGA means and sample SDs. Supply is constraint-aligned: retain stockout burden and complement
+the other five provision measures. Demand > 0 and supply constraints > 0 are flagged, with 1e-10 tie
 tolerance. These are relative concern/readiness classifications.
 
 Each woman's model demand score uses her own six responses, standardized with
@@ -112,3 +112,18 @@ coefficients, CR2 covariance, joint tests, independent PCA reconstruction and HT
 assets. It saves detailed checks in the ignored build directory. Validation is an
 implementation check, not a formal power analysis or validation of source coding.
 The existing aggregate and older residence-specific HTMLs are preserved.
+
+## Shared survey and scoring implementation
+
+Use `survey::svymean()` for SURGO weighted estimates and `survey::svyglm()`
+for the existing modern-use models, with `ids = ~1`, no strata or FPC, and
+the supplied weight. Report the separately calculated administrative-area CR2
+standard errors with Satterthwaite tests. Supply constraints are positive when
+above average; this reverses the former readiness sign without changing the
+primary flags or the supply-risk values already used in models.
+
+The final Sensitivity analyses section exposes the four earlier scoring
+alternatives. The map appendix includes the final-score distribution and zero,
+0.5, 1 and 1.5 SD thresholds. See the project-level
+[survey and scoring methods](../../../docs/SURVEY_AND_SCORING.md) for denominators,
+reference sets, inference details and publication-review requirements.
