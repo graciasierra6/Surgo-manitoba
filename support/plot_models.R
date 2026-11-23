@@ -1,4 +1,22 @@
-# Plot saved modern-use estimates without changing model fits or predictions.
+# Shared modern-use model and adjusted-probability plots
+#
+# Required R packages (restore once: Rscript setup.R):
+#   ggplot2, svglite.
+# Exact package versions: renv.lock. Project dependencies: DESCRIPTION.
+# setup.R uses renv to restore the recorded project package environment.
+# stats, utils, tools, grid, graphics and grDevices are bundled with R where used.
+#
+# Data contract (R objects supplied by the country script):
+#   Saved model coefficient/interval tables, prediction curves and probability gaps
+#   Prepared common-model sample and demand-variable labels for annotations
+#
+# No original source dataset is read, and no model is refitted in this helper. grid is bundled
+#   with R.
+# Country scripts call render_modern_use_plots() automatically. Figures are saved to the runtime
+#   output directory.
+# Full filename inventory: docs/DATASET_FILENAMES.md; roles/checksums: docs/INPUTS.md.
+# Input locations and credentials are runtime parameters, never saved personal paths.
+
 render_modern_use_plots <- function(coefficients, curves, gaps, cc, demand_labels,
                                    demand_variables, out, score_method,
                                    demand_resolution, resolution, country, supply_pca_mixed = NULL) {

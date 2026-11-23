@@ -1,4 +1,19 @@
-# Independent numerical checks of the shared weighted-estimation implementation.
+# Independent numerical tests of shared survey methods
+#
+# Required R packages (restore once: Rscript setup.R):
+#   survey, clubSandwich.
+# Exact package versions: renv.lock. Project dependencies: DESCRIPTION.
+# setup.R uses renv to restore the recorded project package environment.
+# stats, utils, tools, grid, graphics and grDevices are bundled with R where used.
+#
+# Test data:
+#   Synthetic response/weight/covariate records generated inside this script; no external dataset
+#
+# Run: Rscript validation/test_methods.R. Checks weighted means, missing denominators, svyglm/GLM
+#   coefficient equivalence and geographic CR2/Satterthwaite results.
+# Full filename inventory: docs/DATASET_FILENAMES.md; roles/checksums: docs/INPUTS.md.
+# Input locations and credentials are runtime parameters, never saved personal paths.
+
 args <- commandArgs(trailingOnly=TRUE)
 script <- sub('^--file=', '', grep('^--file=',commandArgs(),value=TRUE)[1])
 root <- normalizePath(file.path(dirname(script),'..'),mustWork=TRUE)

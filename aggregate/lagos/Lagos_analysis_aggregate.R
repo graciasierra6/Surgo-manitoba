@@ -1,24 +1,51 @@
 #!/usr/bin/env Rscript
-# Lagos whole-area report: complete country analysis.
-# Run this one R file from the complete project; output HTML/Rmd is beside it.
-# Setup: Rscript setup.R. External data: --input-zip or SURGO_MANITOBA_INPUT_ZIP.
-# Exact source filenames: docs/DATASET_FILENAMES.md. No input data are in this repo.
-# R packages: haven, dplyr, readr, readxl, jsonlite, digest, sf, survey,
-# clubSandwich, ggplot2, svglite, tidyselect, rmarkdown, knitr, base64enc.
-# SURGO uses final weights, ids=~1, no strata/FPC; separate area CR2 inference.
-# Facility means use confirmed FP providers with valid responses, equally weighted.
-# Sections: country definitions; facility preparation; descriptive scores; models;
-# sensitivity analyses; independent checks; build and render the matching report.
-
-# Original source weight: weight -> internal weight.
-# Selected source files (ZIP-relative members; dictionaries/lookups also required):
+# Lagos | aggregate report
+#
+# Required R packages (restore once: Rscript setup.R):
+#   haven, dplyr, readr, readxl, jsonlite, digest, sf, survey, clubSandwich, ggplot2, svglite,
+#   tidyselect, rmarkdown, knitr, base64enc.
+# Exact package versions: renv.lock. Project dependencies: DESCRIPTION.
+# setup.R uses renv to restore the recorded project package environment.
+# stats, utils, tools, grid, graphics and grDevices are bundled with R where used.
+#
+# Original country surveys:
 #   inputs/surgo/lagos/surgo_lagos_women.csv
 #   inputs/uom/lagos/uom_lagos_facility_pooled.dta
+#
+# Shared facility summaries, archetypes, volumes and geographic dictionary:
 #   uom_pipeline/uom_summary_facility.csv
 #   uom_pipeline/Facilities data with archetype assignments.csv
 #   uom_pipeline/new_demand_vol_facility.csv
 #   exports/uom_surgo_geo_crosswalk_reviewed.csv
-# Full inventory and roles: docs/INPUTS.md.
+#   exports/merged_supply_demand_dictionary.csv
+#
+# Shared upstream reconciliation inputs (read during automatic join preparation):
+#   merge_pipeline/uom_facility_geo.csv
+#   merge_pipeline/uom_summary_facility_crosswalked.csv
+#   exports/merged_supply_demand_department.csv
+#   exports/merged_supply_demand_coverage.csv
+#   curated/Facilities data with archetype assignments.csv
+#   surgo_pipeline/lagos/wra_design_ready.rds
+#   surgo_pipeline/senegal/wra_design_ready.rds
+#   surgo_pipeline/cotedivoire/wra_design_ready.rds
+#   surgo_pipeline/sindh/wra_design_ready.rds
+#
+# Bundle integrity / geographic provenance:
+#   bundle_manifest.json
+#   lookups/geographic_sources.json
+#
+# Supply the complete SURGO_Manitoba_linkage_inputs_complete.zip through --input-zip or
+#   SURGO_MANITOBA_INPUT_ZIP. All 56 members must remain intact; common preparation also
+#   validates/reads the other countries and reference files.
+# No prejoined dataset must be chosen manually. This script prepares whole-area FP-provider
+#   profiles.
+# Original SURGO weight: weight -> internal weight. Survey ids=~1; no strata/FPC; separate
+#   administrative-area CR2 inference. Facility means are unweighted.
+# Python 3 (standard library only) and Pandoc are also required for report rendering.
+# Output: Lagos_analysis_aggregate.html via the adjacent Lagos_analysis_aggregate.Rmd. Keep the
+#   complete project, including support/.
+# Full filename inventory: docs/DATASET_FILENAMES.md; roles/checksums: docs/INPUTS.md.
+# Input locations and credentials are runtime parameters, never saved personal paths.
 
 .source_files <- vapply(sys.frames(),function(frame) {
   file<-frame$ofile;if(is.null(file))""else as.character(file)[1]

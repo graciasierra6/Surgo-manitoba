@@ -1,5 +1,22 @@
-# Shared SURGO estimation. Facility means and equal-area score references are
-# deliberately outside the respondent-weighted survey design.
+# Shared survey-weighted means, logistic fits and geographic CR2 inference
+#
+# Required R packages (restore once: Rscript setup.R):
+#   survey, clubSandwich.
+# Exact package versions: renv.lock. Project dependencies: DESCRIPTION.
+# setup.R uses renv to restore the recorded project package environment.
+# stats, utils, tools, grid, graphics and grDevices are bundled with R where used.
+#
+# Data contract (caller-supplied R objects; no original data file read here):
+#   Numeric response and weight vectors for means
+#   Prepared woman-level data with weight, model outcome/covariates and the supplied administrative-area cluster vector
+#
+# Original weight fields: weight (Lagos), WEIGHT (Senegal/CDI), Normalizedweights (Sindh).
+# Callers copy the supplied values into an internal field named weight.
+# Design: ids=~1, no strata or FPC. Models: svyglm/quasibinomial; separate administrative-area
+#   CR2/Satterthwaite inference. Facility means and equal-area score references remain outside
+#   SURGO survey weighting.
+# Full filename inventory: docs/DATASET_FILENAMES.md; roles/checksums: docs/INPUTS.md.
+# Input locations and credentials are runtime parameters, never saved personal paths.
 
 survey_weighted_mean <- function(x, w, na.rm = FALSE, ...) {
   x <- as.numeric(x); w <- as.numeric(w)

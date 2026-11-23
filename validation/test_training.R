@@ -1,4 +1,22 @@
-# Exercise substantive statuses, both encodings, conflicts and facility ratios.
+# Sindh training-status and denominator tests
+#
+# Required R packages (restore once: Rscript setup.R):
+#   No additional non-bundled packages are used directly.
+# Exact package versions: renv.lock. Project dependencies: DESCRIPTION.
+# setup.R uses renv to restore the recorded project package environment.
+# stats, utils, tools, grid, graphics and grDevices are bundled with R where used.
+#
+# Test data / definitions:
+#   Synthetic Q406 checkbox/text fixtures generated inside this script; no external dataset
+#   Training functions in aggregate/sindh/Sindh_analysis.R (code only; report build is not executed)
+#
+# No additional non-bundled package functions are used directly by these fixtures. Restore the
+#   project environment with setup.R for consistent module loading.
+# Run: Rscript validation/test_training.R. Checks text/checkbox encodings, explicit unknowns,
+#   contradictions, known-status denominators and facility proportions.
+# Full filename inventory: docs/DATASET_FILENAMES.md; roles/checksums: docs/INPUTS.md.
+# Input locations and credentials are runtime parameters, never saved personal paths.
+
 entry<-sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)[1])
 root<-normalizePath(file.path(dirname(entry),".."),mustWork=TRUE)
 module<-new.env(parent=globalenv())

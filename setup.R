@@ -1,4 +1,23 @@
-# Restore the recorded R dependency versions, or install current CRAN versions.
+# Restore the recorded R environment
+#
+# Required R packages (restore once: Rscript setup.R):
+#   renv, haven, dplyr, readr, readxl, jsonlite, digest, sf, survey, clubSandwich, ggplot2,
+#   svglite, tidyselect, rmarkdown, knitr, base64enc.
+# Exact package versions: renv.lock. Project dependencies: DESCRIPTION.
+# setup.R uses renv to restore the recorded project package environment.
+# stats, utils, tools, grid, graphics and grDevices are bundled with R where used.
+#
+# Software metadata (no survey or facility datasets are read):
+#   DESCRIPTION
+#   renv.lock
+#
+# Run once from the project root: Rscript setup.R. Restores the package versions recorded in
+#   renv.lock; --latest intentionally selects a different environment.
+# This installer creates the project package library and checks versions. Python 3/Pandoc and any
+#   spatial system dependencies must be installed separately.
+# Full filename inventory: docs/DATASET_FILENAMES.md; roles/checksums: docs/INPUTS.md.
+# Input locations and credentials are runtime parameters, never saved personal paths.
+
 args <- commandArgs(trailingOnly = TRUE)
 script <- sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)[1])
 script <- gsub("~+~", " ", script, fixed = TRUE)

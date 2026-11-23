@@ -1,5 +1,21 @@
-# Publish scores in a common direction: higher means more measured constraints.
-# Heatmap percentages retain their original units and valid-response denominators.
+# Shared constraint orientation, composite scores and scoring sensitivities
+#
+# Required R packages (restore once: Rscript setup.R):
+#   jsonlite.
+# Exact package versions: renv.lock. Project dependencies: DESCRIPTION.
+# setup.R uses renv to restore the recorded project package environment.
+# stats, utils, tools, grid, graphics and grDevices are bundled with R where used.
+#
+# Data contract (prepared aggregate objects, supplied by callers):
+#   report_data.json payload: component values, score references and area scores
+#   Prepared supply-component data frames and saved aggregate score objects
+#
+# No original SURGO/UoM file is read directly here. The caller prepares weighted demand estimates
+#   and unweighted FP-facility summaries.
+# Used automatically by country/report scripts; outputs include alternative scoring and
+#   final-composite SD map data.
+# Full filename inventory: docs/DATASET_FILENAMES.md; roles/checksums: docs/INPUTS.md.
+# Input locations and credentials are runtime parameters, never saved personal paths.
 
 risk_category <- function(demand, supply) {
   ifelse(is.na(demand) | is.na(supply), "unassessed",

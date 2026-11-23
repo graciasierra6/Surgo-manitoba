@@ -1,9 +1,41 @@
 #!/usr/bin/env Rscript
-# Rebuild supplementary coverage, component-profile and awareness checks after the seven reports.
-# Run: Rscript data_checks/Build_data_checks.R --work-dir WORK --cache-dir CACHE --output-dir DIR
-# WORK must contain the country calculations made by run_all.R with the same input ZIP.
-# Packages: survey, clubSandwich, haven, dplyr, readr, readxl, ggplot2, svglite,
-# rmarkdown, knitr, base64enc, jsonlite, digest. Exact inputs: docs/DATASET_FILENAMES.md.
+# Supplementary coverage, component-profile and awareness checks
+#
+# Required R packages (restore once: Rscript setup.R):
+#   haven, dplyr, readr, readxl, jsonlite, digest, sf, survey, clubSandwich, ggplot2, svglite,
+#   tidyselect, rmarkdown, knitr, base64enc.
+# Exact package versions: renv.lock. Project dependencies: DESCRIPTION.
+# setup.R uses renv to restore the recorded project package environment.
+# stats, utils, tools, grid, graphics and grDevices are bundled with R where used.
+#
+# Generated inputs, relative to the caller-supplied --work-dir (created by run_all.R):
+#   rural_urban/lagos/Lagos_rural_urban_updated_files/analysis_frame.rds
+#   rural_urban/senegal/Senegal_rural_urban_updated_files/analysis_frame.rds
+#   rural_urban/cotedivoire/CotedIvoire_rural_urban_updated_files/analysis_frame.rds
+#   aggregate/sindh/Sindh_analysis_files/analysis_frame.rds
+#   rural_urban/lagos/inputs/lagos_women_manitoba_rural_urban_fp.rds
+#   rural_urban/senegal/inputs/senegal_women_manitoba_rural_urban_fp.rds
+#   rural_urban/cotedivoire/inputs/cotedivoire_women_manitoba_rural_urban_fp.rds
+#   aggregate/sindh/inputs/sindh_women_manitoba_fp_providers.rds
+#   joins/urban_rural/admin_reference/audit/facility_linkage_inputs.rds
+#
+# Original input ZIP members read via the verified --cache-dir:
+#   inputs/uom/lagos/uom_lagos_facility_pooled.dta
+#   inputs/uom/senegal/uom_senegal_facility_pooled.dta
+#   inputs/uom/cdi/uom_cdi_facility_pooled.dta
+#   inputs/uom/sindh/uom_sindh_facility_pooled.dta
+#   inputs/SenegalURlookup.xlsx
+#   surgo_pipeline/sindh/sindh_wra_design_ready.rds
+#
+# The same country calculation directories also supply report_data.json, model results and score
+#   references. These are generated working outputs, not files to obtain separately.
+# Run after the seven reports: Rscript data_checks/Build_data_checks.R --work-dir WORK --cache-dir
+#   CACHE --output-dir DIR.
+# Python 3 and Pandoc render the outputs. The main runner supplies every required generated/source
+#   argument automatically.
+# Full filename inventory: docs/DATASET_FILENAMES.md; roles/checksums: docs/INPUTS.md.
+# Input locations and credentials are runtime parameters, never saved personal paths.
+
 .entry<-grep("^--file=",commandArgs(),value=TRUE)
 .source_files<-vapply(sys.frames(),function(frame){file<-frame$ofile;if(is.null(file))""else as.character(file)[1]},character(1))
 .source_files<-.source_files[nzchar(.source_files)]

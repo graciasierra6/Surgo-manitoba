@@ -1,17 +1,21 @@
-# Dependencies and input/output reference
-# Setup once from repository root: Rscript setup.R
-# Direct R packages: jsonlite.
-# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/RUN_GUIDE.md.
-# Role: Test/validation utility.
-# Inputs: Test fixtures or caller-supplied earlier/current saved results, as specified in the
-#   code.
-# Outputs: Assertions, validation records or aggregate before/after comparisons.
-# Source dataset names/roles: docs/RUN_GUIDE.md (D01-D14 and supporting files).
-# Run instructions and runtime input/output locations: docs/RUN_GUIDE.md.
-# External data locations are caller parameters; keep working data out of shared files.
+# Compare saved results from two builds
+#
+# Required R packages (restore once: Rscript setup.R):
+#   jsonlite.
+# Exact package versions: renv.lock. Project dependencies: DESCRIPTION.
+# setup.R uses renv to restore the recorded project package environment.
+# stats, utils, tools, grid, graphics and grDevices are bundled with R where used.
+#
+# Files read within caller-supplied --previous-dir and --current-dir:
+#   report_data.json
+#   models_zscore/fitted_models.rds and associated result CSV tables
+#   pca_appendix/models/fitted_models.rds and result tables, where present
+#
+# No original input surveys are read. This utility compares existing weighted percentages, scores,
+#   categories, model results and uncertainty; --output selects the aggregate comparison record.
+# Full filename inventory: docs/DATASET_FILENAMES.md; roles/checksums: docs/INPUTS.md.
+# Input locations and credentials are runtime parameters, never saved personal paths.
 
-# Compare a regenerated analysis with its prior saved numerical results.
-# Only aggregate validation statistics are exported; no woman-level records.
 args <- commandArgs(trailingOnly=TRUE)
 arg <- function(k) {
   i <- match(k,args)

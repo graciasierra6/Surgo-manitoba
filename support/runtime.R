@@ -1,4 +1,24 @@
-# Shared runtime: parameterized paths, stage isolation, renderer dispatch and join preparation.
+# Shared runtime and parameterized input/output handling
+#
+# Required R packages (restore once: Rscript setup.R):
+#   jsonlite, digest, rmarkdown.
+# Exact package versions: renv.lock. Project dependencies: DESCRIPTION.
+# setup.R uses renv to restore the recorded project package environment.
+# stats, utils, tools, grid, graphics and grDevices are bundled with R where used.
+#
+# Metadata / resources used here:
+#   bundle_manifest.json (inside caller-supplied input ZIP)
+#   renv.lock
+#   support/assets/manifest.json
+#   run_parameters.json (generated join metadata)
+#
+# No original woman/facility dataset is read directly in these runtime helpers; source extraction
+#   and joins are delegated to support/linkage.R.
+# Invoked by country/diagnostic scripts. Python 3 and Pandoc support rendering. Runtime paths are
+#   supplied by arguments/environment and resolved only when executed.
+# Full filename inventory: docs/DATASET_FILENAMES.md; roles/checksums: docs/INPUTS.md.
+# Input locations and credentials are runtime parameters, never saved personal paths.
+
 project_path <- function(path,root) {
   path<-path.expand(path)
   if(!grepl("^/|^[A-Za-z]:|^\\\\",path))path<-file.path(root,path)

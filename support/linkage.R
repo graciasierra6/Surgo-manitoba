@@ -1,5 +1,53 @@
-# Shared ingestion and geographic linkage. Inputs are runtime parameters.
-# Supply aggregation here preserves upstream parity. Report preparation applies FP eligibility.
+# Shared input verification and geographic joins
+#
+# Required R packages (restore once: Rscript setup.R):
+#   haven, dplyr, readr, readxl, jsonlite, digest, tidyselect.
+# Exact package versions: renv.lock. Project dependencies: DESCRIPTION.
+# setup.R uses renv to restore the recorded project package environment.
+# stats, utils, tools, grid, graphics and grDevices are bundled with R where used.
+#
+# Primary input members in the complete ZIP:
+#   inputs/surgo/lagos/surgo_lagos_women.csv
+#   inputs/surgo/senegal/surgo_senegal_women.dta
+#   inputs/surgo/cotedivoire/surgo_cotedivoire_women.dta
+#   inputs/surgo/sindh/20250124_forms_wt.dta
+#   inputs/uom/lagos/uom_lagos_facility_pooled.dta
+#   inputs/uom/senegal/uom_senegal_facility_pooled.dta
+#   inputs/uom/cdi/uom_cdi_facility_pooled.dta
+#   inputs/uom/sindh/uom_sindh_facility_pooled.dta
+#   uom_pipeline/uom_summary_facility.csv
+#   uom_pipeline/Facilities data with archetype assignments.csv
+#   uom_pipeline/new_demand_vol_facility.csv
+#   exports/uom_surgo_geo_crosswalk_reviewed.csv
+#   inputs/SenegalURlookup.xlsx
+#   surgo_pipeline/sindh/sindh_wra_design_ready.rds
+#
+# Source metadata and checked geography:
+#   exports/merged_supply_demand_dictionary.csv
+#   lookups/senegal_health_district_department_evidence.csv
+#   lookups/cdi_health_district_codebook.csv
+#   lookups/sindh_district_aliases.csv
+#   lookups/geographic_sources.json
+#   bundle_manifest.json
+#
+# Upstream reconciliation inputs:
+#   merge_pipeline/uom_facility_geo.csv
+#   merge_pipeline/uom_summary_facility_crosswalked.csv
+#   exports/merged_supply_demand_department.csv
+#   exports/merged_supply_demand_coverage.csv
+#   curated/Facilities data with archetype assignments.csv
+#   surgo_pipeline/lagos/wra_design_ready.rds
+#   surgo_pipeline/senegal/wra_design_ready.rds
+#   surgo_pipeline/cotedivoire/wra_design_ready.rds
+#   surgo_pipeline/sindh/wra_design_ready.rds
+#
+# Used automatically by country scripts/run_all.R; this is not a separate country report entry.
+# Base joins preserve upstream supply definitions for reconciliation. Country analysis preparation
+#   subsequently reaggregates confirmed FP providers. No SURGO weights are applied to facility
+#   means.
+# Full filename inventory: docs/DATASET_FILENAMES.md; roles/checksums: docs/INPUTS.md.
+# Input locations and credentials are runtime parameters, never saved personal paths.
+
 load_linkage_definitions <- function(target) {
   evalq({
     # Source fields and geography levels; edit here for a new source version.
