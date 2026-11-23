@@ -17,6 +17,34 @@ By default, the HTML is replaced beside the R script. Optional runtime arguments
 are `--output-dir`, `--work-dir`, `--cache-dir`, `--join-dir`, `--python` and
 `--pandoc-dir`. Use `Rscript setup.R` once at the project root to restore packages.
 
+## Input data for this report
+
+**Supply the same complete `SURGO_Manitoba_linkage_inputs_complete.zip` used for all
+seven reports.** The R script selects the country files and aggregation itself.
+Do not select a previously joined dataset or create a smaller country ZIP.
+
+The country analysis uses these exact ZIP members:
+
+| Input | Exact member inside the ZIP |
+|---|---|
+| Original SURGO women | `inputs/surgo/sindh/20250124_forms_wt.dta` |
+| Detailed UoM facilities | `inputs/uom/sindh/uom_sindh_facility_pooled.dta` |
+| Cleaned facility indicators | `uom_pipeline/uom_summary_facility.csv` |
+| Facility archetype assignments | `uom_pipeline/Facilities data with archetype assignments.csv` |
+| Facility service volumes retained in the broad join | `uom_pipeline/new_demand_vol_facility.csv` |
+| Reviewed geographic crosswalk; checked assignments are applied separately | `exports/uom_surgo_geo_crosswalk_reviewed.csv` |
+| Derived need flag, matched by col_id | `surgo_pipeline/sindh/sindh_wra_design_ready.rds` |
+| Supply dictionary | `exports/merged_supply_demand_dictionary.csv` |
+| Explicit district-name aliases | `lookups/sindh_district_aliases.csv` |
+
+The full bundle also contains required geographic provenance and cross-country
+reconciliation inputs. Preparation verifies all 56 members and reconstructs the
+joins; the table above is not a minimum replacement bundle. The complete filename
+list is [here](../../docs/DATASET_FILENAMES.md).
+
+This report averages eligible facilities within the whole administrative area
+and assigns that area profile to each woman living there.
+
 ## Population, assignment and inference
 
 Coverage retains all source women; Section 2 onward uses the approved questionnaire-based

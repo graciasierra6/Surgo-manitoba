@@ -28,6 +28,33 @@ IFS= read -r SURGO_MANITOBA_INPUT_ZIP
 export SURGO_MANITOBA_INPUT_ZIP
 ```
 
+## Which data go with which report?
+
+**Use the same complete ZIP for every report.** No manual choice of a joined
+woman-level file is required. The report script prepares its join automatically.
+Both aggregation options for a country start with the same original surveys:
+
+| Geography | Original SURGO file | Detailed UoM file | Reports using these country sources |
+|---|---|---|---|
+| Lagos | `surgo_lagos_women.csv` | `uom_lagos_facility_pooled.dta` | Aggregate and Rural/Urban |
+| Senegal | `surgo_senegal_women.dta` | `uom_senegal_facility_pooled.dta` | Aggregate and Rural/Urban |
+| Côte d’Ivoire | `surgo_cotedivoire_women.dta` | `uom_cdi_facility_pooled.dta` | Aggregate and Rural/Urban |
+| Sindh | `20250124_forms_wt.dta` | `uom_sindh_facility_pooled.dta` | Aggregate only |
+
+All use the selected `uom_pipeline/uom_summary_facility.csv`, archetype and
+service-volume files, reviewed/checked geographic inputs and supply dictionary.
+Sindh additionally uses `surgo_pipeline/sindh/sindh_wra_design_ready.rds` for its
+approved derived need flag. Senegal's residence analysis uses
+`inputs/SenegalURlookup.xlsx` as a facility-residence proxy. Full ZIP-relative
+members and country-specific lookups are listed in each report folder's README
+and [the filename index](DATASET_FILENAMES.md).
+
+For a given country, **the aggregation code differs; the original source files do
+not**. Whole-area analyses assign area means; Rural/Urban analyses assign matching
+residence profiles with the documented fallback rule. Country summaries in the
+table describe analysis inputs; common join/reconciliation preparation still
+requires the complete ZIP, including other countries and references.
+
 ## Complete rebuild
 
 ```sh
