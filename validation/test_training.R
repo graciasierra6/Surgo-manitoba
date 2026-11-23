@@ -21,7 +21,7 @@ entry<-sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)[1])
 root<-normalizePath(file.path(dirname(entry),".."),mustWork=TRUE)
 module<-new.env(parent=globalenv())
 source(file.path(root,"aggregate/sindh/Sindh_analysis.R"),local=module)
-module$.report_definitions[["training_reconstruction.R"]](globalenv())
+sindh_training <- module$sindh_training
 cases<-c("trained_text","none_text","dont_know_text","excluded_topic_text",
  "blank","malformed","trained_binary","no_binary","partial_no",
  "dont_know_binary","none_binary","text_binary_conflict","none_and_topic",

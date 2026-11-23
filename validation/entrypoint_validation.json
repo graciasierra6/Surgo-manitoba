@@ -1,0 +1,119 @@
+{
+  "scope": "Seven report scripts with the same CLI and interactive RStudio workflow; no scientific changes",
+  "reference_commit": "623be86c412e8f35d01ea20a320726db04b4a9aa",
+  "tested_platform": "macOS",
+  "windows": {
+    "commands_and_paths_supported": true,
+    "native_end_to_end_run_performed": false,
+    "argument_quoting_checked": true,
+    "python_launcher_supported": true
+  },
+  "full_cli_rebuild": {
+    "reports_and_checks": 15,
+    "all_content_checks_passed": true,
+    "published_reports_byte_identical": 9
+  },
+  "numerical_comparison_count": 1120,
+  "numerical_results": {
+    "aggregate/lagos": {
+      "all_passed": true,
+      "comparisons": 170,
+      "independent_analysis_checks": 2018,
+      "complete_case_sensitivity": {
+        "all_passed": true,
+        "tables": 10,
+        "column_comparisons": 64,
+        "max_abs_difference": 0
+      }
+    },
+    "aggregate/senegal": {
+      "all_passed": true,
+      "comparisons": 170,
+      "independent_analysis_checks": 567,
+      "complete_case_sensitivity": {
+        "all_passed": true,
+        "tables": 10,
+        "column_comparisons": 64,
+        "max_abs_difference": 0
+      }
+    },
+    "aggregate/cotedivoire": {
+      "all_passed": true,
+      "comparisons": 170,
+      "independent_analysis_checks": 1140,
+      "complete_case_sensitivity": {
+        "all_passed": true,
+        "tables": 10,
+        "column_comparisons": 64,
+        "max_abs_difference": 0
+      }
+    },
+    "aggregate/sindh": {
+      "all_passed": true,
+      "comparisons": 100,
+      "independent_analysis_checks": 2428,
+      "complete_case_sensitivity": {
+        "all_passed": true,
+        "tables": 10,
+        "column_comparisons": 64,
+        "max_abs_difference": 0
+      }
+    },
+    "rural_urban/lagos": {
+      "all_passed": true,
+      "comparisons": 170,
+      "independent_analysis_checks": 2143
+    },
+    "rural_urban/senegal": {
+      "all_passed": true,
+      "comparisons": 170,
+      "independent_analysis_checks": 1158
+    },
+    "rural_urban/cotedivoire": {
+      "all_passed": true,
+      "comparisons": 170,
+      "independent_analysis_checks": 2979
+    }
+  },
+  "single_script_html_test": {
+    "report": "Lagos Rural/Urban",
+    "no_repository_or_R_helpers": true,
+    "public_resources_downloaded_and_verified": true,
+    "html_byte_identical": true
+  },
+  "interactive_source_test": {
+    "report": "Lagos aggregate",
+    "interactive_R_source_completed": true,
+    "html_byte_identical": true,
+    "picker": "Native base::file.choose; default function and injected selection/cancellation tested separately"
+  },
+  "cold_residence_joins": {
+    "senegal": {
+      "all_passed": true,
+      "women": 7169,
+      "need": 1905,
+      "fallback": 1815,
+      "fallback_need": 522,
+      "max_component_difference": 0
+    },
+    "cotedivoire": {
+      "all_passed": true,
+      "women": 10859,
+      "need": 4292,
+      "fallback": 0,
+      "fallback_need": 0,
+      "max_component_difference": 0
+    }
+  },
+  "package_setup": {
+    "complete_project_restore_verified": 89,
+    "isolated_project": true,
+    "cache_reuse_tested": true,
+    "first_time_downloads_require_network": true
+  },
+  "input_data_uploaded": false,
+  "published_html_modified": false,
+  "limits": "Checks establish reproduction on the tested platform, not causal identification, original sampling-design reconstruction, or a native Windows execution result.",
+  "validation_precedes_publication": true,
+  "publication_authorized": true
+}

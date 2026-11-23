@@ -37,13 +37,32 @@ use_project_library <- function(root) {
   if(dir.exists(p)){.libPaths(c(p,.libPaths()));Sys.setenv(R_LIBS_USER=paste(.libPaths(),collapse=.Platform$path.sep))}
   invisible(TRUE)
 }
-run_python <- function(root,path,args=character(),python="python3") {
-  previous<-Sys.getenv(c("PYTHONUTF8","PYTHONIOENCODING"),unset=NA_character_)
-  on.exit(for(k in names(previous))if(is.na(previous[[k]]))Sys.unsetenv(k)else do.call(Sys.setenv,setNames(list(previous[[k]]),k)),add=TRUE)
-  Sys.setenv(PYTHONUTF8="1",PYTHONIOENCODING="utf-8")
-  status<-system2(python,vapply(c(file.path(root,path),args),shQuote,character(1)))
-  if(!identical(status,0L))stop("Renderer/verification failed: ",basename(path))
+select_python <- function(requested = "") {
+  candidates <- if (nzchar(requested)) requested else c("python3", "python", "py")
+  for (candidate in candidates) {
+    command <- unname(Sys.which(candidate))
+    if (!nzchar(command) && file.exists(candidate)) command <- candidate
+    if (!nzchar(command)) next
+    prefix <- if (tolower(tools::file_path_sans_ext(basename(command))) == "py") "-3" else character()
+    version <- suppressWarnings(tryCatch(system2(command, shQuote(c(prefix, "-c", "import sys; print(int(sys.version_info >= (3, 9)))")),
+      stdout = TRUE, stderr = TRUE, timeout = 30), error = function(e) character()))
+    if (length(version) && is.null(attr(version, "status")) && tail(version, 1) == "1") return(list(command = command, prefix = prefix))
+  }
+  stop("Python 3.9 or later is needed for HTML/maps. Install Python 3.9 or later or supply --python / SURGO_MANITOBA_PYTHON, then run again.", call. = FALSE)
+}
+run_report_python <- function(root, file, args = character(), python = "") {
+  launch <- select_python(python)
+  old <- Sys.getenv(c("PYTHONUTF8", "PYTHONIOENCODING"), unset = NA_character_)
+  on.exit(for (key in names(old)) {
+    if (is.na(old[[key]])) Sys.unsetenv(key) else do.call(Sys.setenv, setNames(list(old[[key]]), key))
+  }, add = TRUE)
+  Sys.setenv(PYTHONUTF8 = "1", PYTHONIOENCODING = "utf-8")
+  status <- system2(launch$command, shQuote(c(launch$prefix, file.path(root, file), args)))
+  if (!identical(status, 0L)) stop("Report rendering/check failed: ", basename(file), call. = FALSE)
   invisible(TRUE)
+}
+run_python <- function(root, path, args = character(), python = "") {
+  run_report_python(root, path, args, python)
 }
 verify_report_assets <- function(root) {
   base<-file.path(root,"support/assets");m<-jsonlite::read_json(file.path(base,"manifest.json"),simplifyVector=TRUE)

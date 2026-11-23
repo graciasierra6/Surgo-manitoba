@@ -22,9 +22,13 @@ args <- commandArgs(trailingOnly = TRUE)
 script <- sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)[1])
 script <- gsub("~+~", " ", script, fixed = TRUE)
 root <- normalizePath(dirname(script), mustWork = TRUE)
-if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv", repos = "https://cloud.r-project.org")
 library <- file.path(root, "renv", "library", paste0("R-", getRversion()), R.version$platform)
 dir.create(library, recursive = TRUE, showWarnings = FALSE)
+if (!dir.exists(library) || file.access(library, 2L) != 0L) stop("Run setup from a writable project folder.")
+.libPaths(c(library, .libPaths()))
+if (!requireNamespace("renv", quietly = TRUE)) {
+  install.packages("renv", lib = library, repos = "https://cloud.r-project.org")
+}
 if ("--latest" %in% args) {
   install.packages(c("rmarkdown", "knitr", "haven", "dplyr", "readr", "readxl", "jsonlite", "digest",
     "sf", "survey", "clubSandwich", "ggplot2", "svglite", "base64enc", "tidyselect"), lib = library, repos = "https://cloud.r-project.org")

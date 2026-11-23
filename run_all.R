@@ -50,7 +50,8 @@ if("--help" %in% a){cat("run_all.R --input-zip FILE [--work-dir DIR] [--cache-di
 input<-value("--input-zip",Sys.getenv("SURGO_MANITOBA_INPUT_ZIP",""));if(!nzchar(input))stop("Supply input ZIP")
 input<-project_path(input,root);work<-project_path(value("--work-dir","output/build"),root)
 cache<-project_path(value("--cache-dir","data/cache"),root);out<-project_path(value("--output-dir","output/rebuilt"),root)
-python<-value("--python",Sys.getenv("SURGO_MANITOBA_PYTHON","python3"))
+python<-value("--python",Sys.getenv("SURGO_MANITOBA_PYTHON",""))
+python<-select_python(python)$command
 pandoc<-value("--pandoc-dir",Sys.getenv("RSTUDIO_PANDOC",""));if(nzchar(pandoc))Sys.setenv(RSTUDIO_PANDOC=pandoc)
 verify<-value("--verify","true");stopifnot(verify %in% c("true","false"))
 if(verify=="true"){

@@ -1,12 +1,5 @@
-# Rural/Urban analyses
+# Rural/Urban reports
 
-Open the country folder. Its `.R` script produces its adjacent `.html` using the
-matching `.Rmd`; the country analysis and implemented checks are in that R script.
+Each country folder keeps the current `.R` script, `.Rmd` template, `.html` report and short instructions together. Open a report to read it; open the R script in RStudio and click Source to reproduce it with the ZIP picker and automatic R-package setup. The same script runs through Rscript on macOS or Windows.
 
-| Geography | Folder |
-|---|---|
-| lagos | [lagos](lagos/) |
-| senegal | [senegal](senegal/) |
-| cotedivoire | [cotedivoire](cotedivoire/) |
-
-[Project overview](../README.md) · [Input files](../docs/DATASET_FILENAMES.md) · [Run guide](../docs/RUN_GUIDE.md)
+See [the main README](../README.md) for the report links and both workflows, and [the run guide](../docs/RUN_GUIDE.md) for commands and output locations. Confidential inputs are supplied separately; no input data belong here.
