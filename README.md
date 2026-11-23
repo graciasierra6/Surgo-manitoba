@@ -17,7 +17,7 @@ This project links SURGO women’s survey records to University of Manitoba faci
 
 Inside the ZIP, original women’s data are in `inputs/surgo/` and detailed facility data are in `inputs/uom/`. Cleaned summaries, archetypes, processed references and geographic files are also included. [Exact dataset filenames](docs/DATASET_FILENAMES.md) · [Complete ZIP inventory](docs/INPUTS.md).
 
-**If you download this repository using Code → Download ZIP, extract the repository ZIP to obtain the code. Leave the confidential input ZIP zipped.**
+**There is one required input ZIP: `SURGO_Manitoba_linkage_inputs_complete.zip` from OneDrive.** Obtain the code separately from GitHub: one R script is enough for the RStudio route; the terminal route uses a complete working copy of the repository. Keep the input ZIP zipped.
 
 ## Aggregate analyses: scripts and published HTML reports
 

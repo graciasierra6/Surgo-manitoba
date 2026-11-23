@@ -20,11 +20,11 @@ Keep the complete ZIP zipped and its internal filenames unchanged. In RStudio, s
 You need:
 
 - **The input ZIP:** `SURGO_Manitoba_linkage_inputs_complete.zip`, supplied separately by the project team. Keep it zipped. The scripts find, check and extract the required datasets automatically.
-- **The code:** download one R script using the links below, or download the [complete repository](https://github.com/graciasierra6/Surgo-manitoba) using **Code → Download ZIP**, then extract the repository ZIP.
+- **The code:** download one R script using the links below, or obtain a complete working copy of the [repository](https://github.com/graciasierra6/Surgo-manitoba). Code comes from GitHub; input data come from the OneDrive ZIP.
 - **R and Python 3.9 or later**, installed in the environment where you will run the analysis. Use **RStudio** for Approach 1. HTML generation also requires **Pandoc**, which RStudio normally includes. For Approach 2, Pandoc must be available to the commands being executed.
 - Internet access for the first run. Required R packages install automatically. The validated R version is **4.6.0**; package installation on a different R version may require help.
 
-**The two ZIPs have different purposes:** extract the downloaded *repository* ZIP to get the code, but leave the confidential *input* ZIP zipped.
+**There is one required input ZIP: `SURGO_Manitoba_linkage_inputs_complete.zip` from OneDrive.** Use this same ZIP for any of the seven report scripts. Keep it zipped; no other input ZIP is needed.
 
 ## Choose the report you want
 
@@ -238,7 +238,7 @@ The supplied complete input ZIP was checked against the project's recorded file 
 | A package/version conflict | Choose **Session → Restart R**, reopen the script and click **Source** again. |
 | Package installation fails | Check internet access and read the first error. Some packages need compatible system software; ask for help with that error rather than changing the analysis. |
 | No ZIP-selection window | Start a fresh RStudio session and click **Source** on the complete script. A supplied input setting can bypass the window. |
-| ZIP missing or incomplete | Select the confidential file whose name ends in **`_complete.zip`**. Do not select the repository ZIP. |
+| ZIP missing or incomplete | Select **`SURGO_Manitoba_linkage_inputs_complete.zip`** from OneDrive and keep its contents unchanged. |
 | Python or Pandoc missing | Install/configure the named software, restart RStudio or the terminal, then rerun. RStudio normally provides Pandoc for Approach 1. |
 | `Rscript` not recognized | Use Approach 1 in RStudio, or make R available to your terminal. |
 
