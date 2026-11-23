@@ -1,5 +1,10 @@
 # Administrative area + urban/rural linkage
 
+Start with the [input and separate-run guide](../docs/COLLEAGUE_RUN_GUIDE.md) for the exact dataset
+names, dependency setup, commands and expected outputs. The [full ZIP inventory](../docs/INPUTS.md)
+lists all 56 members; the 14 primary inputs alone are not a replacement bundle.
+[Script dependencies and data contracts](../docs/SCRIPT_REFERENCE.md) are also summarized in R headers.
+
 This module aggregates Manitoba facility supply measures by **administrative area and urban/rural category**, then attaches the corresponding profile to every original SURGO woman. Areas are Lagos LGAs, Senegal/CDI departments and Sindh districts. All source women, variables, weights and row order are retained. The module performs linkage and validation only.
 
 ## Inputs and dependencies

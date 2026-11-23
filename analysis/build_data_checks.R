@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: haven, jsonlite, tidyselect.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Cumulative checks calculation.
+# Inputs: Saved four-country analysis directories, facility audit and verified extracted input
+#   cache.
+# Outputs: Calculated aggregate values JSON consumed by render_data_checks.py.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Shared survey-weighted estimation and geographic regression inference.
 .survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
 .survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()

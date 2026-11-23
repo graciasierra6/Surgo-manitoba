@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: clubSandwich, jsonlite, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Model stage.
+# Inputs: Prepared analysis_frame.rds; optional saved PCA scores; runtime data/output directories.
+# Outputs: Weighted modern-use models, score references, model_results.json and model_audit.json.
+# Source context via country pipeline: D04,D08,D09,D10,D11,D12,D14; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Shared survey-weighted estimation and geographic regression inference.
 .survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
 .survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()

@@ -1,3 +1,25 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite, rmarkdown.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Current residence report: prepare exact/fallback FP-provider supply, fit and verify, then
+#   render matching Rmd.
+# Inputs: Original country women/facilities and shared inputs below, prepared through the
+#   join/cache.
+# Outputs: Matching HTML via the existing Rmd; inputs/*_fp*.rds, calculation files, models and
+#   checks.
+# Original source inputs (exact ZIP members; shared dictionaries/lookups also required):
+#   D01 inputs/surgo/lagos/surgo_lagos_women.csv
+#   D05 inputs/uom/lagos/uom_lagos_facility_pooled.dta
+#   D09 uom_pipeline/uom_summary_facility.csv
+#   D10 uom_pipeline/Facilities data with archetype assignments.csv
+#   D11 uom_pipeline/new_demand_vol_facility.csv
+#   D12 exports/uom_surgo_geo_crosswalk_reviewed.csv
+# SURGO original weight: weight -> internal weight; survey ids=~1, no strata/FPC.
+# Model uncertainty: separate administrative-area CR2/Satterthwaite; facilities unweighted.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Reproduce the updated Lagos report with exact FP-provider LGA-residence supply.
 # External inputs are supplied at runtime; working datasets stay in ignored output.
 build_lagos_rural_urban <- function(root,join_dir="",cache_dir="data/cache",

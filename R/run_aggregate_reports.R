@@ -1,4 +1,16 @@
 #!/usr/bin/env Rscript
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: digest, jsonlite, rmarkdown, utils.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Run all four whole-area reports, or the --countries subset.
+# Inputs: Input ZIP, or a verified administrative join with matching extracted cache.
+# Outputs: Selected country HTMLs and aggregate_build_manifest.json; private working
+#   inputs/models.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Build the four administrative-area reports independently of residence matching.
 script<-gsub("~+~"," ",sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)[1]),fixed=TRUE)
 root<-normalizePath(file.path(dirname(script),".."),mustWork=TRUE)
@@ -49,7 +61,27 @@ for(country in countries){
   regression_function="survey::svyglm",design_ids="~1",design_strata="None",
   inference="Administrative-area CR2; Satterthwaite coefficient intervals and HTZ block tests",
   PCA_in_appendix=country!="sindh",
-  complete_case_sensitivity_sections_in_report=FALSE,numerical_checks_passed=check$all_passed)
+  complete_case_sensitivity_sections_in_report=TRUE,
+  complete_facility_sensitivity_in_report=FALSE,
+  regression_completeness_sensitivity_in_report=TRUE,
+  numerical_checks_passed=check$all_passed)
+ {
+  sensitivity<-jsonlite::read_json(file.path(result$data_dir,"regression_sensitivity/verification.json"),simplifyVector=TRUE)
+  stopifnot(sensitivity$all_passed)
+  records[[country]]$regression_sensitivity<-list(
+   verification_checks=sensitivity$check_count,main_n=sensitivity$main_n,
+   supply_available_n=sensitivity$supply_available_n,
+   available_case_inference="Administrative-area CR2/Satterthwaite",
+   response_weighting_inference=paste0("Delete-one-area jackknife refitting response and outcome models; t",model$districts-1," intervals"))
+ }
+ if(country=="sindh")records[[country]]$training_reconstruction<-list(
+   source="Raw Q406 text and topic checkboxes; retained Sindh topics A/C/D/G/H",
+   original_valid_facilities=audit$training_original_valid,
+   revised_valid_facilities=audit$training_reconstructed_valid,
+   known_staff=audit$training_known_staff,
+   dont_know_records=audit$training_dont_know_records,
+   topic_comparisons=audit$training_encoding_topic_comparisons,
+   topic_disagreements=audit$training_encoding_topic_disagreements)
 }
 packages<-c("rmarkdown","knitr","haven","dplyr","readr","readxl","jsonlite","digest","sf","survey","clubSandwich","ggplot2","svglite")
 versions<-setNames(lapply(packages,function(p)as.character(utils::packageVersion(p))),packages)

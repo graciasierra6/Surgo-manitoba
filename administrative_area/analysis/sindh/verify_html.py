@@ -28,7 +28,11 @@ order=['coverage','use','joint','models','definitions']
 positions=[source.index('<section id="'+k+'"') for k in order]
 assert positions==sorted(positions)
 assert {k:len(set(v)) for k,v in f.maps.items()}=={'coverage':30,'zscore':30}
-assert len(f.images)==4
+assert len(f.images)==6
+assert "regression-sensitivity" in f.ids
+assert source.index('<section id="regression-sensitivity">') > source.index('<section id="score-thresholds"')
+sensitivity=json.loads((root/"regression_sensitivity/verification.json").read_text())
+assert sensitivity["all_passed"] and sensitivity["main_n"]==3115 and sensitivity["supply_available_n"]==3263
 assert p['audit']['need_n']==3274 and p['audit']['source_rows']==10364
 assert p['supply_variables']==['offering','free','training','daily_provision','larc_stock','stockout_burden']
 assert {r['method'] for r in p['scores']}=={'zscore','rank','raw','robust','median_count'}
@@ -36,7 +40,8 @@ assert len(p['scores'])==150 and p['thresholds'][0]['demand_cutoff']==0 and p['t
 assert m['audit']['common_n']==3115 and m['audit']['districts']==30
 assert all(r['n']==3115 for r in m['samples'])
 for value in ['2,823','3,274','3,115','10,364','Q506','PB2A only','Normalizedweights','ids = ~1','svyglm',
-              'No random effects or interactions','278 of 2,823','881','above zero']:
+              'No random effects or interactions','2,811 of 2,823','278','881','above zero',
+              'Training reconstruction check','15,116','4,809','don’t-know']:
     assert value in text,value
 assert not re.search(r'\b(?:PCA|Lagos|Senegal)\b',text,re.I)
 assert 'PB2A–C' not in text and 'Three-LARC' not in text
@@ -55,4 +60,7 @@ for blob in blobs:
     assert not re.search(r'/(?:[Uu]sers|[Hh]ome)/|bearer\s+[a-z0-9]',blob,re.I)
     assert not any(token in blob.lower() for token in ['co'+'dex','chat'+'gpt','open'+'ai','fi'+'le://'])
 assert not re.search(r'<(?:script|link|img)[^>]+(?:src|href)=["\']https?://',source,re.I)
-print('PASS: z-score primary, alternative scores, zero cutoffs, 30-district maps, four model figures, FP restriction, need group, coverage caveat and clean embedded assets.')
+assert p['audit']['training_original_valid']==278
+assert p['audit']['training_reconstructed_valid']==2811
+assert p['audit']['training_dont_know_records']==57
+print('PASS: z-score primary, alternative scores, zero cutoffs, 30-district maps, six model/sensitivity figures, FP restriction, need group, coverage caveat and clean embedded assets.')

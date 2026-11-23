@@ -1,3 +1,17 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: haven, jsonlite, tidyselect, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Residence assignment.
+# Inputs: Base residence woman join; raw facilities; facility audit, dictionary and prepared
+#   whole-area frame.
+# Outputs: Exact/fallback profiles, *_women_manitoba_rural_urban_fp.rds, revised analysis
+#   frame/report values.
+# Source context via country pipeline: D03,D07,D09,D10,D11,D12; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Reaggregate FP providers in residence cells; use flagged département means for empty cells.
 args<-commandArgs(trailingOnly=TRUE)
 arg<-function(k){i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k);args[i+1L]}

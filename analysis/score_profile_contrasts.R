@@ -1,3 +1,14 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite, rmarkdown.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Profile diagnostic entry.
+# Inputs: Saved main country analysis directories, including Sindh district results.
+# Outputs: score_profile_contrasts.rds and aggregate profile comparison HTML.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Extend the saved-profile comparison to all four geographies.
 # Only aggregate report inputs are read. No scores, models or source reports change.
 build_score_profile_contrasts <- function(data_dirs, work_dir, project_root) {

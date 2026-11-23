@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Coverage HTML updater.
+# Inputs: Existing Data_checks.html and saved country residence analysis frame.
+# Outputs: HTML with that country fallback/coverage section appended or replaced.
+# Source context via country pipeline: D03,D07,D09,D10,D11,D12; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Shared survey-weighted estimation and geographic regression inference.
 .survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
 .survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()

@@ -1,5 +1,10 @@
 # Côte d’Ivoire — updated aggregate analysis
 
+Start with the [input and separate-run guide](../../../docs/COLLEAGUE_RUN_GUIDE.md) for the exact dataset
+names, dependency setup, commands and expected outputs. The [full ZIP inventory](../../../docs/INPUTS.md)
+lists all 56 members; the 14 primary inputs alone are not a replacement bundle.
+[Script dependencies and data contracts](../../../docs/SCRIPT_REFERENCE.md) are also summarized in R headers.
+
 This is the current administrative-area workflow. It replaces the earlier report
 under its stable filename; separate residence-specific reports are unchanged.
 Original input datasets and working outputs are external or ignored, not uploaded.
@@ -167,8 +172,8 @@ and weight concentration are reported; convergence/VIF checks do not prove power
 
 The PCA appendix uses the same updated inputs and the same common regression
 sample. PC1 remains an exploratory sensitivity, with mixed signs, variance,
-permutation references and geographic-deletion checks reported. Complete-facility
-and common-complete-demand sensitivity sections are not added back.
+permutation references and geographic-deletion checks reported. The earlier complete-facility restriction
+appendix is not added back. Regression-completeness checks are described below.
 
 Independent checks reproduce eligibility, original raw fields, frequency categories,
 all geographic assignments/means, source stockout values, aligned scores, zero
@@ -191,3 +196,60 @@ alternatives. The map appendix includes the final-score distribution and zero,
 0.5, 1 and 1.5 SD thresholds. See the project-level
 [survey and scoring methods](../../../docs/SURVEY_AND_SCORING.md) for denominators,
 reference sets, inference details and publication-review requirements.
+
+
+## Regression sensitivity checks
+
+The administrative-area report includes a separate **Sensitivity checks** section
+at the end of its appendix. It retains the current need definition, personal demand
+coding, département-wide supply assignments and fixed score references. The main models,
+heatmaps and classifications are unchanged. This does not modify the separate
+residence-specific analysis.
+
+1. Describe all 4,292 women in need, comparing 3,951 included with
+   341 excluded women on weighted modern use among known outcomes,
+   demographics, unresolved-response drivers and geographic distribution.
+2. Compare the identical supply-only formula in the common sample and its
+   broader eligible sample of 4,185 women, without requiring demand responses.
+3. Fit six single-demand-indicator models in the common and formula-specific
+   eligible samples. Each also includes supply risk and the original covariates.
+   These and the supply-only check use original SURGO weights,
+   `survey::svyglm()`, `ids = ~1`, no strata/FPC, and département-clustered
+   CR2/Satterthwaite inference.
+4. Refit both joint z-score specifications using original weights divided by an
+   estimated probability of complete demand information. The response model uses
+   known modern use, the agreed covariates and département indicators. Supply risk is
+   constant within département and is not redundantly added alongside those indicators.
+   Fully observed areas within the broader eligible target receive probability 1;
+   the response model is fitted in areas with both complete and incomplete records.
+
+For response-weighted inference, delete each of the 77 départements and re-estimate both the response and outcome
+   models. The centered jackknife covariance is `(G-1)/G` times the crossproduct of
+   centered replicate coefficients; intervals use `G-1 = 76` degrees of freedom.
+   The survey-only joint comparison uses the same jackknife. Primary report
+   intervals remain CR2/Satterthwaite. This geographic inference does not assert
+   that département is the original sampling PSU.
+
+No unknown demand response is recoded or imputed, and no weights are trimmed.
+Response weighting still uses the 3,951 complete women and targets the 4,185
+women with a known outcome, covariates and supply score; it does not recover women
+whose supply profile or outcome is unknown. Unresolved answers can be substantive
+Don't know or inconsistent selections, so the observed-information selection
+assumption remains untestable. Effective sample sizes describe weight concentration,
+not formal power or the full survey design. Score-construction uncertainty is not
+propagated by this regression sensitivity.
+
+The entry script runs the shared `regression_sensitivity.R`,
+`verify_regression_sensitivity.R`, `plot_regression_sensitivity.R` and
+`render_regression_sensitivity.py` in `administrative_area/analysis/`.
+Independent checks enumerate model rows, original weights, raw weighted GLM
+coefficients, response probabilities and every refitted jackknife replicate.
+Only aggregate results and figures enter HTML. Working respondent data and fitted
+objects remain in the caller's work directory and are excluded from shared files.
+
+Methods: [response weighting](https://pubmed.ncbi.nlm.nih.gov/21220355/) and
+[cluster jackknife for binary response](https://arxiv.org/abs/2406.00650).
+
+The broader target covers 77 complete-supply départements. Ninety-two women in
+need have an unassessed supply score and remain outside models requiring it;
+response weighting does not resolve those geographic/supply-profile limitations.

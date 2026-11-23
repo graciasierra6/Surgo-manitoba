@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: haven.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Diagnostic/helper.
+# Inputs: Caller-supplied files/objects and runtime arguments listed in this script.
+# Outputs: Requested diagnostic tables/figures or helper results; see adjacent module README.
+# Source context via country pipeline: D01,D05,D09,D10,D11,D12; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Export a requested facility-level training table. Do not upload the resulting
 # facility records with the aggregate analysis repository.
 args<-commandArgs(trailingOnly=TRUE)

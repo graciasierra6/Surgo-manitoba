@@ -1,3 +1,17 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: haven, jsonlite, tidyselect, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: FP-provider preparation.
+# Inputs: Base checked woman join; facility_linkage_inputs.rds; raw country facilities/women;
+#   supply dictionary.
+# Outputs: Reaggregated FP-provider whole-area profiles, *_women_manitoba_fp_providers.rds/.dta
+#   and audits.
+# Source context via country pipeline: D04,D08,D09,D10,D11,D12,D14; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Restrict supply summaries to confirmed FP providers, preserving original women.
 args<-commandArgs(trailingOnly=TRUE)
 arg<-function(k){i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k);args[i+1L]}
@@ -8,14 +22,17 @@ project_root<-normalizePath(file.path(dirname(script),"..","..",".."),mustWork=T
 root<-file.path(project_root,"administrative_area")
 source(file.path(root,"R/helpers.R"));source(file.path(root,"R/aggregate_supply.R"))
 source(file.path(dirname(script),"supply_definitions.R"))
+source(file.path(dirname(script),"training_reconstruction.R"))
 inputs<-c(input,facility_input,raw_facility,raw_women,dictionary_file);hash<-unname(tools::md5sum(inputs))
 fac<-readRDS(facility_input);fac<-fac[fac$country=="sindh",]
-r<-haven::read_dta(raw_facility,col_select=tidyselect::all_of(c("key","facility_id","district","q506","q702","q507ab","q507ai",sindh_frequency_fields())))
+header<-haven::read_dta(raw_facility,n_max=0)
+r<-haven::read_dta(raw_facility,col_select=tidyselect::all_of(c("key","facility_id","district","q506","q702","q507ab","q507ai",sindh_frequency_fields(),sindh_training_fields(names(header)))))
 raw_id<-as.character(r$key);empty<-is.na(raw_id)|trimws(raw_id)=="";raw_id[empty]<-as.character(r$facility_id[empty])
 assert_unique(data.frame(fid=raw_id),"fid","Raw Sindh facilities")
 ix<-match(fac$fid,raw_id);stopifnot(!anyNA(ix),nrow(fac)==nrow(r),nrow(fac)==4308,sum(empty)==13,
  all(is.na(r$q507ab)|trimws(r$q507ab)==""),all(is.na(r$q507ai)|trimws(r$q507ai)==""))
 fp<-num(r$q506[ix]);fac$fp_provider<-fp%in%1
+fac<-apply_sindh_training(fac,r,ix)
 counsel<-num(r$q702[ix]);cf<-ifelse(counsel%in%1,1,ifelse(counsel%in%2,0,NA_real_))
 stopifnot(isTRUE(all.equal(cf,fac$counselor_available,check.attributes=FALSE)))
 frequency<-sindh_frequency(r[ix,]);fac<-cbind(fac,frequency)
@@ -58,6 +75,15 @@ audit<-list(source_women=nrow(raw),original_survey_columns=length(preserved),ori
  daily_undefined_linked=sum(linked&fac$fp_provider&!is.finite(fac$daily_provision)),
  daily_definition="Daily classes (code 1) divided by recorded offered classes (codes 1-4); code 5 Not at all excluded. Seven method classes; most frequent recorded IUD/injectable variant. No removals or sterilization. Average valid facility ratios among Q506 Yes.",
  stockout_definition="Original cleaned UoM p_any_stockout, averaged among Q506 Yes with valid values; unchanged upstream coding.",
+ training_definition="Reconstructed Q406 selected topics A/C/D/G/H; Yes in any included topic is trained. Known complete No/None or a valid full selection with no included topic is untrained. Explicit Don't know, malformed or conflicting selections are unresolved in either encoding. Facility ratio uses staff with known status; average valid ratios across Q506 Yes facilities.",
+ training_original_valid=sum(eligible$fp_provider&is.finite(eligible$training_original_p_train)),
+ training_reconstructed_valid=sum(is.finite(eligible$p_train)),
+ training_dont_know_records=sum(eligible$training_n_dont_know),
+ training_conflicting_records=sum(eligible$training_n_conflict),
+ training_malformed_records=sum(eligible$training_n_malformed),
+ training_encoding_overlap_staff=sum(eligible$training_n_overlap_staff),
+ training_encoding_topic_comparisons=sum(eligible$training_n_compared_topics),
+ training_encoding_topic_disagreements=sum(eligible$training_n_topic_disagreements),
  geography="Checked named district and explicit supplied aliases; all 4308 facilities assigned to 30 survey districts. The source-crosswalk subset omitted 881 facilities; checked assignments are used here.",
  frequency_unpopulated_fields="q507ab (hormonal IUD) and q507ai (Noristerat) are entirely blank and excluded from the selected frequency inputs; no zero/No recoding.",
  all_supply_columns_reaggregated=replace,source_files_unchanged=identical(hash,unname(tools::md5sum(inputs))))
@@ -75,5 +101,6 @@ saveRDS(profile,file.path(out,"sindh_fp_provider_profiles.rds"))
 write.csv(profile,file.path(out,"sindh_fp_provider_profiles.csv"),row.names=FALSE,na="")
 write.csv(coverage,file.path(out,"fp_provider_coverage.csv"),row.names=FALSE)
 write.csv(fac[c("fid","assigned_join_area","fp_provider",names(frequency))],file.path(out,"daily_provision_facility_audit.csv"),row.names=FALSE,na="")
+write.csv(fac[c("fid","assigned_join_area","fp_provider",grep("^training_",names(fac),value=TRUE))],file.path(out,"training_facility_audit.csv"),row.names=FALSE,na="")
 jsonlite::write_json(audit,file.path(out,"dataset_verification.json"),auto_unbox=TRUE,pretty=TRUE)
 cat("Verified original women; reaggregated supply among",audit$linked_fp_providers,"FP facilities across 30 linked districts.\n")

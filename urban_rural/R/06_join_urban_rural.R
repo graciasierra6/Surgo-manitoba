@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: digest, haven, jsonlite, readxl, tidyselect.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Internal residence join stage.
+# Inputs: Administrative facility audit, original women, residence configuration and D13.
+# Outputs: Base exact area/residence joins, supply profiles and coverage/issue audits.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Use through its caller/module; this file is not an independent report entry point.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Run through R/run_join_urban_rural.R.
 # Implemented: strict area/type match; unmatched record count = 0, rates = missing.
 # Alternative (not implemented): attach broader administrative averages with a

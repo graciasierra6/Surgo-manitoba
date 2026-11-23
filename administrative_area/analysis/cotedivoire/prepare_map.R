@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite, sf, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Map stage.
+# Inputs: Saved report values and versioned boundary assets; explicit display-name aliases.
+# Outputs: Report map geometry/metadata and display checks; no geographic reassignment.
+# Source context via country pipeline: D03,D07,D09,D10,D11,D12; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Display geometry: CNTIG/OCHA 2018 boundaries with documented 2020 splits.
 # No facility or woman is assigned geographically using these polygons.
 args<-commandArgs(trailingOnly=TRUE)

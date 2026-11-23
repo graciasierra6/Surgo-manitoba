@@ -2,7 +2,7 @@
   "report_count": 18,
   "all_passed": true,
   "byte_identical_count": 3,
-  "comparison": "Current reports use the validated release signatures and published HTML hashes in current_build_reference.json, including embedded map documents. Previous reference hashes are retained for provenance. Historical reports use their original reference comparison. Numerical model/score equivalence is checked separately by compare_analysis_update.R. PNG layout is not a numerical test.",
+  "comparison": "Targeted cumulative update: all four administrative-area reports include independently verified regression-completeness appendices. Removing each new section and navigation reproduces the prior report bytes. Existing main and PCA model results, heatmaps and map flags reproduce unchanged. Residence-specific reports retain their prior validated builds. All 18 report references pass. This is not a new full input-ZIP rebuild of every workflow.",
   "reports": {
     "reports/Lagos_analysis_aggregate.html": {
       "passed": true,
@@ -14,7 +14,7 @@
         "figure_values": true,
         "embedded_documents": true
       },
-      "sha256": "a59b9e15879de576635178a23f6c78782f54d0b5cab956e7667fff6fafda20cf"
+      "sha256": "8e2c6df8d89a18633bddf9dec87e4d018872c97123394fd8b6ff723531309a10"
     },
     "reports/Senegal_analysis_aggregate.html": {
       "passed": true,
@@ -26,7 +26,7 @@
         "figure_values": true,
         "embedded_documents": true
       },
-      "sha256": "f1775f65ef307cbda146c699f13148b1702e41cce7ec93ce065b8d1a6b8f1ba2"
+      "sha256": "7631757a6b79933813089e82e22367292c06dffe05f53bbcccd2dad9c13aa396"
     },
     "reports/Cote_dIvoire_analysis_aggregate.html": {
       "passed": true,
@@ -38,7 +38,7 @@
         "figure_values": true,
         "embedded_documents": true
       },
-      "sha256": "1ce33f062b496091623bd2da381576db885fe20ede793255b1c2e5aa5c85a08f"
+      "sha256": "9460a0520b442ae6e64af7d1680da9537994559d995a8a9e6e90a33f3120d4c8"
     },
     "reports/Sindh_analysis.html": {
       "passed": true,
@@ -50,7 +50,7 @@
         "figure_values": true,
         "embedded_documents": true
       },
-      "sha256": "0cdfd9f2fb34bac126e7fc468c4ecdc821be9983c4eb9f351e4b7eff7203e289"
+      "sha256": "567e7c68e3f7da5ee0d6f1e09d097de0a8d10bbc2267018b1f9ef4d53e16a2f7"
     },
     "reports/Lagos_rural_urban_updated.html": {
       "passed": true,
@@ -98,7 +98,7 @@
         "figure_values": true,
         "embedded_documents": true
       },
-      "sha256": "8fbc1e1360659958d3f4e9ef8cca742ab02b67b276c3016df7296876e409ab8e"
+      "sha256": "64e4d9fc6758aaa899b954a74bd3d6c8fcd0da256f7c74bb2c459ecbcd8d167c"
     },
     "reports/Score_profile_examples.html": {
       "passed": true,
@@ -146,7 +146,7 @@
         "figure_values": true,
         "embedded_documents": true
       },
-      "sha256": "a4c91f21e99e0e62936441887dc1f9a2eb8f3e870ef3c071b64c51643acea6b4"
+      "sha256": "834672d9ac978b97962550f84d704548fed335b0eb17c2ba2a8f9b3152ae3e19"
     },
     "reports/Method_awareness_check_Senegal_Lagos.html": {
       "passed": true,
@@ -206,31 +206,10 @@
       "expected_sha256": "86159bbfa7974d6fbeaea6139dc032aa65d0604cf0cfd083e34ba45fc90cc591"
     }
   },
-  "release_date": "2026-11-20",
-  "fresh_complete_bundle_rebuild": true,
-  "input_bundle_sha256": "f525ccffbefad4e3b00aea72e01a47e837d9ade2c6e3d5c15aad7d23cc439dd2",
-  "input_manifest_files": 55,
-  "software_environment": {
-    "r_version": "4.6.0",
-    "packages": {
-      "rmarkdown": "2.31",
-      "knitr": "1.51",
-      "haven": "2.5.5",
-      "dplyr": "1.2.1",
-      "readr": "2.2.0",
-      "readxl": "1.5.0",
-      "jsonlite": "2.0.0",
-      "digest": "0.6.39",
-      "sf": "1.1.1",
-      "survey": "4.5",
-      "clubSandwich": "0.7.0",
-      "ggplot2": "4.0.3",
-      "svglite": "2.2.2"
-    },
-    "pandoc_version": "3.8.3"
-  },
-  "before_after_numerical_comparisons_passed": 1116,
-  "published_html_count": 9,
-  "published_html_byte_identical_to_rebuild": true,
-  "current_main_independent_check_count": 12428
+  "validation_edition": "2026-11-22 four administrative-area regression sensitivity appendices",
+  "numerical_validations": [
+    "tests/sindh_training_validation.json",
+    "tests/lagos_regression_sensitivity_validation.json",
+    "tests/administrative_area_sensitivity_validation.json"
+  ]
 }

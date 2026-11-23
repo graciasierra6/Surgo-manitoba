@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite, sf.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Map stage.
+# Inputs: Saved report values and versioned boundary assets; explicit display-name aliases.
+# Outputs: Report map geometry/metadata and display checks; no geographic reassignment.
+# Source context via country pipeline: D04,D08,D09,D10,D11,D12,D14; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Verify a one-to-one named district boundary crosswalk and project for display.
 args<-commandArgs(trailingOnly=TRUE)
 opt<-function(k){i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k);args[i+1L]}

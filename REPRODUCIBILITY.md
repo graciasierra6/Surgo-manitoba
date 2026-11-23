@@ -4,6 +4,13 @@ The project has two geographic join modules and separate analyses using their
 outputs. The complete rebuild entry point connects these existing modules; it
 does not change scientific definitions or the source survey data.
 
+The [colleague run guide](docs/COLLEAGUE_RUN_GUIDE.md) is the starting point for
+finding inputs and running individual components. It lists the 14 primary inputs
+within the complete 56-member ZIP, required supporting files, package setup, both
+join commands, seven country report commands and their outputs. The
+[dataset catalog](docs/dataset_catalog.json) reserves Databricks mapping fields;
+source identifiers and snapshots are pending confirmation by the data owner.
+
 ## Requirements and inputs
 
 1. Obtain the authorized complete input ZIP through the project's data-sharing

@@ -33029,20 +33029,42 @@
     }
   },
   "_existing_join_files": {
-    "administrative_area/R/00_config.R": "68369f50d581e371a5f4666e9940ba20b3352171498de97936e0d5f16c097137",
-    "administrative_area/R/04_join.R": "ec39406b0449db2de056ebea741367236030967d4dee9a2479662229cab43048",
-    "administrative_area/R/05_validate.R": "2a7b7ca28baed3cab89424929d1af6bea398bfc2d01083c2e896728b1d006d5e",
-    "administrative_area/R/aggregate_supply.R": "f35ba7a08d95dd4da9c1a4eb699e9bcbce1ccf42e8d10ecf71194d575f55c997",
-    "administrative_area/R/geography.R": "7b01c25bf708c18ba35ba8e9986fce5708ab8b1ea04ab99c529294ee3d2e46ff",
-    "administrative_area/R/helpers.R": "3775b14d16b5a0196366991a5b9d6dcdab17e4a8bcf153913a14a3cb23d0f2cb",
-    "administrative_area/R/run_join.R": "ca23f99d98292d54b033ce6c653ca60ac4e5280a6ddd0539dc80c839e7d48078",
-    "administrative_area/README.md": "6d6b30dc29729499a032a95856ae482a8eaa83d5e1f99e102ca91686b4a85ca6",
-    "urban_rural/R/00_config.R": "68369f50d581e371a5f4666e9940ba20b3352171498de97936e0d5f16c097137",
-    "urban_rural/R/06_join_urban_rural.R": "ec5375054824a5283a0a659d0f99fc830d3be315229f9225904bcbf3af40978a",
-    "urban_rural/R/run_join_urban_rural.R": "21a6ae9689af7f5d3c285817f3dba692c6d4a8479fb6b1a004964d77324358ef",
-    "urban_rural/R/urban_rural_config.R": "ea45e65a491bd785642ea723ba78b1fe89f955e2e8626b4f20f1eecb81b8e976",
-    "urban_rural/R/urban_rural_helpers.R": "e2fbc4c6760bbdf9ad304d96211119c9e33df457a451749819611eb5c7e5951e",
-    "urban_rural/README.md": "22534803dda9623bf4d56e6b717e48fc461ac1e71c905d06355deeb7c3d02a8c",
-    "urban_rural/tests/test_urban_rural.R": "bf6a44ccaddb29487b5136857bfeac033789688249a5e00c726255422b0a1e65"
+    "administrative_area/R/00_config.R": "b10649496651eb9145f2780156c40c181fbb69a809a3674c0b35e5ef22c85605",
+    "administrative_area/R/04_join.R": "441be1880e39eee7e600c4957043e30b10606c9d35e3c5d2f86de4810498fe3e",
+    "administrative_area/R/05_validate.R": "6e6db625dd1dfebe968d26b9b65a9b62804ebd5951da01ca540879c786554070",
+    "administrative_area/R/aggregate_supply.R": "9311c24c625685db06f6b140ff29d28ac22a20a67fea9ad60b72228ff32b9d04",
+    "administrative_area/R/geography.R": "e23e1f3cfb4aad1ffec498133d99c844401ad79a7715630be20bba16d34265c5",
+    "administrative_area/R/helpers.R": "46171e2b4016c9c98b65cf621b073a7b10881ec3436e87832f23204324172b6e",
+    "administrative_area/R/run_join.R": "3ec4d6f6aa2cf918358354e810ceb5d2af05fd1fce38c4dc8db287af309d8a8e",
+    "administrative_area/README.md": "7cba9051adad1bc1c0b599f7b60dd14f169bf777f9bb1e8484f1ecf0360a22ec",
+    "urban_rural/R/00_config.R": "b10649496651eb9145f2780156c40c181fbb69a809a3674c0b35e5ef22c85605",
+    "urban_rural/R/06_join_urban_rural.R": "47016facffc596887c5a504c58389f5fb6484c719824031d5281a6fcf2a0a5c1",
+    "urban_rural/R/run_join_urban_rural.R": "79a0c8c5eb34bd3f7ecdf31bc103d751fdca4bcd0f0cf30e611a275500c820d7",
+    "urban_rural/R/urban_rural_config.R": "9119da36c0cbf26d61802efdab9a82ddcfbc203e5748c2d26555a4565b9c582f",
+    "urban_rural/R/urban_rural_helpers.R": "fa71fcf998755aa0a08970103c77bc6a43f0a8390c9ece104be1925e7cdeda36",
+    "urban_rural/README.md": "49c51ca597c2d832eebc5d5a0addf55cc1783c799db4687edb5a70d5f515afb4",
+    "urban_rural/tests/test_urban_rural.R": "d3203655999c1dcfd792a93d7903c21117a51b513ef51421bf1992c27adc46ad"
+  },
+  "_join_documentation_revision": {
+    "date": "2026-11-22",
+    "scope": "Dependency/input/output headers and README run-guide links only. Parsed R expressions match the previous verified join source; numerical reference values are unchanged.",
+    "validation": "tests/documentation_validation.json",
+    "previous_file_hashes": {
+      "administrative_area/R/00_config.R": "68369f50d581e371a5f4666e9940ba20b3352171498de97936e0d5f16c097137",
+      "administrative_area/R/04_join.R": "ec39406b0449db2de056ebea741367236030967d4dee9a2479662229cab43048",
+      "administrative_area/R/05_validate.R": "2a7b7ca28baed3cab89424929d1af6bea398bfc2d01083c2e896728b1d006d5e",
+      "administrative_area/R/aggregate_supply.R": "f35ba7a08d95dd4da9c1a4eb699e9bcbce1ccf42e8d10ecf71194d575f55c997",
+      "administrative_area/R/geography.R": "7b01c25bf708c18ba35ba8e9986fce5708ab8b1ea04ab99c529294ee3d2e46ff",
+      "administrative_area/R/helpers.R": "3775b14d16b5a0196366991a5b9d6dcdab17e4a8bcf153913a14a3cb23d0f2cb",
+      "administrative_area/R/run_join.R": "ca23f99d98292d54b033ce6c653ca60ac4e5280a6ddd0539dc80c839e7d48078",
+      "administrative_area/README.md": "6d6b30dc29729499a032a95856ae482a8eaa83d5e1f99e102ca91686b4a85ca6",
+      "urban_rural/R/00_config.R": "68369f50d581e371a5f4666e9940ba20b3352171498de97936e0d5f16c097137",
+      "urban_rural/R/06_join_urban_rural.R": "ec5375054824a5283a0a659d0f99fc830d3be315229f9225904bcbf3af40978a",
+      "urban_rural/R/run_join_urban_rural.R": "21a6ae9689af7f5d3c285817f3dba692c6d4a8479fb6b1a004964d77324358ef",
+      "urban_rural/R/urban_rural_config.R": "ea45e65a491bd785642ea723ba78b1fe89f955e2e8626b4f20f1eecb81b8e976",
+      "urban_rural/R/urban_rural_helpers.R": "e2fbc4c6760bbdf9ad304d96211119c9e33df457a451749819611eb5c7e5951e",
+      "urban_rural/README.md": "22534803dda9623bf4d56e6b717e48fc461ac1e71c905d06355deeb7c3d02a8c",
+      "urban_rural/tests/test_urban_rural.R": "bf6a44ccaddb29487b5136857bfeac033789688249a5e00c726255422b0a1e65"
+    }
   }
 }

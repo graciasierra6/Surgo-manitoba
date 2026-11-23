@@ -27,7 +27,9 @@ for country, name in reports:
     path = root / 'reports' / (name + '.html')
     text = path.read_text()
     assert text.lower().startswith('<!doctype html>')
-    assert len(re.findall(r'data:image/svg\+xml;base64,', text)) == (4 if country == 'sindh' else 10)
+    expected_figures = 6 if country == 'sindh' else 12
+    assert len(re.findall(r'data:image/svg\+xml;base64,', text)) == expected_figures
+    assert 'id="regression-sensitivity"' in text
     assert '<section id="appendix-facilities"' not in text
     assert '<section id="appendix-demand"' not in text
     assert 'id="supply-component-summary"' in text
@@ -47,5 +49,7 @@ for country, name in reports:
     assert 'id="score-thresholds"' in text
     assert 'data-supply-score-orientation="constraints"' in text
     assert record['counseling_in_main'] is False
-    assert record['complete_case_sensitivity_sections_in_report'] is False
+    assert record['complete_case_sensitivity_sections_in_report'] is True
+    assert record['regression_completeness_sensitivity_in_report'] is True
+    assert record['complete_facility_sensitivity_in_report'] is False
 print('Checked all four current administrative-area reports, independent source files and build hashes.')

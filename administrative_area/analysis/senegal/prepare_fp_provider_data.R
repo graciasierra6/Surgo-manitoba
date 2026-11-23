@@ -1,3 +1,17 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: haven, jsonlite, tidyselect, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: FP-provider preparation.
+# Inputs: Base checked woman join; facility_linkage_inputs.rds; raw country facilities/women;
+#   supply dictionary.
+# Outputs: Reaggregated FP-provider whole-area profiles, *_women_manitoba_fp_providers.rds/.dta
+#   and audits.
+# Source context via country pipeline: D02,D06,D09,D10,D11,D12; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Reaggregate all supply columns among confirmed FP providers; retain every woman.
 args <- commandArgs(trailingOnly=TRUE)
 arg <- function(k) {i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k);args[i+1L]}

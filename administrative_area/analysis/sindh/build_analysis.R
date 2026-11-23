@@ -1,3 +1,17 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: haven, jsonlite, survey, tidyselect, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Descriptive/scoring stage.
+# Inputs: Prepared woman join, facility audit and raw fields supplied by the calling country
+#   entry.
+# Outputs: analysis_frame.rds, report_data.json, analysis_audit.json and aggregate calculation
+#   tables.
+# Source context via country pipeline: D04,D08,D09,D10,D11,D12,D14; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Shared survey-weighted estimation and geographic regression inference.
 .survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
 .survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
@@ -14,7 +28,7 @@ opt <- function(k) { i <- match(k,args); if(is.na(i)||i==length(args)) stop("Sup
 input <- opt("--input"); need_file <- opt("--need-file"); facility_file <- opt("--facility-input"); out <- opt("--output-dir"); raw_facility<-opt("--raw-facility")
 for(pkg in c("survey","jsonlite")) if(!requireNamespace(pkg,quietly=TRUE)) stop("Install ",pkg)
 here <- dirname(gsub("~+~", " ", sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)[1]), fixed=TRUE))
-source(file.path(here,"..","..","..","analysis/sindh/sindh_definitions.R"));source(file.path(here,"supply_definitions.R")); dir.create(out,recursive=TRUE,showWarnings=FALSE)
+source(file.path(here,"..","..","..","analysis/sindh/sindh_definitions.R"));source(file.path(here,"supply_definitions.R"));source(file.path(here,"training_reconstruction.R")); dir.create(out,recursive=TRUE,showWarnings=FALSE)
 hash <- unname(tools::md5sum(c(input,need_file,facility_file)))
 x <- readRDS(input); d <- sindh_definitions(x,need_file); domains <- sindh_updated_domains()
 pb2a<-as.numeric(x$pb2a);d$health<-ifelse(pb2a%in%1:4,as.numeric(pb2a%in%1:2),NA_real_)
@@ -25,9 +39,11 @@ stopifnot(!anyDuplicated(profiles$geo),nrow(profiles)==30,nrow(x)==10364,sum(d$p
 fac <- readRDS(facility_file); fac <- fac[fac$country=="sindh",]
 key <- function(v) toupper(gsub("[^A-Za-z0-9]","",as.character(v)))
 fac$geo<-key(fac$assigned_join_area);inventory<-fac
-r<-haven::read_dta(raw_facility,col_select=tidyselect::all_of(c("key","facility_id","q506",sindh_frequency_fields())))
+header<-haven::read_dta(raw_facility,n_max=0)
+r<-haven::read_dta(raw_facility,col_select=tidyselect::all_of(c("key","facility_id","q506",sindh_frequency_fields(),sindh_training_fields(names(header)))))
 raw_id<-as.character(r$key);empty<-is.na(raw_id)|trimws(raw_id)=="";raw_id[empty]<-as.character(r$facility_id[empty])
 ri<-match(fac$fid,raw_id);stopifnot(!anyNA(ri))
+fac<-apply_sindh_training(fac,r,ri)
 frequency<-sindh_frequency(r[ri,]);fac<-cbind(fac,frequency)
 fp<-as.numeric(r$q506[ri]);fac<-fac[fp%in%1,]
 mapped<-!is.na(fac$geo)&nzchar(fac$geo)
@@ -41,6 +57,17 @@ wm <- function(v,w) {ok<-is.finite(v)&is.finite(w)&w>0;if(any(ok))survey_weighte
 savecsv <- function(v,name) write.csv(v,file.path(out,name),row.names=FALSE,na="")
 areas <- sort(profiles$geo); names_map <- setNames(profiles$district,profiles$geo)
 savecsv(fac[c("fid","geo",names(frequency))],"daily_provision_facility_audit.csv")
+savecsv(fac[c("fid","geo",grep("^training_",names(fac),value=TRUE))],"training_facility_audit.csv")
+training_comparison<-do.call(rbind,lapply(areas,function(g){
+ ff<-fac[fac$geo==g,]
+ data.frame(geo=g,district=names_map[[g]],fp_facilities=nrow(ff),
+   original_valid=sum(is.finite(ff$training_original_p_train)),reconstructed_valid=sum(is.finite(ff$p_train)),
+   original_mean=valid_mean(ff$training_original_p_train),reconstructed_mean=valid_mean(ff$p_train),
+   known_staff=sum(ff$training_n_known),trained_staff=sum(ff$training_n_trained),
+   dont_know_records=sum(ff$training_n_dont_know),conflicting_records=sum(ff$training_n_conflict),
+   malformed_records=sum(ff$training_n_malformed))
+}))
+savecsv(training_comparison,"training_reconstruction_by_district.csv")
 reconcile <- list()
 for(g in areas) {
  ff <- fac[mapped & fac$geo%in%g,]; pp <- profiles[profiles$geo==g,]
@@ -100,6 +127,24 @@ ds<-rowMeans(M$Demand$zscore);ss<-rowMeans(M$Supply$zscore);df<-ds>1e-10;sf<-ss>
 scores<-data.frame(method="zscore",geo=areas,demand_score=ds,supply_score=ss,demand_flag=df,supply_flag=sf,
  demand_priority_rank=rank(-ds,ties.method="average"),supply_priority_rank=rank(-ss,ties.method="average"),
  category=ifelse(df&sf,"both",ifelse(df,"demand",ifelse(sf,"supply","neither"))))
+# Isolate the effect of reconstructing training; all other inputs stay fixed.
+original_aligned<-sapply(S,function(k){
+ if(k=="training")training_comparison$original_mean[match(areas,training_comparison$geo)]
+ else profiles[[k]][match(areas,profiles$geo)]
+})
+for(k in setdiff(S,"stockout_burden"))original_aligned[,k]<-1-original_aligned[,k]
+original_score<-rowMeans(scale(original_aligned))
+category<-function(a,b)ifelse(a&b,"both",ifelse(a,"demand",ifelse(b,"supply","neither")))
+training_flags<-do.call(rbind,lapply(c(0,.5,1,1.5),function(cutoff){
+ demand_flag<-if(cutoff==0)ds>1e-10 else as.numeric(scale(ds))>=cutoff
+ previous_flag<-if(cutoff==0)original_score>1e-10 else as.numeric(scale(original_score))>=cutoff
+ revised_flag<-if(cutoff==0)ss>1e-10 else as.numeric(scale(ss))>=cutoff
+ data.frame(geo=areas,district=unname(names_map[areas]),threshold_sd=cutoff,
+  original_supply_score=original_score,reconstructed_supply_score=ss,
+  original_category=category(demand_flag,previous_flag),reconstructed_category=category(demand_flag,revised_flag),
+  changed=previous_flag!=revised_flag)
+}))
+savecsv(training_flags,"training_classification_comparison.csv")
 thresholds<-data.frame(method="zscore",demand_cutoff=0,supply_cutoff=0,demand_rule="strictly above final-score mean (zero)",
  supply_rule="strictly above constraints-score mean (zero)",demand_reference_n=30,supply_reference_n=30)
 trace<-do.call(rbind,transforms)
@@ -143,6 +188,14 @@ audit<-list(supply_score_orientation="constraints",country="Sindh",source_rows=n
  survey_design="Final normalized weights and recorded clusterCode; no inferred strata or FPC. Full consenting positive-weight design before need-domain subsetting. Full original sampling design remains unavailable.",
  linked_districts=length(areas),districts=length(areas),all_facility_records=nrow(inventory),linked_source_facilities=nrow(inventory),
  fp_facility_records=nrow(fac),linked_fp_facilities=nrow(fac),daily_valid_linked=sum(is.finite(fac$daily_provision)),daily_undefined_linked=sum(!is.finite(fac$daily_provision)),
+ training_original_valid=sum(is.finite(fac$training_original_p_train)),training_reconstructed_valid=sum(is.finite(fac$p_train)),
+ training_known_staff=sum(fac$training_n_known),training_trained_staff=sum(fac$training_n_trained),
+ training_dont_know_records=sum(fac$training_n_dont_know),training_conflicting_records=sum(fac$training_n_conflict),
+ training_malformed_records=sum(fac$training_n_malformed),
+ training_encoding_overlap_staff=sum(fac$training_n_overlap_staff),
+ training_encoding_topic_comparisons=sum(fac$training_n_compared_topics),
+ training_encoding_topic_disagreements=sum(fac$training_n_topic_disagreements),
+ training_definition="Reconstructed raw Q406 topics A/C/D/G/H, same included topics as the original Sindh code. Explicit Don't know and conflicting/malformed selections are unresolved across both encodings. Known staff form each facility denominator; district means weight valid FP facilities equally. Original cleaned values retained in the reconstruction audit.",
  geography_version="Checked named district plus supplied aliases; all 4308 facilities assigned. The older source-crosswalk report used 3427 and omitted 881; no pre-existing matched assignment conflicts with the checked one.",
  supply_aggregation="Q506 Yes only; equal-facility valid-response means within district. Valid zero/FALSE included; unknown/undefined excluded separately by measure. No facility weights, zero filling or Rural/Urban split.",
  health_definition="PB2A only: 1/2 concern, 3/4 no concern; otherwise unresolved.",

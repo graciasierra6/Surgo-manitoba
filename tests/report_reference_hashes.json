@@ -27,7 +27,9 @@
       "sha256": "92d87cffba2edb44e2d87bd2ab81e1820a484731042d2192843accf48afa4ed9"
     },
     "reports/Demand_population_classification_check.html": {
-      "sha256": "8fbc1e1360659958d3f4e9ef8cca742ab02b67b276c3016df7296876e409ab8e"
+      "sha256": "64e4d9fc6758aaa899b954a74bd3d6c8fcd0da256f7c74bb2c459ecbcd8d167c",
+      "previous_sha256": "8fbc1e1360659958d3f4e9ef8cca742ab02b67b276c3016df7296876e409ab8e",
+      "revision": "Recomputed after the Sindh Q406 training correction"
     }
   }
 }

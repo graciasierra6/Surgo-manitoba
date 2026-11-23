@@ -1,5 +1,10 @@
 # Lagos — updated aggregate analysis
 
+Start with the [input and separate-run guide](../../../docs/COLLEAGUE_RUN_GUIDE.md) for the exact dataset
+names, dependency setup, commands and expected outputs. The [full ZIP inventory](../../../docs/INPUTS.md)
+lists all 56 members; the 14 primary inputs alone are not a replacement bundle.
+[Script dependencies and data contracts](../../../docs/SCRIPT_REFERENCE.md) are also summarized in R headers.
+
 This is the current administrative-area workflow. It replaces the earlier report
 under its stable filename; separate residence-specific reports are unchanged.
 Original input datasets and working outputs are external or ignored, not uploaded.
@@ -149,8 +154,8 @@ Appendices retain the five scoring comparisons and updated weighted PCA analyses
 including the same five models. Stock continuity enters PCA before fitting.
 Inspect signed coefficients, variance retained and exploratory permutation/deletion
 checks. Model intervals condition on estimated scores and do not propagate their
-construction uncertainty. Complete-facility/common-demand sensitivity sections are
-not reintroduced.
+construction uncertainty. The earlier complete-facility restriction analysis is
+not reintroduced. A separate regression-completeness appendix is described below.
 
 ## Verification
 
@@ -177,3 +182,53 @@ alternatives. The map appendix includes the final-score distribution and zero,
 0.5, 1 and 1.5 SD thresholds. See the project-level
 [survey and scoring methods](../../../docs/SURVEY_AND_SCORING.md) for denominators,
 reference sets, inference details and publication-review requirements.
+
+## Appendix C: regression sensitivity checks
+
+This addition is specific to the Lagos administrative-area report. It does not
+change the residence-specific workflow, primary models, scores or classifications.
+All checks retain original FPN2 = 1 and the same covariates and score references.
+
+1. Compare the 1,896 included and 263 excluded women on weighted known-outcome
+   modern use, demographics, missing-response drivers and LGA distribution.
+2. Fit identical supply-only and six single-demand-indicator formulas in the
+   common sample and in each formula's own available sample. Every single-indicator
+   model also controls for supply risk and the agreed covariates. Supply-only uses
+   2,132 women in its broader sample. These fits use the original SURGO weights,
+   `ids = ~1`, no strata/FPC, and LGA CR2/Satterthwaite intervals.
+3. Refit both joint z-score specifications with inverse-probability-of-response
+   weights. The target comprises 2,132 women with known outcome, controls and supply;
+   the fitted outcome models still use the 1,896 complete women. A survey-weighted
+   logistic completeness model uses observed modern use, the covariates and LGA
+   fixed indicators. Supply risk is constant within LGA and is therefore not added
+   alongside the saturated LGA indicators. Eti-Osa and Ikeja have no incomplete
+   cases within this target: their response probability is 1 and their original
+   survey weights need no additional adjustment. Estimate probabilities in LGAs
+   with both complete and incomplete records; multiply original weights by 1/p.
+   No unknown answer is recoded or imputed, and no weights are trimmed.
+
+For the joint response-weight comparison, delete each of the 17 LGAs and refit
+both the response and outcome models. Use the centered replicate covariance
+`(G-1)/G * crossprod(beta_minus_g - mean_beta_minus_g)` with t16 intervals. Apply
+the same jackknife to the survey-only comparison so differences in interval method
+are not conflated with response weighting. Main CR2 intervals remain unchanged.
+This is geographic error-cluster inference, not an assertion that LGA is the
+original sampling PSU. Score references stay fixed; their estimation uncertainty
+is outside this check. Response weighting relies on an adequately specified
+selection model using observed information and cannot rule out selection on
+unrecorded concerns. Effective sample sizes describe weight concentration only.
+Unresolved responses can include substantive Don't know or incoherent selections;
+this sensitivity treats classifiability as an observation process and does not
+establish that all such responses are accidental nonresponse.
+
+`regression_sensitivity.R`, `verify_regression_sensitivity.R`,
+`plot_regression_sensitivity.R` and `render_regression_sensitivity.py` build,
+independently check and append the section after the existing appendices.
+The main report entry runs all four. Only aggregate tables and figures are
+embedded in HTML; response records, fitted objects and private audit data stay in
+the caller's work directory.
+
+Method references: [Seaman and White](https://pubmed.ncbi.nlm.nih.gov/21220355/)
+for response weighting and [MacKinnon, Nielsen and Webb](https://arxiv.org/abs/2406.00650)
+for geographic jackknife inference in binary-response models. These references
+support the methods, not the untestable adequacy of this particular selection model.

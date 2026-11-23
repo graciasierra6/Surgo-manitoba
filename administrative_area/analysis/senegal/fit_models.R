@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: clubSandwich, jsonlite, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Model stage.
+# Inputs: Prepared analysis_frame.rds; optional saved PCA scores; runtime data/output directories.
+# Outputs: Weighted modern-use models, score references, model_results.json and model_audit.json.
+# Source context via country pipeline: D02,D06,D09,D10,D11,D12; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Shared survey-weighted estimation and geographic regression inference.
 .survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
 .survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()
@@ -112,11 +124,11 @@ missing <- data.frame(variable = common_vars,
   missing_in_need = vapply(d[d$need, common_vars], function(a) sum(is.na(a)), integer(1)))
 savecsv(missing, "model_missingness.csv")
 savecsv(z[, c("geo", "demand_score", "supply_score")], "model_department_scores.csv")
-# Broader available-case score-only checks isolate the effect of requiring the
-# six individual demand responses for common-sample comparisons.
-available <- d$need & positive & complete.cases(d[c("y_modern", controls, "demand_score", "supply_risk")])
+# Each score-model check uses only its formula variables; supply-only must not
+# require the six personal demand responses.
 sensitivity <- list()
 for (id in c("score_demand", "supply", "score_joint")) {
+  available <- d$need & positive & complete.cases(d[all.vars(fits[[id]]$formula)])
   aa <- d[available, ]; f <- fit_survey_model(fits[[id]]$formula, aa)
   V <- geographic_cr2(f, aa$geo)
   t <- coef_table(f, V); t$model <- id; t$n <- nrow(aa); sensitivity[[id]] <- t

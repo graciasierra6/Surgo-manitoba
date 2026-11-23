@@ -139,5 +139,9 @@
   "publication_date": "2026-11-20",
   "published_html_updated": true,
   "published_html_count": 9,
-  "presentations_unchanged": true
+  "presentations_unchanged": true,
+  "validation_edition": "Previous survey-command update; Sindh training was subsequently revised",
+  "subsequent_validation": "tests/sindh_training_validation.json",
+  "later_regression_validation": "tests/lagos_regression_sensitivity_validation.json",
+  "administrative_area_sensitivity_validation": "tests/administrative_area_sensitivity_validation.json"
 }

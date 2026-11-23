@@ -1,5 +1,10 @@
 # Updated residence-specific analyses
 
+Start with the [input and separate-run guide](../../docs/COLLEAGUE_RUN_GUIDE.md) for the exact dataset
+names, dependency setup, commands and expected outputs. The [full ZIP inventory](../../docs/INPUTS.md)
+lists all 56 members; the 14 primary inputs alone are not a replacement bundle.
+[Script dependencies and data contracts](../../docs/SCRIPT_REFERENCE.md) are also summarized in R headers.
+
 These modules reproduce the three current Rural/Urban reports. They supplement
 the separate administrative-area analysis; neither join module is changed.
 
@@ -68,8 +73,9 @@ Sindh has no SURGO Rural/Urban field and continues to use the district-level rep
 there is no new Sindh residence-specific file.
 
 Models use modern use, personal demand, assigned supply risk, agreed covariates,
-final survey weights and administrative-area-clustered CR2 inference. Recorded
-sampling clusters are used where documented; original strata/FPC are incomplete.
+final survey weights and administrative-area-clustered CR2 inference. The shared
+survey object uses `ids = ~1`, with no strata or FPC; the administrative error
+clusters are specified separately and are not asserted to be sampling PSUs.
 No random effects or interactions are added. Categories are relative planning
 signals; neither classification nor regression identifies causal binding constraints.
 

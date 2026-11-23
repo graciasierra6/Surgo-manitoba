@@ -1,4 +1,15 @@
 #!/usr/bin/env Rscript
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Build base residence joins and an administrative reference; no regression models.
+# Inputs: Full input ZIP; residence configuration; optional validated Sindh residence lookup.
+# Outputs: Base area/residence joins, admin_reference, exact profiles, coding and coverage audits.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Independent module entry point: no prior administrative-area run is required.
 # Input: same checksummed ZIP as the sibling module; paths are runtime arguments.
 # Output: a separate directory with admin_reference/, exact area/type profiles,

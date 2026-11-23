@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: haven, jsonlite, readxl, rmarkdown, tidyselect, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Coverage diagnostic entry.
+# Inputs: Four FP-provider woman joins, four raw facility files, facility audit, D13 and D14.
+# Outputs: Coverage tables/working checks and Surgo_UoM_checks.html through the matching Rmd.
+# Source context via country pipeline: D01,D02,D03,D04,D05,D06,D07,D08,D09,D10,D11,D12,D13,D14;
+#   exact dataset names in docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Shared survey-weighted estimation and geographic regression inference.
 .survey_entry <- grep("^--file=", commandArgs(), value = TRUE)
 .survey_root <- if (length(.survey_entry)) dirname(normalizePath(gsub("~+~", " ", sub("^--file=", "", .survey_entry[1]), fixed = TRUE), mustWork = TRUE)) else getwd()

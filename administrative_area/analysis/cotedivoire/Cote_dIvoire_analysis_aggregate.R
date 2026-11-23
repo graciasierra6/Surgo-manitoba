@@ -1,3 +1,25 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite, rmarkdown.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Current whole-area report: prepare FP-provider summaries, fit and verify, then render
+#   matching Rmd.
+# Inputs: Original country women/facilities and shared inputs below, prepared through the
+#   join/cache.
+# Outputs: Matching HTML via the existing Rmd; inputs/*_fp*.rds, calculation files, models and
+#   checks.
+# Original source inputs (exact ZIP members; shared dictionaries/lookups also required):
+#   D03 inputs/surgo/cotedivoire/surgo_cotedivoire_women.dta
+#   D07 inputs/uom/cdi/uom_cdi_facility_pooled.dta
+#   D09 uom_pipeline/uom_summary_facility.csv
+#   D10 uom_pipeline/Facilities data with archetype assignments.csv
+#   D11 uom_pipeline/new_demand_vol_facility.csv
+#   D12 exports/uom_surgo_geo_crosswalk_reviewed.csv
+# SURGO original weight: WEIGHT -> internal weight; survey ids=~1, no strata/FPC.
+# Model uncertainty: separate administrative-area CR2/Satterthwaite; facilities unweighted.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Côte d’Ivoire aggregate update: facility aggregation, individual joins and analysis.
 #
 # Supply sample: raw s2_5_sp = 1 (general FP services). This does not require
@@ -59,12 +81,18 @@ build_cotedivoire_aggregate <- function(root, join_dir, cache_dir, work_dir,
   stage("build_pca_scores.R",c("--data-dir",data,"--output-dir",pca))
   stage("fit_models.R",c("--data-dir",data,"--output-dir",file.path(pca,"models"),
     "--score-method","pca","--pca-score-file",file.path(pca,"pca_scores.rds")))
+  sensitivity<-file.path(data,"regression_sensitivity")
+  sensitivity_stage<-function(name,args)run_stage(file.path(root,"administrative_area/analysis",name),args,python)
+  sensitivity_stage("regression_sensitivity.R",c("--country","cotedivoire","--data-dir",data,"--output-dir",sensitivity))
+  sensitivity_stage("verify_regression_sensitivity.R",c("--data-dir",data,"--sensitivity-dir",sensitivity))
+  sensitivity_stage("plot_regression_sensitivity.R",c("--data-dir",sensitivity))
   stage("verify_analysis.R",c(inputs[1:8],"--cleaned-facility",
     file.path(context$cache_dir,"uom_pipeline/uom_summary_facility.csv"),"--data-dir",data))
   native<-file.path(work_dir,"Cote_dIvoire_analysis_aggregate.html")
   stage("render_analysis.py",c("--data-dir",data,"--output",native))
   # Sensitivity analyses: alternative scores and final-composite SD maps.
   render_score_threshold_appendix(root,"cotedivoire",data,native,python,"administrative_area")
+  sensitivity_stage("render_regression_sensitivity.py",c("--data-dir",sensitivity,"--html",native))
   stage("verify_html.py",c("--data-dir",data,"--html",native))
   fragment<-file.path(work_dir,"report_fragment.html")
   run_stage(file.path(root,"analysis/common/html_fragment.py"),c("--input",native,"--output",fragment),python)

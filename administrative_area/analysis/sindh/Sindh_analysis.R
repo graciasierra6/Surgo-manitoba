@@ -1,8 +1,31 @@
-# Sindh updated district analysis: Q506 Yes, original cleaned supply indicators,
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite, rmarkdown.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Current whole-area report: prepare FP-provider summaries, fit and verify, then render
+#   matching Rmd.
+# Inputs: Original country women/facilities and shared inputs below, prepared through the
+#   join/cache.
+# Outputs: Matching HTML via the existing Rmd; inputs/*_fp*.rds, calculation files, models and
+#   checks.
+# Original source inputs (exact ZIP members; shared dictionaries/lookups also required):
+#   D04 inputs/surgo/sindh/20250124_forms_wt.dta
+#   D08 inputs/uom/sindh/uom_sindh_facility_pooled.dta
+#   D09 uom_pipeline/uom_summary_facility.csv
+#   D10 uom_pipeline/Facilities data with archetype assignments.csv
+#   D11 uom_pipeline/new_demand_vol_facility.csv
+#   D12 exports/uom_surgo_geo_crosswalk_reviewed.csv
+#   D14 surgo_pipeline/sindh/sindh_wra_design_ready.rds
+# SURGO original weight: Normalizedweights -> internal weight; survey ids=~1, no strata/FPC.
+# Model uncertainty: separate administrative-area CR2/Satterthwaite; facilities unweighted.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
+# Sindh updated district analysis: Q506 Yes, reconstructed Q406 training,
 # PB2A-only health beliefs, authorized fpn2_derived and final Normalizedweights.
 # Only mean component z-scores; geographic cutoffs are zero. Personal demand and
 # assigned district supply enter five adjusted modern-use models with district CR2.
-# No Rural/Urban split, random effects, alternative scoring or PCA in this revision.
+# No Rural/Urban split or random effects; alternative scoring is in the appendix.
 # All external inputs are supplied at runtime. See the adjacent README.
 build_sindh_aggregate <- function(root, join_dir, cache_dir, work_dir,
                                           python="python3", input_zip="") {
@@ -28,6 +51,11 @@ build_sindh_aggregate <- function(root, join_dir, cache_dir, work_dir,
   stage("build_analysis.R",c(inputs,"--output-dir",data))
   stage("fit_models.R",c("--data-dir",data,"--output-dir",file.path(data,"models_zscore")))
   stage("prepare_map.R",c("--boundary",file.path(root,"analysis/assets/boundaries/sindh_districts.geojson"),"--data-dir",data))
+  sensitivity<-file.path(data,"regression_sensitivity")
+  sensitivity_stage<-function(name,args)run_stage(file.path(root,"administrative_area/analysis",name),args,python)
+  sensitivity_stage("regression_sensitivity.R",c("--country","sindh","--data-dir",data,"--output-dir",sensitivity))
+  sensitivity_stage("verify_regression_sensitivity.R",c("--data-dir",data,"--sensitivity-dir",sensitivity))
+  sensitivity_stage("plot_regression_sensitivity.R",c("--data-dir",sensitivity))
   stage("verify_analysis.R",c(inputs,"--raw-women",raw,"--district-aliases",file.path(context$cache_dir,"lookups/sindh_district_aliases.csv"),"--cleaned-facility",
     file.path(context$cache_dir,"uom_pipeline/uom_summary_facility.csv"),"--data-dir",data))
   stage("save_updated_dataset.R",c("--input",file.path(prep,"sindh_women_manitoba_fp_providers.rds"),"--data-dir",data,"--output-dir",prep))
@@ -35,6 +63,7 @@ build_sindh_aggregate <- function(root, join_dir, cache_dir, work_dir,
   stage("render_analysis.py",c("--data-dir",data,"--output",native))
   # Sensitivity analyses: alternative scores and final-composite SD maps.
   render_score_threshold_appendix(root,"sindh",data,native,python,"administrative_area")
+  sensitivity_stage("render_regression_sensitivity.py",c("--data-dir",sensitivity,"--html",native))
   stage("verify_html.py",c("--data-dir",data,"--html",native))
   fragment<-file.path(work_dir,"report_fragment.html")
   run_stage(file.path(root,"analysis/common/html_fragment.py"),c("--input",native,"--output",fragment),python)

@@ -1,3 +1,14 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Verification.
+# Inputs: Caller-supplied source/analysis files and saved report/model results.
+# Outputs: Independent verification checks; no change to analytical source inputs.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Verify every model exposure against the prepared facility records in its
 # exact administrative area and rural/urban cell. No source records are changed.
 args <- commandArgs(trailingOnly = TRUE)

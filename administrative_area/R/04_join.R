@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: haven, jsonlite, tidyselect.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Internal join stage.
+# Inputs: D01-D12 plus dictionaries, checked lookups and upstream comparison exports.
+# Outputs: Base joins, facility_linkage_inputs.rds, supply profiles and linkage audits.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Use through its caller/module; this file is not an independent report entry point.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Join stage; run through R/run_join.R. Original survey columns are retained.
 source(file.path(root, "R/helpers.R"))
 source(file.path(root, "R/aggregate_supply.R"))

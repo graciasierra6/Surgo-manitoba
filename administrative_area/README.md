@@ -1,5 +1,10 @@
 # Administrative-area linkage
 
+Start with the [input and separate-run guide](../docs/COLLEAGUE_RUN_GUIDE.md) for the exact dataset
+names, dependency setup, commands and expected outputs. The [full ZIP inventory](../docs/INPUTS.md)
+lists all 56 members; the 14 primary inputs alone are not a replacement bundle.
+[Script dependencies and data contracts](../docs/SCRIPT_REFERENCE.md) are also summarized in R headers.
+
 This module joins University of Manitoba facility supply profiles to every original SURGO woman's record in Lagos, Senegal, Côte d'Ivoire and Sindh. It performs data preparation, geographic linkage and validation only. It does not fit models, calculate research results or create a demand/supply constraint score.
 
 ## Inputs

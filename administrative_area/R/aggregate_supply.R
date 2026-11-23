@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: bundled R only; dependencies may be supplied by the caller.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Shared pipeline helper.
+# Inputs: Caller-supplied data objects, runtime file arguments or configured input bundle members.
+# Outputs: Shared helper functions/results; used through documented entry points.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Use through its caller/module; this file is not an independent report entry point.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Reproduce the supply columns in upstream workflow_merge/m06, using its saved
 # facility summaries and classifications. Facility measures are not redefined.
 

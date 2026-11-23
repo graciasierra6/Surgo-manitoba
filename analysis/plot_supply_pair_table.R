@@ -1,3 +1,14 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: grDevices, grid, jsonlite, svglite.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Diagnostic figure entry.
+# Inputs: Saved score_profile_contrasts.rds aggregate profiles.
+# Outputs: Supply comparison figures and Composite score_comparisons.html with demand comparisons.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Supply component comparisons from saved aggregate profiles; no model refitting.
 plot_supply_pair_table <- function(input,country,area_a,area_b,output_dir,html_output='') {
   for(p in c('svglite','jsonlite'))if(!requireNamespace(p,quietly=TRUE))stop('Install ',p)
@@ -155,7 +166,7 @@ build_supply_regional_comparisons <- function(input,output_dir,html_output,proje
   h<-sub('</nav>',paste0(paste(nav,collapse=''),'</nav>'),h,fixed=TRUE)
   h<-sub('<main>','<main><h2 class="group-title">Demand concerns</h2>',h,fixed=TRUE)
   introduction<-paste0('<div class="group-intro"><h2 class="group-title">Supply constraints</h2><p>Every pair below has positive supply-constraint scores. Higher percentages mean better readiness in all six rows; the stockout row is shown as <strong>stock continuity = 100% − stockout burden</strong>. Bold and orange shading identify values below the component reference average.</p><p>These examples distinguish different types of weakness, broader shortfalls and profiles dominated by one large shortfall.</p></div>')
-  h<-sub('</main>',paste0(introduction,paste(sections,collapse=''),'<details><summary>How the supply examples were selected</summary><p>All four geographies were searched using the saved whole-area scores and component values. The eight illustrated pairs have negative readiness scores, an absolute score gap no larger than 0.10 average-z points, at least 20 valid FP facilities per component in each area, and no displayed 0% or 100% component. These screening rules select readable descriptive examples; they are not statistical adequacy thresholds. The pairs illustrate different contrasts rather than a representative sample of areas. No negative-readiness area had exactly one component below average. Sindh did not supply a pair meeting the illustration screen because some component denominators were smaller. The original scores, thresholds, classifications and models are unchanged.</p></details></main>'),h,fixed=TRUE)
+  h<-sub('</main>',paste0(introduction,paste(sections,collapse=''),'<details><summary>How the supply examples were selected</summary><p>All four geographies were searched using the saved whole-area scores and component values. The eight illustrated pairs have negative readiness scores, an absolute score gap no larger than 0.10 average-z points, at least 20 valid FP facilities per component in each area, and no displayed 0% or 100% component. These screening rules select readable descriptive examples; they are not statistical adequacy thresholds. The pairs illustrate different contrasts rather than a representative sample of areas. No negative-readiness area had exactly one component below average. The illustrated supply pairs are fixed examples from Lagos, Senegal and Côte d’Ivoire; they are not an exhaustive list of qualifying pairs. The original scores, thresholds, classifications and models are unchanged.</p></details></main>'),h,fixed=TRUE)
   h<-sub('</style></head>','</style><style>.group-title{font-size:27px;margin:34px 0 20px;border-bottom:2px solid #D8E3E8;padding-bottom:10px}.group-intro{margin:45px 0 30px;max-width:1150px}.group-intro p{margin:10px 0}@media print{.group-intro{break-before:page}}</style></head>',h,fixed=TRUE)
   # The presentation report keeps its opening paragraph and comparison findings.
   # Detailed methods and value tables remain in standalone previews and source docs.

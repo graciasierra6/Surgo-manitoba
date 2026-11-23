@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: ggplot2, grid, jsonlite, svglite, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: PCA sensitivity stage.
+# Inputs: Saved analysis_frame.rds with personal demand and assigned facility supply.
+# Outputs: Exploratory PCA scores, loadings, diagnostic tables and figures.
+# Source context via country pipeline: D01,D05,D09,D10,D11,D12; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Weighted PCA sensitivity using individual concerns and each woman's exact
 # LGA-residence supply exposure. Main geographic classifications are untouched.
 args <- commandArgs(trailingOnly = TRUE)

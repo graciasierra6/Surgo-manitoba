@@ -1,3 +1,25 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite, rmarkdown.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Current whole-area report: prepare FP-provider summaries, fit and verify, then render
+#   matching Rmd.
+# Inputs: Original country women/facilities and shared inputs below, prepared through the
+#   join/cache.
+# Outputs: Matching HTML via the existing Rmd; inputs/*_fp*.rds, calculation files, models and
+#   checks.
+# Original source inputs (exact ZIP members; shared dictionaries/lookups also required):
+#   D01 inputs/surgo/lagos/surgo_lagos_women.csv
+#   D05 inputs/uom/lagos/uom_lagos_facility_pooled.dta
+#   D09 uom_pipeline/uom_summary_facility.csv
+#   D10 uom_pipeline/Facilities data with archetype assignments.csv
+#   D11 uom_pipeline/new_demand_vol_facility.csv
+#   D12 exports/uom_surgo_geo_crosswalk_reviewed.csv
+# SURGO original weight: weight -> internal weight; survey ids=~1, no strata/FPC.
+# Model uncertainty: separate administrative-area CR2/Satterthwaite; facilities unweighted.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Lagos updated aggregate analysis: original FPN2, Q506 Yes facility summaries.
 # Health beliefs use PB2A only. Six supply components include daily provision and
 # original cleaned p_any_stockout; stockout burden and complemented provision measures are constraint-aligned before scoring.
@@ -31,12 +53,17 @@ build_lagos_aggregate <- function(root, join_dir, cache_dir, work_dir,
   stage("build_pca_scores.R",c("--data-dir",data,"--output-dir",pca))
   stage("fit_models.R",c("--data-dir",data,"--output-dir",file.path(pca,"models"),
     "--score-method","pca","--pca-score-file",file.path(pca,"pca_scores.rds")))
+  sensitivity<-file.path(data,"regression_sensitivity")
+  stage("regression_sensitivity.R",c("--data-dir",data,"--output-dir",sensitivity))
+  stage("verify_regression_sensitivity.R",c("--data-dir",data,"--sensitivity-dir",sensitivity))
+  stage("plot_regression_sensitivity.R",c("--data-dir",sensitivity))
   stage("verify_analysis.R",c(inputs,"--raw-women",raw,"--cleaned-facility",
     file.path(context$cache_dir,"uom_pipeline/uom_summary_facility.csv"),"--data-dir",data))
   native<-file.path(work_dir,"Lagos_analysis_aggregate.html")
   stage("render_analysis.py",c("--data-dir",data,"--reference-html",file.path(root,"analysis/assets/lagos_map_template.html"),"--output",native))
   # Sensitivity analyses: alternative scores and final-composite SD maps.
   render_score_threshold_appendix(root,"lagos",data,native,python,"administrative_area")
+  stage("render_regression_sensitivity.py",c("--data-dir",sensitivity,"--html",native))
   stage("verify_html.py",c("--data-dir",data,"--html",native))
   fragment<-file.path(work_dir,"report_fragment.html")
   run_stage(file.path(root,"analysis/common/html_fragment.py"),c("--input",native,"--output",fragment),python)

@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: ggplot2, jsonlite, svglite.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Diagnostic/helper.
+# Inputs: Caller-supplied files/objects and runtime arguments listed in this script.
+# Outputs: Requested diagnostic tables/figures or helper results; see adjacent module README.
+# Source context via country pipeline: D03,D07,D09,D10,D11,D12; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Plot the saved department-level demand index without refitting any analysis.
 # All input and output locations are supplied by the caller.
 args <- commandArgs(trailingOnly = TRUE)

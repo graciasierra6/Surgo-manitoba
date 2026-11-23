@@ -1,5 +1,10 @@
 # Data coverage checks
 
+Start with the [input and separate-run guide](../docs/COLLEAGUE_RUN_GUIDE.md) for the exact dataset
+names, dependency setup, commands and expected outputs. The [full ZIP inventory](../docs/INPUTS.md)
+lists all 56 members; the 14 primary inputs alone are not a replacement bundle.
+[Script dependencies and data contracts](../docs/SCRIPT_REFERENCE.md) are also summarized in R headers.
+
 [Open the four-geography coverage report](Surgo_UoM_checks.html).
 
 The report compares SURGO women with Manitoba FP-provider coverage in Côte

@@ -21,7 +21,13 @@ assert set(f.anchors).issubset(f.ids), 'Broken anchor'
 assert {k:len(set(v)) for k,v in f.maps.items()}=={'coverage':20,'zscore':20}
 order=['coverage','use','joint','models','definitions','appendix-scoring','appendix-pca']
 assert [source.index('<section id="'+i+'"') for i in order]==sorted(source.index('<section id="'+i+'"') for i in order)
-assert len(f.images)==10
+assert len(f.images)==12
+assert 'regression-sensitivity' in f.ids
+assert source.index('<section id="regression-sensitivity">')>source.index('<section id="score-thresholds"')
+assert 'Appendix C · Sensitivity checks' in source
+assert '2,132' in source and 'response-adjusted weights' in source
+check=json.loads((root/'regression_sensitivity/verification.json').read_text())
+assert check['all_passed'] and check['main_n']==1896 and check['supply_available_n']==2132
 assert p['audit']['need_n']==2159 and p['audit']['source_rows']==4555
 assert p['supply_variables']==['offering','free','training','daily_provision','larc_stock','stockout_burden']
 blobs=[source]
@@ -45,6 +51,6 @@ assert 'PB2A–C' not in text and 'three_larc_stockin' not in text
 assert 'Both-flagged LGAs are included' in text
 for key in ['supply-component-summary','demand-component-summary','supply-department-components','demand-department-components']:
  assert key in f.ids
-print('PASS: LGA-only report order, two maps, 10 embedded figures, component tables, denominators and clean assets.')
+print('PASS: LGA-only report order, two maps, 12 embedded figures, sensitivity appendix, component tables, denominators and clean assets.')
 
 assert 'appendix-facilities' not in f.ids and 'appendix-demand' not in f.ids

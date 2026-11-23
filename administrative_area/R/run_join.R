@@ -1,4 +1,16 @@
 #!/usr/bin/env Rscript
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: digest, jsonlite, utils.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Build base administrative joins and upstream reconciliation, before current FP filtering.
+# Inputs: All manifest-listed ZIP members; country source fields in 00_config.R.
+# Outputs: Base woman joins, facility_linkage_inputs.rds, supply profiles, dictionaries and
+#   audits.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # One entry point for the four woman-level joins. No model fitting is performed.
 script <- sub("^--file=", "", grep("^--file=", commandArgs(), value=TRUE)[1])
 script <- gsub("~+~", " ", script, fixed=TRUE)

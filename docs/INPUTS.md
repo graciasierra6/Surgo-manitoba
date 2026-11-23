@@ -1,5 +1,16 @@
 # Input bundle inventory
 
+For a clean list of exact filenames and ZIP members without checksums or run
+details, use [Input ZIP filenames](DATASET_FILENAMES.md). This is the list to use
+when matching files to Databricks sources later; no source links are assigned yet.
+
+For a concise list of the 14 primary analytical inputs, required supporting files,
+separate country commands and expected outputs, use the
+[colleague run guide](COLLEAGUE_RUN_GUIDE.md). The
+[dataset catalog](dataset_catalog.json) records exact members, keys and pending
+Databricks source mappings; [SCRIPT_REFERENCE.md](SCRIPT_REFERENCE.md) documents
+R dependencies and input contracts. This page remains the full checksum inventory.
+
 The reproducible entry point accepts one authorized ZIP through `--input-zip` or
 `SURGO_MANITOBA_INPUT_ZIP`. Obtain that ZIP through the project’s approved data-sharing
 arrangements and keep it outside the repository. No source datasets are distributed

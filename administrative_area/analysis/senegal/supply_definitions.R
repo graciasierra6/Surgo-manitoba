@@ -1,3 +1,16 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: bundled R only; dependencies may be supplied by the caller.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Country definitions helper.
+# Inputs: Country raw response objects supplied by caller; Sindh need helper also reads D14.
+# Outputs: Recoded values and definition/helper functions for the caller.
+# Source context via country pipeline: D02,D06,D09,D10,D11,D12; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Use through its caller/module; this file is not an independent report entry point.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Report-specific supply definitions; historical country definitions are unchanged.
 base_senegal_domains <- senegal_domains
 senegal_domains <- function() {

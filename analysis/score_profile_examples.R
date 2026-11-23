@@ -1,3 +1,14 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: ggplot2, grid, jsonlite, rmarkdown, svglite, tools.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Profile diagnostic entry.
+# Inputs: Saved Lagos, Senegal and Côte d’Ivoire analysis directories.
+# Outputs: Score_profile_examples.html plus aggregate comparison tables/figures.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Compare similar administrative-area scores with different component profiles.
 # Reads saved aggregate report inputs only; never changes the working reports.
 build_score_profile_examples<-function(data_dirs,work_dir){

@@ -1,5 +1,10 @@
 # Sindh — updated district analysis
 
+Start with the [input and separate-run guide](../../../docs/COLLEAGUE_RUN_GUIDE.md) for the exact dataset
+names, dependency setup, commands and expected outputs. The [full ZIP inventory](../../../docs/INPUTS.md)
+lists all 56 members; the 14 primary inputs alone are not a replacement bundle.
+[Script dependencies and data contracts](../../../docs/SCRIPT_REFERENCE.md) are also summarized in R headers.
+
 This is the current administrative-area workflow. It replaces the earlier report
 under its stable filename; separate residence-specific reports are unchanged.
 Original input datasets and working outputs are external or ignored, not uploaded.
@@ -72,7 +77,7 @@ flag summaries retain the original five-decimal convention.
 |---|---|---|
 | Short + long-acting offering | `one_larc_3_sa_offer` | Share meeting the original ≥1 long-acting plus ≥3 short-acting offering criterion |
 | Free-product provision | `p_free_prod` | Average facility fraction of recorded products provided free |
-| Trained-provider share | `p_train` | Average facility fraction of recorded personnel classified as trained |
+| Trained-provider share | Reconstructed Q406 ratio | Average facility fraction of staff with known status classified as trained |
 | Daily provision | Frequency ratio below | Average facility fraction of offered modern-method classes provided daily |
 | At least one LARC in stock | `one_larc_stockin` | Share meeting the original current-stock criterion |
 | Stockout burden | Original cleaned `p_any_stockout` | Average facility share of product groups with a coded stock interruption |
@@ -82,11 +87,54 @@ but are not selected index components. Preserve the original cleaned UoM stockou
 values and their source grouping/missing-answer rules. Numeric completeness does
 not establish complete underlying questionnaire responses.
 
-**Training coverage is limited:** only **278 of 2,823 FP facilities (9.8%)** have
-defined `p_train` values. Each district has a valid mean, but some rest on very few
-reporters. Undefined values may reflect routing or unusable personnel denominators
-as well as unanswered questions; they are not assumed to mean no trained provider.
-The heatmap, response-count table and score interpretation flag this limitation.
+### Training reconstruction
+
+The supplied cleaned `p_train` has valid values for only **278 of 2,823 FP
+facilities**. The analysis now reconstructs this measure from both Q406 encodings:
+topic checkboxes and the original multi-selection text. It retains the original
+Sindh topic set: **A** IUD insertion, **C** injectables, **D** implant insertion,
+**G** IUD removal and **H** implant removal. B (postpartum IUD training) and E/F
+(sterilization) do not count as included training. Topic sets differ across the
+country-specific source scripts; this is not a harmonization of their definitions.
+
+Within a staff record, an included-topic Yes establishes training. A complete set
+of included-topic No responses, explicit None (Z), or an interpretable full text
+selection with no included topic establishes no included training. A partial set
+of No checkboxes alone does not establish a negative. Explicit Don't know (Y)
+remains unknown even when the selected-topic checkboxes contain zeros. Conflicting
+text/checkbox selections, None with a substantive topic, Don't know with a topic,
+malformed selections and otherwise unresolved responses are excluded from the
+known-status denominator. This is a documented Sindh correction, not unchanged
+application of the original missing-response code.
+
+For each facility calculate `known trained staff / staff with known status`.
+Genuine zero proportions remain valid; zero known staff gives an undefined ratio.
+Average valid facility proportions equally within district among Q506 Yes
+facilities. This is not a pooled proportion of all district personnel.
+
+The revised ratio is defined for **2,811 of 2,823 FP facilities (99.6%)**. It uses
+**15,116 staff with known status**, of whom **4,809** have included training.
+There are 57 explicit Don't-know records and two malformed records; six of the
+Don't-know records also have contradictory topic selections, so those counts overlap.
+Unknown staff are not imputed and may differ from staff with known status.
+
+The original cleaned inputs stay unchanged. In the analysis working copy only,
+`p_train`, `n_tot` and `n_train` are replaced together so mean and pooled summaries
+use coherent numerators and denominators. Original values and reconstruction
+counts are retained in private facility-level audit outputs; district comparisons
+and classification changes are included in the HTML. Other inherited training
+summaries, including `mdn_skill_lvl`, retain their original definitions and are
+not selected index components. `tests/test_sindh_training.R` checks response
+scenarios; report verification independently reconstructs staff statuses from raw
+responses and checks all district means and assignments.
+The interpretable overlap contains 3,696 staff and 18,480 selected-topic
+comparisons, with no text/checkbox disagreements; unknown and contradictory
+responses are not used to justify text recovery.
+
+To compare an earlier build with this revision, run
+`Rscript tests/compare_sindh_training_update.R --previous-dir PREVIOUS_ANALYSIS_DIR --current-dir CURRENT_ANALYSIS_DIR --output output/sindh_training_validation.json`.
+This requires the saved analysis directories, not just their HTML reports. The
+checked release records are summarized in `tests/sindh_training_validation.json`.
 
 ### Daily provision
 
@@ -198,3 +246,59 @@ alternatives. The map appendix includes the final-score distribution and zero,
 0.5, 1 and 1.5 SD thresholds. See the project-level
 [survey and scoring methods](../../../docs/SURVEY_AND_SCORING.md) for denominators,
 reference sets, inference details and publication-review requirements.
+
+
+## Regression sensitivity checks
+
+The administrative-area report includes a separate **Sensitivity checks** section
+at the end of its appendix. It retains the current need definition, personal demand
+coding, district-wide supply assignments and fixed score references. The main models,
+heatmaps and classifications are unchanged. This does not modify the separate
+residence-specific analysis.
+
+1. Describe all 3,274 women in need, comparing 3,115 included with
+   159 excluded women on weighted modern use among known outcomes,
+   demographics, unresolved-response drivers and geographic distribution.
+2. Compare the identical supply-only formula in the common sample and its
+   broader eligible sample of 3,263 women, without requiring demand responses.
+3. Fit six single-demand-indicator models in the common and formula-specific
+   eligible samples. Each also includes supply risk and the original covariates.
+   These and the supply-only check use original SURGO weights,
+   `survey::svyglm()`, `ids = ~1`, no strata/FPC, and district-clustered
+   CR2/Satterthwaite inference.
+4. Refit both joint z-score specifications using original weights divided by an
+   estimated probability of complete demand information. The response model uses
+   known modern use, the agreed covariates and district indicators. Supply risk is
+   constant within district and is not redundantly added alongside those indicators.
+   Fully observed areas within the broader eligible target receive probability 1;
+   the response model is fitted in areas with both complete and incomplete records.
+
+For response-weighted inference, delete each of the 30 districts and re-estimate both the response and outcome
+   models. The centered jackknife covariance is `(G-1)/G` times the crossproduct of
+   centered replicate coefficients; intervals use `G-1 = 29` degrees of freedom.
+   The survey-only joint comparison uses the same jackknife. Primary report
+   intervals remain CR2/Satterthwaite. This geographic inference does not assert
+   that district is the original sampling PSU.
+
+No unknown demand response is recoded or imputed, and no weights are trimmed.
+Response weighting still uses the 3,115 complete women and targets the 3,263
+women with a known outcome, covariates and supply score; it does not recover women
+whose supply profile or outcome is unknown. Unresolved answers can be substantive
+Don't know or inconsistent selections, so the observed-information selection
+assumption remains untestable. Effective sample sizes describe weight concentration,
+not formal power or the full survey design. Score-construction uncertainty is not
+propagated by this regression sensitivity.
+
+The entry script runs the shared `regression_sensitivity.R`,
+`verify_regression_sensitivity.R`, `plot_regression_sensitivity.R` and
+`render_regression_sensitivity.py` in `administrative_area/analysis/`.
+Independent checks enumerate model rows, original weights, raw weighted GLM
+coefficients, response probabilities and every refitted jackknife replicate.
+Only aggregate results and figures enter HTML. Working respondent data and fitted
+objects remain in the caller's work directory and are excluded from shared files.
+
+Methods: [response weighting](https://pubmed.ncbi.nlm.nih.gov/21220355/) and
+[cluster jackknife for binary response](https://arxiv.org/abs/2406.00650).
+
+Partnership remains constant and Rural/Urban is unavailable: the original Sindh
+adjustment set omits both. The corrected Q406 training measure is retained.

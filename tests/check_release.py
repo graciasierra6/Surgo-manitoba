@@ -50,7 +50,7 @@ for country, name in zip(countries, report_names):
     text = report.read_text()
     assert text.lower().startswith('<!doctype html>') and '<script>' in text
     assert not re.search(r'<(?:script|img)[^>]+(?:src)=["\']https?://', text)
-    assert len(re.findall(r'data:image/svg\+xml;base64,', text)) == (4 if country == 'sindh' else 10)
+    assert len(re.findall(r'data:image/svg\+xml;base64,', text)) == (6 if country == 'sindh' else 10)
 for module in ['administrative_area','urban_rural']:
     assert (root/module/'R'/('run_join.R' if module == 'administrative_area' else 'run_join_urban_rural.R')).is_file()
     assert (root/module/'R/00_config.R').is_file()

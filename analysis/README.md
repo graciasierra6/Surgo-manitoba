@@ -1,5 +1,10 @@
 # Residence-specific analysis and shared definitions
 
+Start with the [input and separate-run guide](../docs/COLLEAGUE_RUN_GUIDE.md) for the exact dataset
+names, dependency setup, commands and expected outputs. The [full ZIP inventory](../docs/INPUTS.md)
+lists all 56 members; the 14 primary inputs alone are not a replacement bundle.
+[Script dependencies and data contracts](../docs/SCRIPT_REFERENCE.md) are also summarized in R headers.
+
 ## Separate demand-population check
 
 Current main classifications already use weighted concern percentages among women

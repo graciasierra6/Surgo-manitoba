@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: ggplot2, grid, svglite.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Shared figure stage.
+# Inputs: Saved aggregate model results and prediction tables.
+# Outputs: Coefficient and adjusted-probability figures; no model refitting.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Use through its caller/module; this file is not an independent report entry point.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Plot saved modern-use estimates without changing model fits or predictions.
 render_modern_use_plots <- function(coefficients, curves, gaps, cc, demand_labels,
                                    demand_variables, out, score_method,

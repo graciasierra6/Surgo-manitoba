@@ -5,6 +5,28 @@ supply environment in Lagos, Senegal, Côte d’Ivoire and Sindh. Original woman
 records and survey variables are retained. Supply profiles are contextual area
 measures; they do not identify the facility a woman attended.
 
+## Start here: inputs and separate runs
+
+For a colleague reproducing the work, start with the
+[input and run guide](docs/COLLEAGUE_RUN_GUIDE.md). It lists the **14 primary
+analytical inputs**, the additional required support/reference files, software
+setup, commands to run each join and each of the seven current reports separately,
+and the expected outputs. Keep the complete repository and the intact authorized
+ZIP: the validated bundle has **56 members**, not only the 14 primary inputs.
+
+Dataset documentation is in:
+
+- [Input ZIP filenames](docs/DATASET_FILENAMES.md): clean filename/member list for adding source links later.
+- [Colleague run guide](docs/COLLEAGUE_RUN_GUIDE.md): filenames, roles, execution and outputs.
+- [Full ZIP inventory](docs/INPUTS.md): all member names, purposes, sizes and checksums.
+- [Input manifest](docs/input_bundle_manifest.json): machine-readable integrity inventory.
+- [Dataset catalog](docs/dataset_catalog.json): primary-input IDs, keys and pending Databricks mappings.
+- [R script reference](docs/SCRIPT_REFERENCE.md): dependencies, input contracts and main entry points.
+
+R script headers identify packages and source inputs; country READMEs explain the
+analytical definitions. Databricks source names/links remain pending until provided
+and validated. No credentials or private data locations are recorded in these files.
+
 ## Inputs and data protection
 
 Original surveys, cleaned facility inputs, intermediate joins, fitted models and
@@ -225,10 +247,22 @@ The shared survey helper supplies weighted means; raw counts, recodes,
 equal-area index references and unweighted facility aggregation retain their
 appropriate calculations. See [survey and scoring methods](docs/SURVEY_AND_SCORING.md).
 
+All four administrative-area reports include an appendix titled **Sensitivity
+checks**: included/excluded profiles, formula-specific available-case models and
+response-weighted joint models. The latter refit response and outcome models in a
+delete-one-area jackknife, with t intervals using the number of represented areas
+minus one degrees of freedom. Primary model intervals retain CR2/Satterthwaite.
+These additions retain whole-area supply assignment and fixed score references;
+the residence-specific reports are unchanged. Country modules document their
+adjustment sets, eligible targets and untestable selection assumptions.
+
 Important qualifications remain: limited geographic contexts; component overlap;
 uncertainty conditional on estimated scores; incomplete source responses and some
-geographic-linkage qualifications. Sindh training proportions are defined for only
-278/2,823 FP facilities. Côte d’Ivoire has four unmatched survey areas and Daoukro's
+geographic-linkage qualifications. Sindh training is reconstructed from both raw
+Q406 encodings using the original Sindh selected topics, with explicit Don't know
+and conflicting responses excluded. It is defined for 2,811/2,823 FP facilities,
+compared with 278 in the supplied cleaned measure; see the country module for the
+documented correction and valid-status denominator. Côte d’Ivoire has four unmatched survey areas and Daoukro's
 undefined free/daily measures, leaving five supply-unassessed areas. Verification
 checks implementation; it does not establish power, causal dominance or an optimal
 investment allocation.

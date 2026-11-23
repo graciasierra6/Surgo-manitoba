@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Test/validation utility.
+# Inputs: Test fixtures or caller-supplied earlier/current saved results, as specified in the
+#   code.
+# Outputs: Assertions, validation records or aggregate before/after comparisons.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Compare a regenerated analysis with its prior saved numerical results.
 # Only aggregate validation statistics are exported; no woman-level records.
 args <- commandArgs(trailingOnly=TRUE)

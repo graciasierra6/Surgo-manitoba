@@ -1,3 +1,14 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: digest, jsonlite, utils.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Shared pipeline helper.
+# Inputs: Caller-supplied data objects, runtime file arguments or configured input bundle members.
+# Outputs: Shared helper functions/results; used through documented entry points.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Shared orchestration for the four country reports. Source from a country Rmd
 # or R/run_reports.R. Confidential locations are supplied only at runtime.
 use_project_library <- function(root) {

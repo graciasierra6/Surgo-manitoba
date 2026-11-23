@@ -57,6 +57,10 @@ parsed = Inspect()
 parsed.feed(source)
 assert len(parsed.ids) == len(set(parsed.ids)), 'Duplicate element IDs'
 assert set(parsed.anchors).issubset(parsed.ids), 'Broken internal links'
+assert "regression-sensitivity" in parsed.ids
+assert source.index('<section id="regression-sensitivity">') > source.index('<section id="score-thresholds"')
+sensitivity=json.loads((data/"regression_sensitivity/verification.json").read_text())
+assert sensitivity["all_passed"] and sensitivity["main_n"]==3951 and sensitivity["supply_available_n"]==4185
 order = ['coverage', 'use', 'joint', 'models', 'definitions',
          'appendix-scoring', 'appendix-stock', 'pca']
 positions = [source.index(f'<section id="{x}"') for x in order]
@@ -67,7 +71,7 @@ assert p['audit']['supply_resolution'].startswith('Department-wide')
 for mode in ('coverage', 'classification'):
     assert len(set(parsed.keys[mode])) == 111, (mode, 'Missing department boundary')
 assert 'colspan="6" class="supply-group"' in source
-assert len(parsed.images) == 10, ('Expected model/PCA figures', len(parsed.images))
+assert len(parsed.images) == 12, ('Expected model/PCA figures', len(parsed.images))
 for src in parsed.images:
     assert src.startswith('data:image/svg+xml;base64,'), 'External or missing figure'
     blob = base64.b64decode(src.split(',', 1)[1]).decode()
@@ -100,7 +104,7 @@ for pattern in (r'/[Uu]sers/', r'/[Hh]ome/', r'file:[/][/]',
         assert not re.search(pattern, base64.b64decode(link['href'].split(',', 1)[1]).decode())
 assert not re.search(r'<(?:script|link|img)[^>]+(?:src|href)=["\']https?://', source, re.I)
 assert not re.search(r'url\(["\']?https?://', source, re.I)
-print('PASS: report order, six main supply columns, two maps, 10 embedded figures,')
+print('PASS: report order, six main supply columns, two maps, 12 embedded figures,')
 print('aggregate downloads, FP restriction, updated components, zero thresholds and portable artifact scan.')
 
 assert 'appendix-facilities' not in parsed.ids and 'appendix-demand' not in parsed.ids

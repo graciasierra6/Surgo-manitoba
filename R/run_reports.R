@@ -1,4 +1,15 @@
 #!/usr/bin/env Rscript
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: bundled R only; dependencies may be supplied by the caller.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Compatibility runner for historical reports; current Sindh delegates to district analysis.
+# Inputs: Authorized input ZIP; optional verified residence join/cache.
+# Outputs: Historical/compatibility country reports; current Sindh district report.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Compatibility entry point for the preserved three-report workflow.
 # Historical definitions come from their checksummed public source revision.
 script<-gsub("~+~"," ",sub("^--file=","",grep("^--file=",commandArgs(),value=TRUE)[1]),fixed=TRUE)

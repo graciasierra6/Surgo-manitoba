@@ -1,3 +1,17 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: jsonlite.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Internal join verification.
+# Inputs: Base joins, upstream women/area/geography exports, both archetype versions and
+#   dictionary.
+# Outputs: Reconciliation tables and checks, including population overlap and preserved source
+#   rows.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Use through its caller/module; this file is not an independent report entry point.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Join/reference validation only; no models or substantive analysis.
 source(file.path(root, "R/helpers.R"))
 input <- Sys.getenv("LINKAGE_INPUT_DIR", file.path(root, "data/extracted"))

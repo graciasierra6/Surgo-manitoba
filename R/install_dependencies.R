@@ -1,3 +1,14 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: renv, utils.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Restore the R package environment; run once before analyses.
+# Inputs: DESCRIPTION and renv.lock; installed package versions for exact-match reuse.
+# Outputs: Project R library and dependency-version checks.
+# Source dataset names/roles: docs/COLLEAGUE_RUN_GUIDE.md (D01-D14 and supporting files).
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Restore the recorded R dependency versions, or install current CRAN versions.
 args <- commandArgs(trailingOnly = TRUE)
 script <- sub("^--file=", "", grep("^--file=", commandArgs(), value = TRUE)[1])

@@ -1,3 +1,15 @@
+# Dependencies and input/output reference
+# Setup once from repository root: Rscript R/install_dependencies.R
+# Direct R packages: clubSandwich, haven, jsonlite, readr.
+# Pipeline packages/versions: DESCRIPTION and renv.lock; see docs/SCRIPT_REFERENCE.md.
+# Role: Verification.
+# Inputs: Caller-supplied source/analysis files and saved report/model results.
+# Outputs: Independent verification checks; no change to analytical source inputs.
+# Source context via country pipeline: D04,D08,D09,D10,D11,D12,D14; exact dataset names in
+#   docs/COLLEAGUE_RUN_GUIDE.md.
+# Run instructions and runtime input/output locations: docs/COLLEAGUE_RUN_GUIDE.md.
+# External data locations are caller parameters; keep working data out of shared files.
+
 # Independent checks of raw inputs, facility means, assignments, scores and models.
 args<-commandArgs(trailingOnly=TRUE)
 arg<-function(k){i<-match(k,args);if(is.na(i)||i==length(args))stop("Supply ",k);args[i+1L]}
@@ -68,7 +80,40 @@ den<-rowSums(m>=1&m<=4,na.rm=TRUE);num<-rowSums(m==1,na.rm=TRUE)
 daily<-ifelse(den>0,num/den,NA_real_)
 daily_audit<-read.csv(file.path(data_dir,"daily_provision_facility_audit.csv"))
 verify("Independent daily-frequency formula",same(daily_audit$daily_provision,daily[match(daily_audit$fid,f$fid)]))
-f$offering<-bool(f$one_larc_3_sa_offer);f$free<-as.numeric(f$p_free_prod);f$training<-as.numeric(f$p_train)
+# Independently enumerate only recorded staff slots and apply the stated rules.
+training_rows<-list();included<-c("A","C","D","G","H");topics<-c(LETTERS[1:8],"Y","Z")
+for(slot in sub("^q406_","",grep("^q406_[0-9]+$",names(r),value=TRUE))){
+ text<-as.character(r[[paste0("q406_",slot)]]);text[is.na(text)]<-""
+ text<-toupper(trimws(gsub("[[:space:]]+"," ",text)))
+ binary<-as.matrix(as.data.frame(lapply(r[paste0("q406_",tolower(topics),"_",slot)],as.numeric)))
+ ii<-which(nzchar(text)|rowSums(!is.na(binary))>0)
+ if(!length(ii))next
+ statuses<-vapply(ii,function(i){
+  v<-binary[i,];names(v)<-topics
+  words<-if(nzchar(text[i]))strsplit(text[i]," ",fixed=TRUE)[[1]] else character()
+  if(any(!words%in%topics)||any(!is.na(v)&!v%in%0:1))return(NA_real_)
+  yes<-union(words,names(v)[which(v==1)])
+  if("Y"%in%yes)return(NA_real_)
+  if("Z"%in%yes&&any(yes%in%LETTERS[1:8]))return(NA_real_)
+  if(length(words)&&any(v[!is.na(v)]!=as.numeric(names(v)[!is.na(v)]%in%words)))return(NA_real_)
+  if(any(yes%in%included))return(1)
+  if(length(words)||"Z"%in%yes||all(v[included]%in%0:1))return(0)
+  NA_real_
+ },numeric(1))
+ training_rows[[length(training_rows)+1L]]<-data.frame(raw_row=ii,status=statuses)
+}
+staff<-do.call(rbind,training_rows)
+independent_training<-rep(NA_real_,nrow(r))
+means<-tapply(staff$status,staff$raw_row,valid_mean)
+independent_training[as.integer(names(means))]<-means
+ta<-read.csv(file.path(data_dir,"training_facility_audit.csv"))
+ti<-match(ta$fid,f$fid)
+verify("Independent raw staff training reconstruction",same(ta$training_proportion,independent_training[ri[ti]]))
+verify("Explicit Don't know excluded consistently",sum(ta$training_n_dont_know)==57&&sum(ta$training_n_known)==15116)
+verify("Conflicting or malformed records flagged",sum(ta$training_n_conflict)==6&&sum(ta$training_n_malformed)==2)
+verify("Training known-status facility coverage",sum(is.finite(ta$training_proportion))==2811&&all(ta$training_n_trained<=ta$training_n_known))
+verify("Text encoding agrees with recorded topic checkboxes",sum(ta$training_n_overlap_staff)==3696&&sum(ta$training_n_compared_topics)==18480&&sum(ta$training_n_topic_disagreements)==0)
+f$offering<-bool(f$one_larc_3_sa_offer);f$free<-as.numeric(f$p_free_prod);f$training<-independent_training[ri]
 f$larc_stock<-bool(f$one_larc_stockin);f$stockout_burden<-as.numeric(f$p_any_stockout);f$daily_provision<-daily
 cl<-readr::read_csv(cleaned,show_col_types=FALSE);ci<-match(f$fid,as.character(cl$fid))
 verify("Stockout source coverage",!anyNA(ci))

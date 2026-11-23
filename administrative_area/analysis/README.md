@@ -1,5 +1,10 @@
 # Administrative-area analysis
 
+Start with the [input and separate-run guide](../../docs/COLLEAGUE_RUN_GUIDE.md) for the exact dataset
+names, dependency setup, commands and expected outputs. The [full ZIP inventory](../../docs/INPUTS.md)
+lists all 56 members; the 14 primary inputs alone are not a replacement bundle.
+[Script dependencies and data contracts](../../docs/SCRIPT_REFERENCE.md) are also summarized in R headers.
+
 These four country modules generate the current reports using whole-area facility
 profiles, without a Rural/Urban supply split. They extend the existing verified
 administrative-area join and reaggregate only confirmed FP providers before
