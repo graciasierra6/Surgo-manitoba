@@ -2,26 +2,96 @@
 
 This project links SURGO women’s survey records to University of Manitoba facility characteristics and examines demand barriers, supply constraints and modern contraceptive use.
 
-**Choose either workflow below. Both run the same analysis and produce the HTML reports, maps, tables, models and implemented sensitivity analyses.** Input data are confidential and supplied separately in one ZIP; no input datasets belong in this repository.
+## Start here: choose how you want to run a report
 
-## Find your report and R script
-
-There are **seven reports**. Aggregate reports assign the whole LGA/département/district facility profile to each woman. Rural/Urban reports assign her matching area–residence profile, with a flagged whole-area fallback when the exact group has no confirmed FP providers. Sindh has no Rural/Urban report because its SURGO data lack a documented residence field.
-
-| Setting | Aggregate: whole area | Rural/Urban: area and residence |
+| Approach | Use this if… | Instructions |
 |---|---|---|
-| Lagos | [R script](aggregate/lagos/Lagos_analysis_aggregate.R) · [HTML report](aggregate/lagos/Lagos_analysis_aggregate.html) | [R script](rural_urban/lagos/Lagos_rural_urban_updated.R) · [HTML report](rural_urban/lagos/Lagos_rural_urban_updated.html) |
-| Senegal | [R script](aggregate/senegal/Senegal_analysis_aggregate.R) · [HTML report](aggregate/senegal/Senegal_analysis_aggregate.html) | [R script](rural_urban/senegal/Senegal_rural_urban_updated.R) · [HTML report](rural_urban/senegal/Senegal_rural_urban_updated.html) |
-| Côte d’Ivoire | [R script](aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R) · [HTML report](aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.html) | [R script](rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R) · [HTML report](rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.html) |
-| Sindh | [R script](aggregate/sindh/Sindh_analysis.R) · [HTML report](aggregate/sindh/Sindh_analysis.html) | Not available |
+| **1. RStudio** | You normally open and run ordinary R scripts. | [Open a script, click Source and select the input ZIP](#approach-1-rstudio). |
+| **2. Claude Code or terminal** | You want the existing repository scripts executed for you, or prefer terminal commands. | [Run the repository with the complete input ZIP](#approach-2-claude-code-or-terminal). |
 
-## Option 1 — run from a terminal or PowerShell
+**Both approaches execute the same R analyses.** For a slower, step-by-step walkthrough, open [How to run the reports](README_RUN_REPORTS.md). It includes a copy-and-paste request for Claude Code, the exact country folders and filenames, output locations and help with common first-run problems.
 
-Use this route to rebuild the complete project or automate runs. Download/clone the repository and open a terminal **in its top folder**, the folder containing this README, `setup.R` and `run_all.R`. Keep the repository folders together.
+## Where are the input data?
 
-**Software:** R (validation used 4.6.0), Python 3 and Pandoc. RStudio includes Pandoc for its own R sessions; a terminal must also be able to locate Pandoc, or use `--pandoc-dir`. Python is detected as `python3`, `python` or the Windows `py` launcher. [Software details and troubleshooting](docs/RUN_GUIDE.md).
+**The datasets are in the separately supplied `SURGO_Manitoba_linkage_inputs_complete.zip`. They are not stored on GitHub.** Obtain that complete ZIP from the project team and keep it zipped. The scripts check it, extract the inputs and select the files they need. You do not need to load individual datasets manually or supply a prejoined dataset.
 
-### macOS Terminal
+Inside the ZIP, original women’s data are in `inputs/surgo/` and detailed facility data are in `inputs/uom/`. Cleaned summaries, archetypes, processed references and geographic files are also included. [Exact dataset filenames](docs/DATASET_FILENAMES.md) · [Complete ZIP inventory](docs/INPUTS.md).
+
+**If you download this repository using Code → Download ZIP, extract the repository ZIP to obtain the code. Leave the confidential input ZIP zipped.**
+
+## Aggregate analyses: scripts and published HTML reports
+
+Start in [aggregate/](aggregate/). Each country folder contains its R script, published HTML, R Markdown template and country README. Aggregate reports assign each woman the FP-provider facility averages for her whole LGA, département or district.
+
+| Setting | Folder containing the script and report | R script to run | Published HTML to compare against |
+|---|---|---|---|
+| Lagos | [aggregate/lagos/](aggregate/lagos/) | [Lagos_analysis_aggregate.R](aggregate/lagos/Lagos_analysis_aggregate.R) | [Lagos_analysis_aggregate.html](aggregate/lagos/Lagos_analysis_aggregate.html) |
+| Senegal | [aggregate/senegal/](aggregate/senegal/) | [Senegal_analysis_aggregate.R](aggregate/senegal/Senegal_analysis_aggregate.R) | [Senegal_analysis_aggregate.html](aggregate/senegal/Senegal_analysis_aggregate.html) |
+| Côte d’Ivoire | [aggregate/cotedivoire/](aggregate/cotedivoire/) | [Cote_dIvoire_analysis_aggregate.R](aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R) | [Cote_dIvoire_analysis_aggregate.html](aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.html) |
+| Sindh | [aggregate/sindh/](aggregate/sindh/) | [Sindh_analysis.R](aggregate/sindh/Sindh_analysis.R) | [Sindh_analysis.html](aggregate/sindh/Sindh_analysis.html) |
+
+To view an HTML report from GitHub, download the actual file using **Download raw file**, then open the downloaded `.html` in your browser. GitHub may otherwise show its source code.
+
+## Rural/Urban analyses: scripts and published HTML reports
+
+These assign the matching area–residence facility profile, with a flagged whole-area fallback when the exact group has no confirmed FP providers. Sindh has no Rural/Urban report because its SURGO data lack a documented residence variable.
+
+| Setting | Folder | R script to run | Published HTML |
+|---|---|---|---|
+| Lagos | [rural_urban/lagos/](rural_urban/lagos/) | [Lagos_rural_urban_updated.R](rural_urban/lagos/Lagos_rural_urban_updated.R) | [Lagos_rural_urban_updated.html](rural_urban/lagos/Lagos_rural_urban_updated.html) |
+| Senegal | [rural_urban/senegal/](rural_urban/senegal/) | [Senegal_rural_urban_updated.R](rural_urban/senegal/Senegal_rural_urban_updated.R) | [Senegal_rural_urban_updated.html](rural_urban/senegal/Senegal_rural_urban_updated.html) |
+| Côte d’Ivoire | [rural_urban/cotedivoire/](rural_urban/cotedivoire/) | [CotedIvoire_rural_urban_updated.R](rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R) | [CotedIvoire_rural_urban_updated.html](rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.html) |
+
+## Before running either approach
+
+The execution environment needs **R, Python 3.9 or later and Pandoc**. Validation used R 4.6.0 and the recorded package versions. RStudio normally supplies Pandoc for its own R sessions; terminal runs must also be able to locate it. Required R packages install automatically for individual scripts. First-time package and public-resource downloads require internet access. [Software details and troubleshooting](docs/RUN_GUIDE.md).
+
+## Approach 1: RStudio
+
+**You only need the desired R script and the complete input ZIP, plus the software above.** You do not need to write data-loading commands.
+
+1. Choose a script from either report table above. Download the actual `.R` file using **Download raw file**, or find it in your downloaded copy of the repository.
+2. Open RStudio and select **Session → Restart R**. Then select **File → Open File** and open the script.
+3. Click **Source** at the top of the script editor. This runs the entire file from beginning to end.
+4. When the file-selection window opens, select **`SURGO_Manitoba_linkage_inputs_complete.zip`**.
+5. Let the script install/load its packages, prepare and join the data, run the analysis and checks, and build the HTML. Wait for **Completed** and the `>` prompt to return.
+6. Open the new HTML at the output location printed in the Console. For Lagos aggregate, this is `output/rebuilt/aggregate/lagos/Lagos_analysis_aggregate.html`.
+
+In a complete repository, outputs are created inside the repository. With one separately downloaded R script, they are created inside that script’s folder. Scripts can run independently and in any country order.
+
+Each country script contains its R calculations, joins, recodes, scoring, models, implemented sensitivities and package-version records. A downloaded single script automatically obtains the matching public map/layout files from a pinned, checksum-verified version; a full repository uses its local `support/` files. No prejoined dataset or separate R helper script is needed for an individual report.
+
+[Full RStudio walkthrough and all aggregate output filenames](README_RUN_REPORTS.md#approach-1-rstudio).
+
+## Approach 2: Claude Code or terminal
+
+### Have Claude Code execute the existing scripts
+
+Claude Code can read files and execute commands. It can therefore follow this repository’s run instructions for you. [Official product documentation](https://code.claude.com/docs/en/overview).
+
+Give it **the repository link, access to the complete input ZIP and the report you want**. A GitHub link alone supplies the code; the confidential data must be available separately in the environment where the scripts will run.
+
+Ask it to:
+
+1. Obtain a working copy of `https://github.com/graciasierra6/Surgo-manitoba` and record the commit used.
+2. Read this README, [the step-by-step guide](README_RUN_REPORTS.md), [the technical run guide](docs/RUN_GUIDE.md) and the selected script’s input/package notes.
+3. Confirm the input ZIP and required software are accessible, and restore the recorded R packages following `setup.R`.
+4. Execute the selected `.R` script with the ZIP supplied through `--input-zip`. The four aggregate script paths are listed above. Each script does its own data loading, joins and analysis.
+5. Check completion and verification results, compare the rebuilt report with its published counterpart, and return the generated HTML location and any differences. Use `output/rebuilt/` for new reports and preserve the published files.
+
+For one report, copy this request:
+
+> Reproduce Lagos aggregate from https://github.com/graciasierra6/Surgo-manitoba using SURGO_Manitoba_linkage_inputs_complete.zip, which I will make accessible to this session. Follow README_RUN_REPORTS.md and docs/RUN_GUIDE.md. Check the software and restore recorded dependencies, then execute aggregate/lagos/Lagos_analysis_aggregate.R with --input-zip. Use the existing analytical definitions. Report the commit, command executed, completion status, checks and generated HTML location. Identify any blockers or differences; do not claim reproduction without execution. Keep inputs and working data out of Git. Do not edit the published reports, commit or push.
+
+For all four aggregate reports, use [the ready-to-copy four-report request](README_RUN_REPORTS.md#copy-and-paste-this-request-for-all-four-aggregate-reports). For the complete seven-report rebuild and supplementary checks, use `run_all.R`. These are different run scopes; `run_all.R` also rebuilds Rural/Urban reports.
+
+The underlying scripts have been validated on macOS. A separate Claude Code execution has not been tested as part of this documentation, and a native Windows end-to-end run remains unverified. The assistant needs file and command-execution access; discussing the code alone does not rebuild reports.
+
+### Or run the terminal commands yourself
+
+Download/clone the complete repository and open macOS Terminal or Windows PowerShell **in its top folder**, containing `README.md`, `setup.R` and `run_all.R`.
+
+**macOS — complete rebuild:**
 
 ```sh
 Rscript setup.R
@@ -30,7 +100,7 @@ IFS= read -r INPUT_ZIP
 Rscript run_all.R --input-zip "$INPUT_ZIP"
 ```
 
-### Windows PowerShell
+**Windows PowerShell — complete rebuild:**
 
 ```powershell
 Rscript setup.R
@@ -38,58 +108,35 @@ $InputZip = Read-Host "Input ZIP file"
 Rscript run_all.R --input-zip "$InputZip"
 ```
 
-Paste the actual ZIP location without surrounding quotes when asked; spaces in the location are supported. `setup.R` is the one-time environment restore. The complete run rebuilds both joins, all seven country reports and eight supplementary checks, then compares results with the validated references.
+When asked, paste the actual input ZIP location without surrounding quotes. Spaces in the location are supported. `setup.R` restores the package environment. The complete run prepares both joins, seven country reports and eight supplementary checks, then compares results with the validated references.
 
-**Where are the results?** Open `output/rebuilt/`. It mirrors the report table above, for example `output/rebuilt/aggregate/lagos/Lagos_analysis_aggregate.html`. Published reports in the source folders are preserved. Private calculations/joins go to ignored `output/build/`; verified extracted inputs go to ignored `data/cache/`.
-
-To run **only one report**, use its R script instead of `run_all.R`. It installs/restores its own R dependencies automatically; `setup.R` is not required for this individual route:
+To run **one report**, replace `run_all.R` with its script path, for example:
 
 ```sh
 Rscript aggregate/lagos/Lagos_analysis_aggregate.R --input-zip "$INPUT_ZIP"
 ```
 
-In PowerShell, use the same command with `"$InputZip"`. Commands for all seven reports and optional software/output parameters are in the [run guide](docs/RUN_GUIDE.md).
+PowerShell uses `"$InputZip"`. Individual scripts also handle their own package setup, so `setup.R` is optional for the single-report route. [Commands for every report and optional arguments](docs/RUN_GUIDE.md).
 
-## Option 2 — open one script in RStudio
+## Where are the new HTML reports?
 
-Use this route when you prefer ordinary R scripts and a file-selection window. **You do not need to type an input location or select a prejoined dataset.**
+New reports go under **`output/rebuilt/`**, preserving the same workflow/country folders and HTML filenames shown in the report tables. For example:
 
-### Choose your independent R script
+```text
+output/rebuilt/aggregate/lagos/Lagos_analysis_aggregate.html
+output/rebuilt/aggregate/senegal/Senegal_analysis_aggregate.html
+output/rebuilt/aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.html
+output/rebuilt/aggregate/sindh/Sindh_analysis.html
+```
 
-Download **one** of these scripts for the report you want. Each contains its own R analysis and automatic package setup; use it with the confidential input ZIP.
-
-| Setting | Aggregate: whole area | Rural/Urban: area and residence |
-|---|---|---|
-| Lagos | [Lagos aggregate R script](aggregate/lagos/Lagos_analysis_aggregate.R) | [Lagos Rural/Urban R script](rural_urban/lagos/Lagos_rural_urban_updated.R) |
-| Senegal | [Senegal aggregate R script](aggregate/senegal/Senegal_analysis_aggregate.R) | [Senegal Rural/Urban R script](rural_urban/senegal/Senegal_rural_urban_updated.R) |
-| Côte d’Ivoire | [Côte d’Ivoire aggregate R script](aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R) | [Côte d’Ivoire Rural/Urban R script](rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R) |
-| Sindh | [Sindh aggregate R script](aggregate/sindh/Sindh_analysis.R) | Not available |
-
-### Open the script and run it
-
-1. Obtain the confidential complete input ZIP from the project team. Keep it as a ZIP; the script verifies and extracts it automatically.
-2. Open the independent R script linked in this Option 2 table. In GitHub, download the actual `.R` file using **Raw → Download** (or use the downloaded repository). Avoid saving the GitHub webpage as an R file.
-3. Start a fresh RStudio session and open that `.R` file: **File → Open File**.
-4. Click **Source** in the script-editor toolbar. This runs the entire script from top to bottom.
-5. In the native file-selection window, choose the confidential input `.zip` file.
-6. Wait for package setup, analysis and report generation. The script automatically installs missing/different R dependencies at their recorded versions, loads them, constructs the joins and supply averages, runs the models and sensitivities, verifies results, and builds the HTML/maps.
-7. Read the **Report output** location printed in the Console. Open the resulting `.html` in your browser. `RESULTS.json` identifies the result files. In a full repo, the default is the same `output/rebuilt/<workflow>/<setting>/` used by the CLI.
-
-### Running a single downloaded R script
-
-Each country script includes its own R calculations, join code, recodes, scores, model code, sensitivity analyses and package-version records. It does not source another R analysis file and does not require a separate `renv.lock` or prejoined dataset.
-
-For HTML/maps it also needs public boundaries and presentation files. **Inside the full repository**, these come from `support/`. **With just one downloaded R script**, the script automatically downloads the matching public display files from a pinned repository version and verifies their checksums. You do not need to organize a `report_assets/` folder manually. Only public files are downloaded; confidential survey data are never transmitted.
-
-R and the required R packages cannot replace **Python 3 and Pandoc**, which the existing HTML renderer uses. Install Python 3 before running; RStudio normally supplies Pandoc automatically. First-time package/resource downloads need internet access. If a required package cannot install, the Console identifies the dependency; fix the installation and click Source again. A loaded conflicting version may require **Session → Restart R** before rerunning.
-
-The first section of each R script repeats these instructions and lists the exact source datasets. Its simple settings include `input_zip`, `output_dir` and `render_html <- TRUE`. For numerical outputs without HTML, set `render_html <- FALSE` (CLI: `--no-html`); that route requires only R, its packages and the inputs.
+Published reports remain in `aggregate/` or `rural_urban/`. `RESULTS.json` identifies the result files for each new run. Private calculations, joined data and models go to ignored `output/build/`; verified extracted inputs go to ignored `data/cache/`. Keep those working folders private.
 
 ## Repository layout — what each place is for
 
 ```text
 Surgo-manitoba/
   README.md                 Start here: both ways to run
+  README_RUN_REPORTS.md     Detailed beginner guide and copyable execution request
   setup.R                   One-time package restore for the complete CLI run
   run_all.R                 Complete CLI rebuild and report comparison
   renv.lock                 Recorded R environment

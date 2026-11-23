@@ -1,6 +1,15 @@
 # Running the analyses
 
-Start with [the main README](../README.md) for the two workflows. This page provides commands, locations and troubleshooting.
+Start with [the main README](../README.md) or the [step-by-step beginner guide](../README_RUN_REPORTS.md). Both label the same two approaches:
+
+| Approach | What you do | Instructions |
+|---|---|---|
+| 1. RStudio | Open one R script, click Source and select the complete input ZIP. | [RStudio walkthrough](../README_RUN_REPORTS.md#approach-1-rstudio). |
+| 2. Claude Code or terminal | Have the repository scripts executed with the input ZIP, or type the commands yourself. | [Execution steps and copyable request](../README_RUN_REPORTS.md#approach-2-claude-code-or-terminal). |
+
+The beginner guide gives the exact [aggregate country folders, R scripts and published HTML filenames](../README_RUN_REPORTS.md#aggregate-analyses-exact-github-folders-scripts-and-html-reports). The confidential data are supplied in `SURGO_Manitoba_linkage_inputs_complete.zip`, separately from GitHub. A command-executing assistant needs access to that ZIP and the required software; the repository link alone does not run an analysis.
+
+This page provides the technical commands, runtime parameters and troubleshooting for both approaches.
 
 ## Software
 

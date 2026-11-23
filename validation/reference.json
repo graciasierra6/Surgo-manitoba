@@ -206,7 +206,7 @@
     ".gitignore": "18fc0a1b35e584072e809396c071329de8a20bdbc877495cd26809db5331475c",
     "DESCRIPTION": "5a5a7d411a472182da533ca8933f4baab11e53fb7aab0cd6049a5c778c40a245",
     "LICENSE-NOTICE": "e0ceea6db1e198504cce6e55027fb920a3cba5eb422f4863c5b65cf31208b544",
-    "README.md": "c8df6ed7035a0e3044d745af198a330f61cb049f2cad686f9ea1a0dd74cb34d7",
+    "README.md": "5face61831971b20d8986de811da681d81446f152de4aeec735cf223ad4523d4",
     "aggregate/README.md": "a002bc0c79ace4831f78fdefaf557e4e0e090f77525a8ed4ab09493a3bd8dba2",
     "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R": "5ad90cc997011bfe2554084482d0a85783204a02b74f4b865677c11bd2ff56c8",
     "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.Rmd": "8672438d829687e6e8520e7752b730d4fa3654e0d9948167e32ada9c043beac7",
@@ -228,7 +228,7 @@
     "data_checks/score_profile_examples.Rmd": "d34d83304fbe5bc9c13f3e9fccc1fd923e6f5a234671e9bd8e5d5c0e78b89485",
     "docs/DATASET_FILENAMES.md": "7f277e2e15b6760f0923851c9018d4461d5d09f563ff0c680211c24a149b61cc",
     "docs/INPUTS.md": "6b84669af874470d163bba40e5a209e1bdd5e67fcdd65aa71d2629010fad3373",
-    "docs/RUN_GUIDE.md": "a7f23982ce06f4d6450f3a6f147f27d50b524d8937cd19e15f2c2985e1261f93",
+    "docs/RUN_GUIDE.md": "a460c73e4672015938e540126688a1a14c5767f681b09fdd8db30e6993f34eaa",
     "docs/SURVEY_AND_SCORING.md": "9e2f702afe27d0a68a9c50874c8bd79289f0e7db4194df5bc4f0df44b5301e66",
     "renv.lock": "b22e1d32e21a3819bc2afa21f3ea3c5ff67a22dcec76265a6f355f087b01a6a6",
     "run_all.R": "dbabd300f4ff22a9a354266974474c4cb647c6d64b1fcbad2027179690bf54af",
@@ -284,7 +284,8 @@
     "support/assets/manifest.json": "e5ed0bbcc8c9df0c7ab4b004b0ed86a11b2adce4903f9f5369d87c67f707e7e5",
     "docs/input_bundle_manifest.json": "e38184b834a195ad4a4636a226becc8770ec7e208a28058009f3d60595901e0d",
     "docs/dataset_catalog.json": "1743d9bd6a37a83b3376764e67f0291ad762cbfaf5f5cb83140dfcc5e5e3de2d",
-    "validation/test_entrypoints.R": "96419eb5bc2bfb7777eb77605802c759a7fa06681ab724a187fbf5d54f7720a9"
+    "validation/test_entrypoints.R": "96419eb5bc2bfb7777eb77605802c759a7fa06681ab724a187fbf5d54f7720a9",
+    "README_RUN_REPORTS.md": "e3b6ed1aea51eec1760a39c253ad798263afb99393f74ee6687ad56d2a625862"
   },
   "previous_location_map": {
     "reports/Lagos_analysis_aggregate.html": "aggregate/lagos/Lagos_analysis_aggregate.html",
