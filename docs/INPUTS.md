@@ -6,10 +6,9 @@ when matching files to Databricks sources later; no source links are assigned ye
 
 For a concise list of the 14 primary analytical inputs, required supporting files,
 separate country commands and expected outputs, use the
-[colleague run guide](COLLEAGUE_RUN_GUIDE.md). The
+[colleague run guide](RUN_GUIDE.md). The
 [dataset catalog](dataset_catalog.json) records exact members, keys and pending
-Databricks source mappings; [SCRIPT_REFERENCE.md](SCRIPT_REFERENCE.md) documents
-R dependencies and input contracts. This page remains the full checksum inventory.
+Databricks source mappings; the report scripts document their R dependencies and input contracts. This page remains the full checksum inventory.
 
 The reproducible entry point accepts one authorized ZIP through `--input-zip` or
 `SURGO_MANITOBA_INPUT_ZIP`. Obtain that ZIP through the project’s approved data-sharing
@@ -63,9 +62,9 @@ minimum set directly read by one country’s analysis.
    woman’s responses or the newly aggregated FP-provider supply profiles.
 
 The complete runner also uses the repository’s versioned map assets and package
-lockfile. Historical reports retrieve a checksummed public source revision, documented
-in [REPRODUCIBILITY.md](../REPRODUCIBILITY.md#historical-outputs); this is code, not an
-additional private data download. Dependencies and Pandoc must also be installed.
+lockfile. Earlier report/code versions remain in Git history. The current `run_all.R` builds
+the seven country reports and eight current supplementary outputs; it does not
+fetch historical code. Dependencies and Pandoc must also be installed.
 
 ## Complete ZIP membership
 

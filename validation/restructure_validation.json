@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-22",
+  "all_passed": true,
+  "scope": "Simplified layout and consolidated country scripts; today’s validated scientific results retained.",
+  "prior_layout_commit": "6a3a382010db2cd4fd083a5aa766b85d466ad9dc",
+  "published_country_reports": 7,
+  "published_data_check_reports": 2,
+  "generated_only_diagnostics": 6,
+  "fresh_current_outputs_rebuilt": 15,
+  "byte_identical_to_established_validated_reference": 15,
+  "country_analysis_and_definition_blocks_compared": 72,
+  "block_equivalence_basis": "R expression-tree comparison against the pre-restructure programs after documented source/path plumbing. Statistical definitions and calculations were retained.",
+  "source_r_files_before": 127,
+  "source_r_files_after": 18,
+  "country_checks": {
+    "aggregate/lagos/Lagos_analysis_aggregate.R": {
+      "all_passed": true,
+      "check_count": 2018,
+      "source_rows": 4555,
+      "need_n": 2159,
+      "model_n": 1896,
+      "fp_providers_only": true,
+      "health_PB2A_only": true,
+      "no_random_effects": true
+    },
+    "aggregate/senegal/Senegal_analysis_aggregate.R": {
+      "all_passed": true,
+      "check_count": 567,
+      "source_rows": 7169,
+      "need_n": 1905,
+      "model_n": 1558,
+      "fp_providers_only": true,
+      "health_PB2A_only": true,
+      "no_random_effects": true
+    },
+    "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R": {
+      "all_passed": true,
+      "check_count": 1140,
+      "source_rows": 10859,
+      "need_n": 4292,
+      "model_n": 3951,
+      "fp_providers_only": true,
+      "health_PB2A_only": true,
+      "no_random_effects": true
+    },
+    "aggregate/sindh/Sindh_analysis.R": {
+      "all_passed": true,
+      "check_count": 2428,
+      "source_rows": 10364,
+      "need_n": 3274,
+      "model_n": 3115,
+      "fp_providers_only": true,
+      "health_PB2A_only": true,
+      "no_random_effects": true
+    },
+    "rural_urban/lagos/Lagos_rural_urban_updated.R": {
+      "all_passed": true,
+      "check_count": 2143,
+      "source_rows": 4555,
+      "need_n": 2159,
+      "model_n": 1896,
+      "fp_providers_only": true,
+      "health_PB2A_only": true,
+      "no_random_effects": true
+    },
+    "rural_urban/senegal/Senegal_rural_urban_updated.R": {
+      "all_passed": true,
+      "check_count": 1158,
+      "source_rows": 7169,
+      "need_n": 1905,
+      "model_n": 1558,
+      "fp_providers_only": true,
+      "health_PB2A_only": true,
+      "no_random_effects": true
+    },
+    "rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R": {
+      "all_passed": true,
+      "check_count": 2979,
+      "source_rows": 10859,
+      "need_n": 4292,
+      "model_n": 3951,
+      "fp_providers_only": true,
+      "health_PB2A_only": true,
+      "no_random_effects": true
+    }
+  },
+  "aggregate_regression_sensitivity_checks": {
+    "lagos": {
+      "all_passed": true,
+      "check_count": 162,
+      "main_n": 1896,
+      "supply_available_n": 2132
+    },
+    "senegal": {
+      "all_passed": true,
+      "check_count": 226,
+      "main_n": 1558,
+      "supply_available_n": 1893
+    },
+    "cotedivoire": {
+      "all_passed": true,
+      "check_count": 402,
+      "main_n": 3951,
+      "supply_available_n": 4185
+    },
+    "sindh": {
+      "all_passed": true,
+      "check_count": 214,
+      "main_n": 3115,
+      "supply_available_n": 3263
+    }
+  },
+  "total_country_numerical_checks": 12433,
+  "total_regression_sensitivity_checks": 1004,
+  "shared_methods_unit_checks": "Passed weighted means, missing denominators, svyglm/GLM point equivalence, CR2 covariance and Satterthwaite comparisons.",
+  "training_unit_checks": "Passed 16 status/encoding/conflict/denominator scenarios.",
+  "input_bundle_members": 56,
+  "input_dataset_files_in_release": 0,
+  "original_input_file_names_preserved": true,
+  "private_locations_runtime_only": true,
+  "portability": "Full build executed from a separate project directory with caller-supplied input/work/cache/output locations; no developer cache or pre-existing join/model was required.",
+  "sampling_design": "SURGO weights; ids=~1; no strata/FPC; separate administrative-area CR2 inference. Facility means are unweighted.",
+  "regression_sensitivity_scope": "Four aggregate reports; residence reports retain their existing scoring/PCA sensitivities.",
+  "report_scope": "All 15 current outputs; historical code/reports retained in Git history rather than duplicated as active entry points."
+}

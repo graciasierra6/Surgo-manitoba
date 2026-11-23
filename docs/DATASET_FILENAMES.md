@@ -120,4 +120,4 @@ They remain part of the validated input bundle.
 | `uom_data.RData` | `uom_pipeline/uom_data.RData` |
 
 For file purposes and checksums, see [the full input inventory](INPUTS.md).
-For separate run commands and outputs, see [the colleague run guide](COLLEAGUE_RUN_GUIDE.md).
+For separate run commands and outputs, see [the colleague run guide](RUN_GUIDE.md).

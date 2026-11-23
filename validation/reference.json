@@ -1,0 +1,306 @@
+{
+  "schema_version": 1,
+  "scope": "Current validated results preserved during repository simplification. Numerical definitions and report findings are unchanged.",
+  "reports": {
+    "aggregate/lagos/Lagos_analysis_aggregate.html": {
+      "published_sha256": "8e2c6df8d89a18633bddf9dec87e4d018872c97123394fd8b6ff723531309a10",
+      "validated_build_sha256": "8e2c6df8d89a18633bddf9dec87e4d018872c97123394fd8b6ff723531309a10",
+      "content_signature": {
+        "visible_text": "ee5266c1651d7d3494fc320019a131a55714d8f0d2d89d78911ef8083b83e4fd",
+        "scripts": "d10b8b9b903b33a3e9308eb3b6bd6c59d1d55677d79dca2defd9c79dd02b453a",
+        "downloadable_values": "55116c11d1fb7bc7be7def7794cf5155fcaf4f9eee7bc2ebf1f159a63b9e05cd",
+        "figure_values": "25bc552191c6f9a2e9592f3bf4a25ff22b903435d547f91293e99d1c22a520c3",
+        "embedded_documents": "ed943d84bc62d0dbefcf928b03b41bd1a3b912d103681bd22566f63ffee83eb0"
+      },
+      "previous_reference_sha256": "d937c45f28f52c1b667a12240556f5941c9acca81e4c7a19323c0f89299b57cc",
+      "previous_published_sha256": "a59b9e15879de576635178a23f6c78782f54d0b5cab956e7667fff6fafda20cf"
+    },
+    "aggregate/senegal/Senegal_analysis_aggregate.html": {
+      "published_sha256": "7631757a6b79933813089e82e22367292c06dffe05f53bbcccd2dad9c13aa396",
+      "validated_build_sha256": "7631757a6b79933813089e82e22367292c06dffe05f53bbcccd2dad9c13aa396",
+      "content_signature": {
+        "visible_text": "f39e4f3327caea3cf7c861c6a509e88fba2ac5223e63deda4b1ced0f518d069a",
+        "scripts": "dcd47f893492cf4e1e16b7408215e2a58502fd3ab6fcdddd544d63e6cd2c4c83",
+        "downloadable_values": "b2b17779553efe27aec1dc3140b46d729ff0e57c8c7435382cf5b4275b7bf92f",
+        "figure_values": "b139bf6e276f86832fb617089203948e04c382a4876f194ed63d566bbbdbda98",
+        "embedded_documents": "5a7eba6df7a79d626555a2f57c38ab59cb5b5acad83c16b166f50eee299a6b9f"
+      },
+      "previous_reference_sha256": "868d01d122960b1d589157da787a973d65cdc279d09fcd6b60a58c2e4a6400c9",
+      "previous_published_sha256": "f1775f65ef307cbda146c699f13148b1702e41cce7ec93ce065b8d1a6b8f1ba2"
+    },
+    "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.html": {
+      "published_sha256": "9460a0520b442ae6e64af7d1680da9537994559d995a8a9e6e90a33f3120d4c8",
+      "validated_build_sha256": "9460a0520b442ae6e64af7d1680da9537994559d995a8a9e6e90a33f3120d4c8",
+      "content_signature": {
+        "visible_text": "c675a20a1578612b3e91f8976e4864ed2598f16382b895f213fa1b82d8c57ba9",
+        "scripts": "d1cfcd6ae776ab2b54cbf4c7638044d02f0ddc6a42392b679a119c942b3d3e39",
+        "downloadable_values": "16ac946f14a7313cad3c29effa2912bad8bcce657dd6b3f838dc6511b4a7d3e4",
+        "figure_values": "527e75445fb70ffc55ca1438be31ee5c149073963d3746cccc4fd61dae9566be",
+        "embedded_documents": "9c9cdb7f25dfe9b1aaab7b168769d435555fdf5f9a6c86059774ca20bcbc34bc"
+      },
+      "previous_reference_sha256": "d0482cb1d080b08fe4dc7357da3b3e478fca91d0e77f8ea79ae2b76c675de3b3",
+      "previous_published_sha256": "1ce33f062b496091623bd2da381576db885fe20ede793255b1c2e5aa5c85a08f"
+    },
+    "aggregate/sindh/Sindh_analysis.html": {
+      "published_sha256": "567e7c68e3f7da5ee0d6f1e09d097de0a8d10bbc2267018b1f9ef4d53e16a2f7",
+      "validated_build_sha256": "567e7c68e3f7da5ee0d6f1e09d097de0a8d10bbc2267018b1f9ef4d53e16a2f7",
+      "content_signature": {
+        "visible_text": "5b96f14fda731e4cba2ac036c5bb84bdd4716c5901c8f94adf67a4eccf054c89",
+        "scripts": "d44c4e4895e31de09c579d83ed40fe7ccb9de830a477549d6069a7391a87f327",
+        "downloadable_values": "af18183673a53760e9a563f69de7b58617ee775d9f646344441bea323026fbc4",
+        "figure_values": "06fe66192a17f4003afff79bca8018b002594d218441406f774f654b3de90448",
+        "embedded_documents": "3f23c5729983e833f8ec68b42dfd260c41d3f15a2c9f08a0919f0b63c668261f"
+      },
+      "previous_reference_sha256": "88dc4a9f85c61750554cb128ecaa68d4b2273847ab7ffffb273bac8b4217a18f",
+      "previous_published_sha256": "930d51bc42f0d861e0a359cb8bedc95dd86c923d9034a2b1680becabe2ea5627"
+    },
+    "rural_urban/lagos/Lagos_rural_urban_updated.html": {
+      "published_sha256": "253c4c97929078bb80dca2c513e8e844ae1bcd4c63fa9c60397ccfa3da6258d6",
+      "validated_build_sha256": "253c4c97929078bb80dca2c513e8e844ae1bcd4c63fa9c60397ccfa3da6258d6",
+      "content_signature": {
+        "visible_text": "aa5ce1364e32d1be9218eb46de99c5923d6944247767c102be508ea99ccf9f65",
+        "scripts": "d10b8b9b903b33a3e9308eb3b6bd6c59d1d55677d79dca2defd9c79dd02b453a",
+        "downloadable_values": "dc1520e5391b8cef52efe4cefa254d10855eb0aa4b86669f9766325182b545c8",
+        "figure_values": "bbf4b1e3c772fd0ed82583fea42bc10e2535b36b1e6711fc288ce55a7dfc6ed9",
+        "embedded_documents": "17cfdd6aada9cf9c5ffb1507c01d7ff4bf6e4cc628501a5e26e6f41012c734e9"
+      },
+      "previous_reference_sha256": "ff4a9d107d10a8d2faba949266a785a4eac3e2e7bb4d7a121195b23e0fdcb8ab"
+    },
+    "rural_urban/senegal/Senegal_rural_urban_updated.html": {
+      "published_sha256": "3ee6fe629c7de620f70310c8cd28afd0cdb079f378409e1472577774a5d896ab",
+      "validated_build_sha256": "3ee6fe629c7de620f70310c8cd28afd0cdb079f378409e1472577774a5d896ab",
+      "content_signature": {
+        "visible_text": "81d9a1b0e41b398913ba0b16d8932cd6208e78a3ca293db66db443e3fa3d0368",
+        "scripts": "8468172c2dd70f79572b4833dceb7383536899ecba847c8e842b63ddfd57e4b1",
+        "downloadable_values": "d5e62fb79783d738ed1aa1aa5af960042af346f6226559a1d38a2371eca2bf15",
+        "figure_values": "9b89525a733bf6616118fdfda6411f6d4a917b9aee77eeeaa90f95ab24a44900",
+        "embedded_documents": "0e0ab8ee173b868f456eb01cfdd188a95fda24ea4016fccd57457699aec490fe"
+      },
+      "previous_reference_sha256": "8c8f5daf4ac00468f1ec529c000f6de2a405b8d3150e998c6b24eeba42940974"
+    },
+    "rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.html": {
+      "published_sha256": "f0626143af7f57f2cc52552bc40e43058e6c6c4a38ca03f179cb07c6fdb73518",
+      "validated_build_sha256": "f0626143af7f57f2cc52552bc40e43058e6c6c4a38ca03f179cb07c6fdb73518",
+      "content_signature": {
+        "visible_text": "07aa74d4787b8f80ee5ee464d65336f55725dbab4fea0165fc28d701a9a26acb",
+        "scripts": "d1cfcd6ae776ab2b54cbf4c7638044d02f0ddc6a42392b679a119c942b3d3e39",
+        "downloadable_values": "9841dac83917c63422fdc175f81ba93f33a275081740b14ed97f2a8853e85243",
+        "figure_values": "0324959690b03b43199293dc840190d812081987920f3727aabdfd9b5d21e70e",
+        "embedded_documents": "62b0f1edbc20740650d434f3c245c587ab89fe56ab3353819b62245fa18ea7ef"
+      },
+      "previous_reference_sha256": "2c585cdd4245053029cb8832cd5fd6f26a88cd9bcfb8caa3c7f3992d1296da53"
+    },
+    "generated_checks/Demand_population_classification_check.html": {
+      "published_sha256": "64e4d9fc6758aaa899b954a74bd3d6c8fcd0da256f7c74bb2c459ecbcd8d167c",
+      "validated_build_sha256": "64e4d9fc6758aaa899b954a74bd3d6c8fcd0da256f7c74bb2c459ecbcd8d167c",
+      "content_signature": {
+        "visible_text": "c5b8c951205801a79fa4b32116d277421c4e70091698de023b5a6f8d673a9192",
+        "scripts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "downloadable_values": "4c28534e222f34423633dcc5495836b087a511ad1786b6e734b77e3d2ca64fff",
+        "figure_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "embedded_documents": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "previous_reference_sha256": "d0e3a0eee709ce375c35825b196601d2bd96317ac569ec54b1c517deb6335d5f",
+      "previous_validated_build_sha256": "8fbc1e1360659958d3f4e9ef8cca742ab02b67b276c3016df7296876e409ab8e",
+      "prior_generated_publication_sha256": null,
+      "byte_reference_basis": "Existing validated build from the pre-restructure edition; no currently published source HTML exists for this generated-only diagnostic."
+    },
+    "generated_checks/Score_profile_examples.html": {
+      "published_sha256": "4398c1cd8a59e3184c1236ab5cdffd2bf64d122da875e4f87070256a3e3996a6",
+      "validated_build_sha256": "4398c1cd8a59e3184c1236ab5cdffd2bf64d122da875e4f87070256a3e3996a6",
+      "content_signature": {
+        "visible_text": "aaced5ed17fe6b28494cddb3d31aa5d0e23cc0c2b60f61a8d3d7bf77fd70ab05",
+        "scripts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "downloadable_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "figure_values": "ac18d020c4863af9efd1e089f7574a4c89123ce33534069aa4a0beb97dfebe81",
+        "embedded_documents": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "previous_reference_sha256": "0a0c458db53596e62ff01c73e7be8c78cf685a66baf88412b38ee4ea6578b201",
+      "prior_generated_publication_sha256": null,
+      "byte_reference_basis": "Existing validated build from the pre-restructure edition; no currently published source HTML exists for this generated-only diagnostic."
+    },
+    "generated_checks/Score_profile_contrasts.html": {
+      "published_sha256": "545f1675f6e0c11d4e9ba33c140e05f4c2f527bed9479b90882da8e84ac8f906",
+      "validated_build_sha256": "545f1675f6e0c11d4e9ba33c140e05f4c2f527bed9479b90882da8e84ac8f906",
+      "content_signature": {
+        "visible_text": "99bb8b12fcfb57fda0424cfd87115d7b01e2fb6b22a151ae2c9748941b6c4d00",
+        "scripts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "downloadable_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "figure_values": "3e2ddebf25516f1d7529ca1f25aa4f7c0eae07eedc9fb965a2baa9ca5cb3f3dd",
+        "embedded_documents": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "previous_reference_sha256": "9b1b5b2cd9ae569dcfec6a66b5a6616feb5f061490aa9079bc07ec5930cee9da",
+      "prior_generated_publication_sha256": null,
+      "byte_reference_basis": "Existing validated build from the pre-restructure edition; no currently published source HTML exists for this generated-only diagnostic."
+    },
+    "generated_checks/Demand_pair_comparisons.html": {
+      "published_sha256": "beff267b7c72f4f8858785101dbb1882d7f2271d7bd623b685895edbf1499e5d",
+      "validated_build_sha256": "beff267b7c72f4f8858785101dbb1882d7f2271d7bd623b685895edbf1499e5d",
+      "content_signature": {
+        "visible_text": "7d92224520e6adbd714a066073d6d9c22059aba5ec7ef64881febd6d9bf3083b",
+        "scripts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "downloadable_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "figure_values": "f3a9534f62bf872396cbbd28db31c4380a9bff00cf70e99ccd05ac1e0b350049",
+        "embedded_documents": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "previous_reference_sha256": "beff267b7c72f4f8858785101dbb1882d7f2271d7bd623b685895edbf1499e5d",
+      "prior_generated_publication_sha256": null,
+      "byte_reference_basis": "Existing validated build from the pre-restructure edition; no currently published source HTML exists for this generated-only diagnostic."
+    },
+    "generated_checks/Method_awareness_check_Senegal_Lagos.html": {
+      "published_sha256": "b48b119e47af1802bc2c7ea31c52bce5e3d9324151f64dea1b931c749e1d6f50",
+      "validated_build_sha256": "b48b119e47af1802bc2c7ea31c52bce5e3d9324151f64dea1b931c749e1d6f50",
+      "content_signature": {
+        "visible_text": "49f5ead7692551774d4797cf52c9efc748ad0b7224c068341f3302749f46023f",
+        "scripts": "7cced6d49d9214740c3c01547e7c166044c788c4de9cf48cb4d8030007b71d32",
+        "downloadable_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "figure_values": "fe44a8cccd89edae70b54c5e58399979bd7d8b12643a8396ad62d089a781b692",
+        "embedded_documents": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "previous_reference_sha256": "bbfb445ded636dc840c96950fe14fe3c2eca6cdfda41a7817dcb8b8dc17351e1",
+      "prior_generated_publication_sha256": null,
+      "byte_reference_basis": "Existing validated build from the pre-restructure edition; no currently published source HTML exists for this generated-only diagnostic."
+    },
+    "generated_checks/Data_checks.html": {
+      "published_sha256": "92d87cffba2edb44e2d87bd2ab81e1820a484731042d2192843accf48afa4ed9",
+      "validated_build_sha256": "92d87cffba2edb44e2d87bd2ab81e1820a484731042d2192843accf48afa4ed9",
+      "content_signature": {
+        "visible_text": "260bb9efc9fae9de44f041dad81a52112e3bbffefeb6eac39bf4ee2c1a538e62",
+        "scripts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "downloadable_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "figure_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "embedded_documents": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "previous_reference_sha256": "92d87cffba2edb44e2d87bd2ab81e1820a484731042d2192843accf48afa4ed9",
+      "prior_generated_publication_sha256": null,
+      "byte_reference_basis": "Existing validated build from the pre-restructure edition; no currently published source HTML exists for this generated-only diagnostic."
+    },
+    "data_checks/Composite score_comparisons.html": {
+      "published_sha256": "834672d9ac978b97962550f84d704548fed335b0eb17c2ba2a8f9b3152ae3e19",
+      "validated_build_sha256": "834672d9ac978b97962550f84d704548fed335b0eb17c2ba2a8f9b3152ae3e19",
+      "content_signature": {
+        "visible_text": "6eb1902f4c60a7b138b3704e31a17da8fad469b7cddf20993c4403f750f96095",
+        "scripts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "downloadable_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "figure_values": "b3e52eaad0db0ed4c0179e1136dbcd16e516b39f0622ae39424c631d310e965b",
+        "embedded_documents": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "previous_reference_sha256": "7b869d88de8b709ee4a222be7fcdc4a7eab487510321906948c4688f830e21c9",
+      "previous_published_sha256": "a4c91f21e99e0e62936441887dc1f9a2eb8f3e870ef3c071b64c51643acea6b4"
+    },
+    "data_checks/Surgo_UoM_checks.html": {
+      "published_sha256": "0207a44e5dc2e5f9d8bc99587ab6a25f60642b58d7898f97ca9d0d9059f0fb06",
+      "validated_build_sha256": "0207a44e5dc2e5f9d8bc99587ab6a25f60642b58d7898f97ca9d0d9059f0fb06",
+      "content_signature": {
+        "visible_text": "0632196a690e372fc9ad7db40e4251449189ec25e20aad970388bc501d78cdff",
+        "scripts": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "downloadable_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "figure_values": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "embedded_documents": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "previous_reference_sha256": "0207a44e5dc2e5f9d8bc99587ab6a25f60642b58d7898f97ca9d0d9059f0fb06"
+    }
+  },
+  "source_files": {
+    ".Rprofile": "2a6cfd8117265ee6807c7e8744538f7aefc5cdebe02d18c949cd01915546cfcb",
+    ".gitignore": "18fc0a1b35e584072e809396c071329de8a20bdbc877495cd26809db5331475c",
+    "DESCRIPTION": "5a5a7d411a472182da533ca8933f4baab11e53fb7aab0cd6049a5c778c40a245",
+    "LICENSE-NOTICE": "e0ceea6db1e198504cce6e55027fb920a3cba5eb422f4863c5b65cf31208b544",
+    "README.md": "ba400a9d06a0a63925ae2d91aab599950e2978f203452525b9ea6e0d3c5eff73",
+    "aggregate/README.md": "98e79f329785bb30ee8982e02de845e4fb6bd86e89e7bce79d39d5403cfb110a",
+    "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R": "a82f94f03edd0adfdd7623e37f3618df8ddc810eca07d64a609fa5ae6b0a3a79",
+    "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.Rmd": "e491becbad13bb7678d6610ea90e40a9d7d8999a895bcf888c333977f4a407e3",
+    "aggregate/cotedivoire/README.md": "57f22d44dea7ccd3f27c3e2a52ca98305e531a05578b4e555bdcb64a14fd707f",
+    "aggregate/lagos/Lagos_analysis_aggregate.R": "e1f67a0890ca9fd24fc09471a3f7fab0fe7c483074ba761bbf8688139fe7b567",
+    "aggregate/lagos/Lagos_analysis_aggregate.Rmd": "6456f4be61f01b43d091a8d02ff5c11c53f613810065db8b02e41cadce5ed9f3",
+    "aggregate/lagos/README.md": "9a746cbb52af3b9ebf462253240bbc8234e08dd7370a989385a0318e8284fabf",
+    "aggregate/senegal/README.md": "202e1783a8445abce9b1b1250503495ae801408fb80ad12e8c59cdb40bf4aee3",
+    "aggregate/senegal/Senegal_analysis_aggregate.R": "25f21c4fcf616c83ea34242bd5b05f489aa41c4f200e0faa33aaa803f5aa36f6",
+    "aggregate/senegal/Senegal_analysis_aggregate.Rmd": "c3cbb4805c5cc105d2a6fa3dad995cb057b19d5210681f82e2ba0c3c5b2d6a74",
+    "aggregate/sindh/README.md": "a33fe2338b1c6fdd5390037d62c4ade2be0f6c092695ccdd935b0d174d983407",
+    "aggregate/sindh/Sindh_analysis.R": "0c495ac4a1f8617de57d038102f7f7f5280c91543937d55eede512c2ff070315",
+    "aggregate/sindh/Sindh_analysis.Rmd": "2f229f056fb21d5a0195c4ca374ca7c8905f269da88ca23afa2c2d9e12bc78a0",
+    "data_checks/Build_data_checks.R": "7ead7de5441cc4626fcd8729da6db4acf6a331fb8d420426a4c98c7ebdf0c434",
+    "data_checks/README.md": "0d4ff2916fc0c35f04725749752b7ad6d50268df77fb653ba0599dca920394a4",
+    "data_checks/Surgo_UoM_checks.Rmd": "2c03ec16ff62f5d2ae0b27b4bbab15d0c81c94c24c2b75a665a40a9c4a09ddf3",
+    "data_checks/check_method_awareness.Rmd": "ce7636f1c763c0bf87c8a3934ab31aa4000ca97e27e8b9fe195b44afb2be8235",
+    "data_checks/score_profile_contrasts.Rmd": "1e4288b3664ac54407eebaaf1a0f9d76fa42072410ab1eb0e676d6b84a00f1d2",
+    "data_checks/score_profile_examples.Rmd": "d34d83304fbe5bc9c13f3e9fccc1fd923e6f5a234671e9bd8e5d5c0e78b89485",
+    "docs/DATASET_FILENAMES.md": "7f277e2e15b6760f0923851c9018d4461d5d09f563ff0c680211c24a149b61cc",
+    "docs/INPUTS.md": "6b84669af874470d163bba40e5a209e1bdd5e67fcdd65aa71d2629010fad3373",
+    "docs/RUN_GUIDE.md": "c741242e97819ddd9efdedf68028da94ade9399d36bf57650f05d33027272727",
+    "docs/SURVEY_AND_SCORING.md": "9e2f702afe27d0a68a9c50874c8bd79289f0e7db4194df5bc4f0df44b5301e66",
+    "renv.lock": "b22e1d32e21a3819bc2afa21f3ea3c5ff67a22dcec76265a6f355f087b01a6a6",
+    "run_all.R": "1c659772561e8273636bc9ca3a754566aa029ec45a997057767c88961c04fc78",
+    "rural_urban/README.md": "617f8870d2686ae6340484381013692d279fde39cbf7943f4e9036b9f0d10b6e",
+    "rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R": "ebe4af912b6d517ca203a7bb47668c9e536a351d28e0f14150e3812f281820b4",
+    "rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.Rmd": "5b9ec9f4e36b9c44e18b5a396c0cd6a32b9884b832fce0860681636798a55b30",
+    "rural_urban/cotedivoire/README.md": "09fbb8772e5b43183360c56dec4f3366a011c5966d662ef83536310b2bb76506",
+    "rural_urban/lagos/Lagos_rural_urban_updated.R": "741c5243cd6767a94c7a77e5603b9583b46ba8764f9a7906eb9a1a5a2444c6cb",
+    "rural_urban/lagos/Lagos_rural_urban_updated.Rmd": "2596cc264e3e7208cf4bf15bdfa3f8184d966e43b468a6f21c6ddebbf61e3db9",
+    "rural_urban/lagos/README.md": "2ba3d86155bd7d34efec4f066cf6d426013f9e34bd9fd93827acc4e3eb52796f",
+    "rural_urban/senegal/README.md": "3a42aa78cc306e060e25eb2740c99bf8351397ad0a98e1440c634eec7a9f4c83",
+    "rural_urban/senegal/Senegal_rural_urban_updated.R": "a7199388ec66e0d18759c99d89dfd0cee6bb713b98cf613979787ed8fb4dad15",
+    "rural_urban/senegal/Senegal_rural_urban_updated.Rmd": "f83696652a612ea06c17cb3924d1c0dab1e81774ed9c06b7022eb8da4f5a7ec6",
+    "setup.R": "f6e92ec80af4842b26be466a1672a6e7e66ce0902be76b89cf5e18bd4e704533",
+    "support/README.md": "7d41ab61d8a6d879d21f6d7f9305204a5268abd675eb284e77be3a788349ffd4",
+    "support/assets/README.md": "730c6727f8b92b371972ccb194d99ca4dbc7e68c4164c57db8ce427e0fef2a4a",
+    "support/linkage.R": "02947ba54c4a3e017c272f3603a96b76e8233de6b5e0457366e1212a399bddbe",
+    "support/plot_models.R": "f7da963c2dedf42d167ccfea1101ebd51e80b500a5097c07ee6a4a9d0ec98e88",
+    "support/renderers/aggregate/cotedivoire_render.py": "c19f0a9f143ff1a337a63f33b23e16b0fae28754871c3a5825cda1bf857b330e",
+    "support/renderers/aggregate/cotedivoire_verify.py": "57596b15dc09ba5497f1438bb503c6f8cf177472264f4cd5068197b9aab2de3d",
+    "support/renderers/aggregate/lagos_render.py": "5c8db1d25a704db2177c08967d2ce7c0e8da754fbb1fe0bf3c401547ca76512f",
+    "support/renderers/aggregate/lagos_verify.py": "472e12f6adde7250b363d1ce02d228fb81ce37f1d67f45451babfffcc3288167",
+    "support/renderers/aggregate/senegal_render.py": "f867483c3d28c6ac907128456bb62f14913197bf87fe68a820b02aae7d9c7693",
+    "support/renderers/aggregate/senegal_verify.py": "915ca8b3b2bebd790b42b0af90ecb7a28006bd44e5a61c8333bc5dcf896cc96f",
+    "support/renderers/aggregate/sindh_render.py": "dcc20533aa32debbf02e7163d3de431d5f5bc6e4dd476672280b4a23276bc1cd",
+    "support/renderers/aggregate/sindh_verify.py": "508d21c48095a7b3ec71eb99d4dbf4ad4f713857341bd9f9325d6c81481495e0",
+    "support/renderers/build_threshold_map_report.py": "d752996b2c61b404660e5c6b3fb7db73edf76f510fbf15ff823be3f64c0e4eaf",
+    "support/renderers/html_fragment.py": "dfaef69903df000b7e37fd54095f2ab892ec9d90803f54a09b3675f18b745219",
+    "support/renderers/lagos_regression_sensitivity.py": "537235d9389ccc9ec951feba29feeb0d0a8bf64b01ebe8139658f3f6100ddd54",
+    "support/renderers/lagos_threshold_comparison.py": "bfccf55d9023446a521f10a3e30ae5e98e500e71f95b889cf80efebc9952f96a",
+    "support/renderers/new_maps.py": "3382f02f1a965acb63a44dbbf0c28321923529dfce02efa79a976581bf4de0c4",
+    "support/renderers/regional_sd_maps.py": "f5fa87f2e2866e9f2270430dadf68e3307e1c874007140f6b421efe098bacb6d",
+    "support/renderers/render_data_checks.py": "1b30b22667d49802f7607862492da5414b3c65f35d18926650e7a34e5db14f73",
+    "support/renderers/render_demand_population_check.py": "d2c697dc3505d04b030beab1bf6c70aaa4c4bf9d1cdb1008aa63e54b4263d6e4",
+    "support/renderers/render_regression_sensitivity.py": "63865c4c0c1f2d69e1cf0d48301d86f4204608105082cd31c8ca1c3ba6cc3b05",
+    "support/renderers/rural_urban/cotedivoire_render.py": "d16cd3bfdf941103b8fbf7fbf844b3e139931f0f9f5c2821a688742df4a94d02",
+    "support/renderers/rural_urban/cotedivoire_verify.py": "036da9f5e098c74f42562ad58fb55699cb0e9c27f6322bc34f3122f3da76d4e5",
+    "support/renderers/rural_urban/lagos_render.py": "ed16fa5cf79d4590518237824e4e6c908831ea4c0753fc9442677adb1d558e7f",
+    "support/renderers/rural_urban/lagos_verify.py": "2ebbc32577e2865bfae701993f0d8c174c4ffe8f77a42ce90f8d2e1f42ceb151",
+    "support/renderers/rural_urban/senegal_render.py": "628825fb573573b6ab9417eef388ddb1355c9b23d4ebf716143e39064ba30e00",
+    "support/renderers/rural_urban/senegal_verify.py": "b4a2e75f1623685a3aae6fa8e8d951a261f30a9b1aa159095a04ce11096f8711",
+    "support/report.css": "2aa4da8b3257aa8ab1bda1dcbe7f3d65b03932b27ce3ea7dbd93f4b6b7ad8448",
+    "support/risk_scores.R": "827095f7acb94bdd61f284e77fe6c3c20c1b0518f3aed3b559193c128c92589c",
+    "support/runtime.R": "567856d46ebf7581a7d90d5b9f524da44b95890b49bcf4415d9387c496edbf71",
+    "support/survey_methods.R": "1bfe1455387089229ceda5343dc1ded7ebe43e3349044a26afbec07dc844a97f",
+    "validation/README.md": "ab2d2d806e21aaf7ab9f39747f9462b3322cc38db23e421324cd47d4976e07c3",
+    "validation/check_release.py": "13af2c9c619cc9860cfed03aee34280d794e5032fe6749563579549b257c6c52",
+    "validation/compare_analysis.R": "b4e107aeb3547f3ca321e1c94c9131728fcf2a53ad18c2d66c5e9c7763ddc7b7",
+    "validation/test_methods.R": "d691c6dd8eb7351f97bb591ea8cc98c97620b62402eb3c25716a3cc1082c594a",
+    "validation/test_training.R": "736373f0b3677a5832997f0ecf87386ede264240287ff39b0d45c3da4b8b122c",
+    "validation/verify_reports.py": "537415375e192a60ea6bf7459b483b21a3db8d4f186fc4b05f8a925576a35108",
+    "support/assets/boundary_updates.csv": "2809002de7620797b7e45ea6f886fc92e59e5655ffd31871f7bf63c53464b65b",
+    "support/assets/manifest.json": "e5ed0bbcc8c9df0c7ab4b004b0ed86a11b2adce4903f9f5369d87c67f707e7e5",
+    "docs/input_bundle_manifest.json": "e38184b834a195ad4a4636a226becc8770ec7e208a28058009f3d60595901e0d",
+    "docs/dataset_catalog.json": "1743d9bd6a37a83b3376764e67f0291ad762cbfaf5f5cb83140dfcc5e5e3de2d"
+  },
+  "previous_location_map": {
+    "reports/Lagos_analysis_aggregate.html": "aggregate/lagos/Lagos_analysis_aggregate.html",
+    "reports/Senegal_analysis_aggregate.html": "aggregate/senegal/Senegal_analysis_aggregate.html",
+    "reports/Cote_dIvoire_analysis_aggregate.html": "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.html",
+    "reports/Sindh_analysis.html": "aggregate/sindh/Sindh_analysis.html",
+    "reports/Lagos_rural_urban_updated.html": "rural_urban/lagos/Lagos_rural_urban_updated.html",
+    "reports/Senegal_rural_urban_updated.html": "rural_urban/senegal/Senegal_rural_urban_updated.html",
+    "reports/CotedIvoire_rural_urban_updated.html": "rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.html",
+    "reports/Demand_population_classification_check.html": "generated_checks/Demand_population_classification_check.html",
+    "reports/Score_profile_examples.html": "generated_checks/Score_profile_examples.html",
+    "reports/Score_profile_contrasts.html": "generated_checks/Score_profile_contrasts.html",
+    "reports/Demand_pair_comparisons.html": "generated_checks/Demand_pair_comparisons.html",
+    "reports/Method_awareness_check_Senegal_Lagos.html": "generated_checks/Method_awareness_check_Senegal_Lagos.html",
+    "reports/Data_checks.html": "generated_checks/Data_checks.html",
+    "data_checks/Composite score_comparisons.html": "data_checks/Composite score_comparisons.html",
+    "data_checks/Surgo_UoM_checks.html": "data_checks/Surgo_UoM_checks.html"
+  },
+  "previous_layout_commit": "6a3a382010db2cd4fd083a5aa766b85d466ad9dc"
+}

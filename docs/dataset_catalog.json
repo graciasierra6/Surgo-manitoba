@@ -6,7 +6,7 @@
   "total_zip_members": 56,
   "inventory": "docs/INPUTS.md",
   "integrity_manifest": "docs/input_bundle_manifest.json",
-  "run_guide": "docs/COLLEAGUE_RUN_GUIDE.md",
+  "run_guide": "docs/RUN_GUIDE.md",
   "databricks_implementation": "Not implemented; identifiers, snapshots and field/label mappings await data-owner confirmation. Existing runners use the intact checksummed ZIP.",
   "primary_inputs": [
     {
@@ -32,7 +32,11 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/lagos/Lagos_analysis_aggregate.R",
+        "rural_urban/lagos/Lagos_rural_urban_updated.R"
+      ]
     },
     {
       "id": "D02",
@@ -57,7 +61,11 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/senegal/Senegal_analysis_aggregate.R",
+        "rural_urban/senegal/Senegal_rural_urban_updated.R"
+      ]
     },
     {
       "id": "D03",
@@ -82,7 +90,11 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R",
+        "rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R"
+      ]
     },
     {
       "id": "D04",
@@ -107,7 +119,10 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/sindh/Sindh_analysis.R"
+      ]
     },
     {
       "id": "D05",
@@ -132,7 +147,11 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/lagos/Lagos_analysis_aggregate.R",
+        "rural_urban/lagos/Lagos_rural_urban_updated.R"
+      ]
     },
     {
       "id": "D06",
@@ -157,7 +176,11 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/senegal/Senegal_analysis_aggregate.R",
+        "rural_urban/senegal/Senegal_rural_urban_updated.R"
+      ]
     },
     {
       "id": "D07",
@@ -182,7 +205,11 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R",
+        "rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R"
+      ]
     },
     {
       "id": "D08",
@@ -207,7 +234,10 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/sindh/Sindh_analysis.R"
+      ]
     },
     {
       "id": "D09",
@@ -232,7 +262,16 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/lagos/Lagos_analysis_aggregate.R",
+        "aggregate/senegal/Senegal_analysis_aggregate.R",
+        "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R",
+        "aggregate/sindh/Sindh_analysis.R",
+        "rural_urban/lagos/Lagos_rural_urban_updated.R",
+        "rural_urban/senegal/Senegal_rural_urban_updated.R",
+        "rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R"
+      ]
     },
     {
       "id": "D10",
@@ -257,7 +296,16 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/lagos/Lagos_analysis_aggregate.R",
+        "aggregate/senegal/Senegal_analysis_aggregate.R",
+        "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R",
+        "aggregate/sindh/Sindh_analysis.R",
+        "rural_urban/lagos/Lagos_rural_urban_updated.R",
+        "rural_urban/senegal/Senegal_rural_urban_updated.R",
+        "rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R"
+      ]
     },
     {
       "id": "D11",
@@ -282,7 +330,16 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/lagos/Lagos_analysis_aggregate.R",
+        "aggregate/senegal/Senegal_analysis_aggregate.R",
+        "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R",
+        "aggregate/sindh/Sindh_analysis.R",
+        "rural_urban/lagos/Lagos_rural_urban_updated.R",
+        "rural_urban/senegal/Senegal_rural_urban_updated.R",
+        "rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R"
+      ]
     },
     {
       "id": "D12",
@@ -307,7 +364,16 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/lagos/Lagos_analysis_aggregate.R",
+        "aggregate/senegal/Senegal_analysis_aggregate.R",
+        "aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R",
+        "aggregate/sindh/Sindh_analysis.R",
+        "rural_urban/lagos/Lagos_rural_urban_updated.R",
+        "rural_urban/senegal/Senegal_rural_urban_updated.R",
+        "rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R"
+      ]
     },
     {
       "id": "D13",
@@ -332,7 +398,10 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "rural_urban/senegal/Senegal_rural_urban_updated.R"
+      ]
     },
     {
       "id": "D14",
@@ -357,7 +426,10 @@
         "source_link": null,
         "field_mapping": null,
         "value_label_mapping": null
-      }
+      },
+      "current_report_scripts": [
+        "aggregate/sindh/Sindh_analysis.R"
+      ]
     }
   ],
   "additional_direct_support_or_reconciliation_inputs": [

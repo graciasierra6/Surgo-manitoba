@@ -38,3 +38,7 @@ reports/*_files/
 *.utf8.md
 *.csv
 *.tsv
+
+generated_checks/
+**/*_files/
+!support/assets/boundary_updates.csv

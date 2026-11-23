@@ -1,333 +1,119 @@
 # SURGO–Manitoba
 
-Join individual SURGO women to their recorded University of Manitoba facility
-supply environment in Lagos, Senegal, Côte d’Ivoire and Sindh. Original woman
-records and survey variables are retained. Supply profiles are contextual area
-measures; they do not identify the facility a woman attended.
+Link SURGO women to recorded University of Manitoba facility characteristics in
+Lagos, Senegal, Côte d’Ivoire and Sindh, and examine demand barriers, supply side
+constraints and their associations with current modern contraceptive use.
 
-## Start here: inputs and separate runs
+## Open a report or run its code
 
-For a colleague reproducing the work, start with the
-[input and run guide](docs/COLLEAGUE_RUN_GUIDE.md). It lists the **14 primary
-analytical inputs**, the additional required support/reference files, software
-setup, commands to run each join and each of the seven current reports separately,
-and the expected outputs. Keep the complete repository and the intact authorized
-ZIP: the validated bundle has **56 members**, not only the 14 primary inputs.
+Each country folder contains **one complete country R script, its matching Rmd,
+and the current HTML report together**. Run the R script; it executes preparation,
+analysis, models, implemented sensitivities, numerical checks and HTML rendering.
+Country calculations are included in that script rather than scattered among
+country helper files. Common ingestion/statistical utilities and renderers live
+in `support/`; keep the complete repository when running any report.
 
-Dataset documentation is in:
-
-- [Input ZIP filenames](docs/DATASET_FILENAMES.md): clean filename/member list for adding source links later.
-- [Colleague run guide](docs/COLLEAGUE_RUN_GUIDE.md): filenames, roles, execution and outputs.
-- [Full ZIP inventory](docs/INPUTS.md): all member names, purposes, sizes and checksums.
-- [Input manifest](docs/input_bundle_manifest.json): machine-readable integrity inventory.
-- [Dataset catalog](docs/dataset_catalog.json): primary-input IDs, keys and pending Databricks mappings.
-- [R script reference](docs/SCRIPT_REFERENCE.md): dependencies, input contracts and main entry points.
-
-R script headers identify packages and source inputs; country READMEs explain the
-analytical definitions. Databricks source names/links remain pending until provided
-and validated. No credentials or private data locations are recorded in these files.
-
-## Inputs and data protection
-
-Original surveys, cleaned facility inputs, intermediate joins, fitted models and
-woman-level outputs stay outside GitHub. Supply external inputs at runtime through
-`SURGO_MANITOBA_INPUT_ZIP`, `--input-zip` or documented existing-join/cache arguments.
-The input ZIP is checked against its manifest. No personal computer paths or
-credentials belong in shared code, reports or documentation. Public display assets
-and aggregate report/build-validation metadata are included; input survey datasets
-are not. The root `.gitignore` excludes working data, caches and generated datasets.
-
-The [complete input inventory](docs/INPUTS.md) lists every ZIP member, its purpose,
-byte size and SHA-256. The reference bundle contains 55 source/reference files plus
-`bundle_manifest.json`; input datasets are obtained separately, not from GitHub.
-
-Install the declared dependencies:
-
-```sh
-Rscript R/install_dependencies.R
-```
-
-Python 3 formats saved aggregate results; statistical calculations and model fits
-use R. Pandoc must be available; its directory can be supplied at runtime with
-`--pandoc-dir` or `RSTUDIO_PANDOC`.
-
-## Reproduce the complete published results
-
-Use the complete, authorized input bundle, including its manifest and geographic
-evidence lookup. Set `SURGO_MANITOBA_INPUT_ZIP` to its location at runtime, then run:
-
-```sh
-Rscript R/rebuild_all.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP"
-```
-
-This builds both joins, all seven current country reports, eight supplementary
-reports/checks, and three optional historical reports. It starts with source
-inputs; no previously generated join, score, fitted model or report-data file is
-required. The outputs go to `output/reproduction/rebuilt/`, preserving the published
-reports for independent comparison. The command fails if the reproduced report
-content, embedded analytical tables, map scripts or figure values differ.
-
-The historical reports use a checksummed public source revision containing their
-earlier definitions. They are deliberately separate from the current FP-provider
-analyses. Restoring packages and retrieving this historical code requires internet
-access. `--include-historical false` rebuilds only the 15 current outputs.
-
-See [Reproduction instructions and validation](REPRODUCIBILITY.md) for dependencies,
-the output inventory, comparison rules and the distinction between identical
-results and platform-dependent figure rendering. Input datasets, extracted caches
-and fitted objects remain in ignored working directories and are never upload files.
-The [reference validation record](reports/reproduction_validation.json) records
-the report comparisons and the tested software setup.
-
-The current publication updates the seven country HTMLs and two data-check HTMLs
-together with their generators and validation references. Presentations are
-unchanged and Git history is preserved. The repository publishes seven current country reports and two reports
-in `data_checks/`. Six other diagnostics and three historical reports remain
-generated-only outputs, with validated fingerprints in
-`tests/report_reference_hashes.json`. They are rebuilt in the selected output
-directory without restoring retired HTMLs to the published report folder.
-Missing published reports still fail validation.
-
-## Two geographic join modules
-
-| Module | Join level | Documentation |
+| Geography | Aggregate: whole administrative area | Rural/Urban: residence-specific supply |
 |---|---|---|
-| `administrative_area/` | Lagos LGA, Senegal/CDI département-equivalent area, Sindh district | [Administrative-area join](administrative_area/README.md) |
-| `urban_rural/` | Administrative area plus Rural/Urban, where available | [Residence-specific join](urban_rural/README.md) |
+| Lagos | [Report](aggregate/lagos/Lagos_analysis_aggregate.html) · [R script](aggregate/lagos/Lagos_analysis_aggregate.R) · [Rmd](aggregate/lagos/Lagos_analysis_aggregate.Rmd) | [Report](rural_urban/lagos/Lagos_rural_urban_updated.html) · [R script](rural_urban/lagos/Lagos_rural_urban_updated.R) · [Rmd](rural_urban/lagos/Lagos_rural_urban_updated.Rmd) |
+| Senegal | [Report](aggregate/senegal/Senegal_analysis_aggregate.html) · [R script](aggregate/senegal/Senegal_analysis_aggregate.R) · [Rmd](aggregate/senegal/Senegal_analysis_aggregate.Rmd) | [Report](rural_urban/senegal/Senegal_rural_urban_updated.html) · [R script](rural_urban/senegal/Senegal_rural_urban_updated.R) · [Rmd](rural_urban/senegal/Senegal_rural_urban_updated.Rmd) |
+| Côte d’Ivoire | [Report](aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.html) · [R script](aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.R) · [Rmd](aggregate/cotedivoire/Cote_dIvoire_analysis_aggregate.Rmd) | [Report](rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.html) · [R script](rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.R) · [Rmd](rural_urban/cotedivoire/CotedIvoire_rural_urban_updated.Rmd) |
+| Sindh | [Report](aggregate/sindh/Sindh_analysis.html) · [R script](aggregate/sindh/Sindh_analysis.R) · [Rmd](aggregate/sindh/Sindh_analysis.Rmd) | Not available: no documented woman Rural/Urban field |
+
+## Reproduce everything
+
+1. Obtain the authorized complete input ZIP separately. Input datasets are never
+   uploaded to this repository.
+2. Restore packages with `Rscript setup.R` (versions recorded in `renv.lock`).
+3. Set `SURGO_MANITOBA_INPUT_ZIP` to the ZIP location in the running environment.
+4. Run:
 
 ```sh
-Rscript administrative_area/R/run_join.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP" --geography-version both
-Rscript urban_rural/R/run_join_urban_rural.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP" --geography-version both
+Rscript run_all.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP"
 ```
 
-Base joins retain the original supply-summary definitions for upstream reconciliation.
-The current administrative-area **analysis preparation then reaggregates supply
-among confirmed FP providers**, writes the analysis-specific woman-level join to
-ignored working output, and uses that profile in all subsequent calculations.
-The residence-specific join module is unchanged by this analysis update. Sindh's
-women file has no documented Rural/Urban variable and is matched by district only.
+This starts from the input ZIP, rebuilds the joins, seven country reports and eight
+supplementary checks, and compares them with the validated report references.
+Rebuilt files go to ignored `output/rebuilt/`, with the same country layout as
+above. Published reference reports are preserved. Calculations and private joins
+stay in ignored `output/build/`; verified extracted inputs stay in ignored `data/cache/`.
 
-## Current administrative-area reports
-
-Reports replace their earlier versions under the same filenames. One runner
-builds all four, with inputs supplied at runtime:
+For one report, run its R script directly:
 
 ```sh
-Rscript R/run_aggregate_reports.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP"
+Rscript aggregate/lagos/Lagos_analysis_aggregate.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP"
 ```
 
-A verified join and extracted bundle can be reused:
+The individual script defaults to replacing its adjacent HTML after its numerical
+checks pass. Use `--output-dir` to build elsewhere. See the
+[run guide](docs/RUN_GUIDE.md) for all seven commands, requirements and outputs.
+
+## Where things are
+
+| Folder/file | Contents |
+|---|---|
+| `aggregate/<country>/` | Whole-LGA/département/district analysis: R, Rmd, HTML and a short README. |
+| `rural_urban/<country>/` | Residence-specific analysis: R, Rmd, HTML and a short README; three settings. |
+| `data_checks/` | Coverage and score-comparison HTMLs plus their cumulative rebuild script/templates. |
+| `support/` | Shared input/join functions, survey/scoring helpers, display assets and Python renderers. These run automatically. |
+| `docs/` | Exact input filenames, full inventory, source catalog, run guide and methods. |
+| `validation/` | Report reference signatures, source/release checks and validation evidence. |
+| `setup.R`, `run_all.R` | Package setup and complete reproduction entry point. |
+
+The previous `administrative_area/analysis/`, `urban_rural/analysis/`, top-level
+`analysis/` and `reports/` layout has been replaced. Historical report/code versions
+remain in Git history; they are not additional current report entry points.
+
+## Input files and source links
+
+- [Clean ZIP filename list](docs/DATASET_FILENAMES.md): exact basenames and ZIP-relative members.
+- [Full input inventory](docs/INPUTS.md): all names, purposes, sizes and SHA-256 checksums.
+- [Dataset catalog](docs/dataset_catalog.json): primary inputs, identifiers, weights and pending source mappings.
+
+The complete ZIP contains **14 primary analytical inputs plus 42 supporting,
+reference and manifest members: 56 total**. Do not flatten folders or omit reference
+members; the runner verifies every manifest-listed file. Databricks identifiers
+and links remain pending, rather than inferred from filenames. External locations
+and credentials are runtime parameters, never personal paths saved in the code.
+
+## Methods and today's updates
+
+Coverage uses all women. Subsequent analyses use women in need of FP: original
+SURGO `fpn2/FPN2 = 1` in Lagos, Senegal and Côte d’Ivoire; the approved instrument-based
+`fpn2_derived` in Sindh. SURGO estimates use supplied weights through `survey`;
+models use `svyglm()`, `ids = ~1`, no strata/FPC, and separately calculated
+administrative-area CR2/Satterthwaite inference. No random effects are used.
+
+Facility summaries use confirmed FP providers and valid responses separately for
+each measure, with equal facility weight, retaining genuine zeros/FALSE. Whole-area
+analyses assign area averages. Residence analyses assign matching area–Rural/Urban
+profiles; cells with no confirmed FP providers use a flagged same-area fallback
+where available. An undefined component is not automatically zero-filled or replaced.
+
+Both scores run higher = more barriers/constraints. Geographic scores average six
+component z-scores; above zero is the primary flag. Maps also show 0.5, 1 and 1.5
+final-composite SD thresholds. Personal demand responses and assigned supply are
+retained in individual models. [Methods and limitations](docs/SURVEY_AND_SCORING.md).
+
+The four aggregate reports include the latest **regression Sensitivity checks**:
+included/excluded profiles, formula-specific available-case models, and
+response-weighted joint models with two-stage geographic jackknife intervals.
+Sindh includes the corrected training reconstruction from raw Q406 text and
+checkbox responses. The Rural/Urban reports retain their existing scoring/PCA
+sensitivities; today's new regression-completeness appendix was scoped to aggregate
+analyses. These distinctions are stated in the country READMEs.
+
+## Validation and sharing
 
 ```sh
-Rscript R/run_aggregate_reports.R \
-  --join-dir "$SURGO_MANITOBA_JOIN_DIR" \
-  --cache-dir "$SURGO_MANITOBA_CACHE_DIR" \
-  --countries all
+python3 validation/check_release.py
 ```
 
-| Geography | Report | Source women | Women in need | Common model sample |
-|---|---|---:|---:|---:|
-| Lagos | [Lagos_analysis_aggregate.html](reports/Lagos_analysis_aggregate.html) | 4,555 | 2,159 | 1,896 |
-| Senegal | [Senegal_analysis_aggregate.html](reports/Senegal_analysis_aggregate.html) | 7,169 | 1,905 | 1,558 |
-| Côte d’Ivoire | [Cote_dIvoire_analysis_aggregate.html](reports/Cote_dIvoire_analysis_aggregate.html) | 10,859 | 4,292 | 3,951 |
-| Sindh | [Sindh_analysis.html](reports/Sindh_analysis.html) | 10,364 | 3,274 | 3,115 |
+Numerical verification also runs inside every country script. `run_all.R` checks
+rebuilt report values, embedded tables, figures and maps against versioned references.
+Validation establishes implementation/reproduction for the documented inputs, not
+causal identification or absence of source-data limitations.
 
-Matching R entry scripts, Rmds, definitions, model and verification helpers are in
-`administrative_area/analysis/<country>/`. See the [analysis guide](administrative_area/analysis/README.md)
-and each country README for reproduction and qualifications. The separate earlier
-Lagos, Senegal and Côte d’Ivoire reports are archived rather than published as
-current HTMLs. Their optional rebuild workflow is `R/run_reports.R`; their exact
-reference fingerprints are retained without restoring the report files.
-Sindh always delegates to the current district workflow, since residence splitting
-is unavailable there.
-
-The updated Lagos residence-specific analysis is a separate report:
-[Lagos_rural_urban_updated.html](reports/Lagos_rural_urban_updated.html). Its
-[module guide](urban_rural/analysis/lagos/README.md) documents exact FP-provider
-LGA–Rural/Urban assignment, the Ibeju-Lekki–Urban coverage limitation and
-reproduction. Run it with:
-
-```sh
-Rscript urban_rural/analysis/lagos/Lagos_rural_urban_updated.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP"
-```
-
-Its planning heatmaps/maps retain LGA-wide summaries. Its models use residence
-profiles with a flagged LGA-wide fallback when an exact residence cell has zero
-FP providers. Undefined values are not zero-filled. The four current aggregate
-reports remain separate from these residence-specific results.
-
-The same updated residence-specific workflow is available for Senegal:
-[Senegal_rural_urban_updated.html](reports/Senegal_rural_urban_updated.html), with
-[source and reproduction notes](urban_rural/analysis/senegal/README.md).
-
-```sh
-Rscript urban_rural/analysis/senegal/Senegal_rural_urban_updated.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP"
-```
-
-Senegal uses matching département–Rural/Urban FP-provider means, with flagged
-département-wide fallback for 16 empty rural FP-provider cells. Facility residence
-is a health-district lookup proxy; this limitation and all fallback groups are
-documented in the report. Planning heatmaps/maps remain département-wide, while
-models and PCA use personal demand and assigned residence/fallback supply.
-
-The current Côte d’Ivoire residence workflow is also available:
-[CotedIvoire_rural_urban_updated.html](reports/CotedIvoire_rural_urban_updated.html),
-with [source and reproduction notes](urban_rural/analysis/cotedivoire/README.md).
-
-```sh
-Rscript urban_rural/analysis/cotedivoire/CotedIvoire_rural_urban_updated.R --input-zip "$SURGO_MANITOBA_INPUT_ZIP"
-```
-
-It uses matching département–Rural/Urban FP-provider means for individual models
-and PCA while preserving département-wide planning summaries. The empty-cell
-fallback rule is implemented, but no fallback is required in the current source.
-Four unmatched survey areas and Daoukro's undefined ratios remain explicitly
-unresolved; they are not assigned zero or another département's services.
-
-See the [updated residence-analysis guide](urban_rural/analysis/README.md) for
-shared reproduction instructions and supplementary checks.
-
-## Population, measures and scores
-
-Coverage precedes the need restriction. From Section 2 onward, Lagos, Senegal and
-Côte d’Ivoire use original SURGO FPN2 = 1. Sindh uses the previously authorized
-instrument-based `fpn2_derived`, because its source FPN2 field is entirely code 95.
-The existing Sindh SA1 = 95/97 exclusion policy is retained and explicitly qualified;
-no permanent-protection additions are made. These flags are not the DHS unmet-need
-algorithm.
-
-Require FP provision: Lagos/Sindh Q506 Yes; Senegal s5_6 Yes; Côte d’Ivoire s2_5_sp
-Yes. The Côte d’Ivoire filter is general FP service provision and does not also
-require Yes to its separate on-site question s5_1. Within each geographic area,
-average valid facility values equally, retaining valid zeros/FALSE and excluding
-unknown or undefined values separately by measure. No facility weights or automatic
-zero filling. Preserve the original cleaned UoM definitions.
-
-Six supply inputs capture short/long-acting offering, free-product proportion,
-trained-provider proportion, daily provision of offered modern-method classes,
-at least one LARC in stock, and original cleaned stockout burden. Counseling and
-popular-product stock are no longer selected components. Six demand domains cover
-general healthcare permission, anticipated stigma, PB2A-only health beliefs,
-future-fertility concerns, method confidence under the retained knowledge label,
-and opposition to FP. MC5 measures confidence, not an objective knowledge test.
-
-For geographic classification, calculate weighted demand percentages and unweighted
-FP-facility summaries. Standardize each component against its side's complete-area
-reference mean and sample SD, then average six z-scores. For the current-code constraint score, retain stockout burden in its risk direction
-and use one minus provision for the other five supply inputs. Flag both demand
-and supply constraints above zero. Supply constraints equal negative readiness,
-so this sign harmonization preserves every primary category. These are relative patterns, not causal binding constraints or absolute
-service standards. Tables show the weakest service components and most elevated
-reported concerns, ordered by component z-scores rather than intervention effects.
-The standardized score remains primary in all countries. A final Sensitivity
-analyses section exports rank-average, mean-percentage, median/IQR and median-count
-comparisons. Existing PCA appendices remain separate. The risk-distribution/map
-appendix shows zero, +0.5, +1 and +1.5 final-composite SD rules with the existing
-boundaries, colors and weighted use tooltips.
-
-## Models and interpretation
-
-Five primary models all have **current modern-method use** as outcome: personal
-demand score; assigned supply risk; both scores; six personal demand indicators;
-and those indicators plus supply risk. Each country uses one common complete model
-sample. Personal demand scores retain each woman's own responses; supply risk is
-the mean of assigned risk-aligned components (equivalently negative readiness): whole-area profiles in the aggregate workflow,
-or area–Rural/Urban profiles with flagged whole-area fallbacks in the updated
-residence workflow.
-
-All models use `survey::svyglm()` with the supplied SURGO weights, `ids = ~1`,
-no strata and no FPC, and adjust for age, age squared, education
-and fertility goal. Partnership and Rural/Urban are included in Lagos, Senegal and
-Côte d’Ivoire. In Sindh, partnership is constant in the modeled group and Rural/Urban
-is unavailable. Primary uncertainty uses geographic CR2 clustering, Satterthwaite
-intervals, HTZ block tests and Holm adjustment within each joint model's two tests.
-No random effects or interactions. Administrative error clusters are not asserted to be the original sampling PSUs.
-Original sampling clusters and strata are not specified in these main models.
-The shared survey helper supplies weighted means; raw counts, recodes,
-equal-area index references and unweighted facility aggregation retain their
-appropriate calculations. See [survey and scoring methods](docs/SURVEY_AND_SCORING.md).
-
-All four administrative-area reports include an appendix titled **Sensitivity
-checks**: included/excluded profiles, formula-specific available-case models and
-response-weighted joint models. The latter refit response and outcome models in a
-delete-one-area jackknife, with t intervals using the number of represented areas
-minus one degrees of freedom. Primary model intervals retain CR2/Satterthwaite.
-These additions retain whole-area supply assignment and fixed score references;
-the residence-specific reports are unchanged. Country modules document their
-adjustment sets, eligible targets and untestable selection assumptions.
-
-Important qualifications remain: limited geographic contexts; component overlap;
-uncertainty conditional on estimated scores; incomplete source responses and some
-geographic-linkage qualifications. Sindh training is reconstructed from both raw
-Q406 encodings using the original Sindh selected topics, with explicit Don't know
-and conflicting responses excluded. It is defined for 2,811/2,823 FP facilities,
-compared with 278 in the supplied cleaned measure; see the country module for the
-documented correction and valid-status denominator. Côte d’Ivoire has four unmatched survey areas and Daoukro's
-undefined free/daily measures, leaving five supply-unassessed areas. Verification
-checks implementation; it does not establish power, causal dominance or an optimal
-investment allocation.
-
-## Checks and outputs
-
-```sh
-python3 tests/check_aggregate_release.py
-python3 tests/check_rural_urban_release.py
-```
-
-Each workflow independently checks raw-field preservation, FP eligibility,
-geographic assignments, valid-response means, scoring direction/cutoffs, personal
-scores, weighted model coefficients, geographic covariance and report contents.
-The release checks inspect the actual source/report files and decoded embedded
-assets. `reports/aggregate_build_manifest.json` records relative report names,
-hashes, software versions and verification status. The corresponding updated
-residence record is `reports/rural_urban_build_manifest.json`. Neither manifest
-contains input datasets.
-Working inputs and outputs remain in ignored directories. Upload source code,
-documentation and the HTML reports, without local input/output folders or ZIPs.
-
-## Supplementary diagnostics
-
-The updated residence reports remain the main analyses. Separate supplementary
-checks retain the same definitions and do not replace the main scores or models:
-
-| Check | Output | Reproduction source |
-|---|---|---|
-| Coverage and completeness tables: all women and women in need in four geographies | [SURGO UoM checks](data_checks/Surgo_UoM_checks.html) | `analysis/Surgo_UoM_checks.R`, matching Rmd and `tabulate_women_residence.R` |
-| Demand population definition | `Demand_population_classification_check.html` (generated output) | `analysis/check_demand_population.R` and its renderer |
-| Cumulative facility eligibility, response coverage and residence fallback checks | `Data_checks.html` (generated output) | `analysis/build_data_checks.R`, its template and residence update scripts |
-| Similar scores with different component profiles | `Score_profile_examples.html` (generated output) | `analysis/score_profile_examples.R` and matching Rmd |
-| Four-geography search for sharper component contrasts | `Score_profile_contrasts.html` (generated output) | `analysis/score_profile_contrasts.R` and matching Rmd |
-| Paired demand tables with relative-elevation shading and percentage-point differences | `Demand_pair_comparisons.html` (generated output) | `analysis/plot_demand_pair_table.R` |
-| Five demand and eight supply-profile comparisons with findings beneath each figure | [Composite score comparisons](data_checks/Composite%20score_comparisons.html) | `analysis/plot_supply_pair_table.R` and `analysis/plot_demand_pair_table.R` |
-| Method awareness versus perceived capability | `Method_awareness_check_Senegal_Lagos.html` (generated output) | `analysis/check_method_awareness.R` and matching Rmd |
-| Derived need-definition concordance | Aggregate cross-tabs written to the caller-selected working output | `analysis/check_need_definition_concordance.R` |
-
-These checks read generated analysis outputs and caller-supplied joins. See the
-[analysis guide](analysis/README.md) for parameters, weighting, scope and
-interpretation. Supporting calculations stay in ignored working output; only
-source files, documentation and aggregate HTML reports belong in the repository.
-
-## Current survey-estimation and report release
-
-The current published HTMLs and their generators use the same survey-estimation
-and scoring implementation. SURGO weighted estimates use the survey package;
-models use `svyglm()` with weights, `ids = ~1`, no strata or FPC, and separate
-administrative-area CR2 inference. Supply scores consistently run higher = greater
-constraints. Main zero-cutoff classifications are unchanged, and each report
-includes distributions and maps at zero, +0.5, +1 and +1.5 final-composite SDs.
-
-The [survey and scoring methods](docs/SURVEY_AND_SCORING.md) document the exact
-implementation and limitations. The [validation summary](tests/script_update_validation.json)
-records before/after numerical comparisons. Weighted percentages, model samples,
-primary categories and clustered regression results are unchanged to numerical
-tolerance; descriptive intervals in Senegal, Côte d’Ivoire and Sindh follow the
-new weights-only variance specification.
-
-Rebuild into a separate directory as described in [reproducibility](REPRODUCIBILITY.md).
-Current source and report signatures are recorded together; prior published hashes
-remain identified separately. Input surveys, joins and fitted objects remain
-external or in ignored working directories. This update needs no new input dataset.
-
-```sh
-Rscript tests/test_survey_methods.R
-```
+Only code, documentation, approved aggregate reports, public display assets and
+validation metadata belong in uploads. Input datasets, extracted caches, working
+joins and fitted objects are ignored and must remain outside shared commits.

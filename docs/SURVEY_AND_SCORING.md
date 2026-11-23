@@ -9,11 +9,10 @@ shared helpers and supplementary analyses use the same documented SURGO weightin
 framework. Facility aggregation, sample counts, recodes and equal-area index
 references keep their distinct statistical roles.
 
-Historical-definition modules under `analysis/<country>/` are not the current
-report entry points. Their earlier variable and threshold definitions remain
-identified as historical. The optional historical-report runner uses its pinned
-source revision. Current entry points are under `administrative_area/analysis/`
-and `urban_rural/analysis/`.
+Current complete report scripts are under `aggregate/<country>/` and
+`rural_urban/<country>/`, beside their Rmd and HTML. Earlier definitions and the
+previous folder layout remain in Git history. Shared statistical implementations
+are in `support/`; country calculations are included in each country R script.
 
 ## SURGO weights and population
 
@@ -35,7 +34,7 @@ SURGO FPN2 = 1 in Lagos, Senegal and Côte d’Ivoire, and the previously author
 Pakistan-instrument-derived flag in Sindh. Keep the existing item definitions,
 missing-response rules, outcomes, covariates and common model samples.
 
-`analysis/common/survey_methods.R` provides:
+`support/survey_methods.R` provides:
 
 - `survey_weighted_mean()`: a wrapper around `survey::svymean()` with the existing
   valid-response denominator. Weighted heatmap cells, use distributions,
@@ -107,7 +106,7 @@ supply-risk values already used in the regressions.
 
 ## SD maps and distributions
 
-`analysis/common/risk_scores.R` calculates distributions of the final composite
+`support/risk_scores.R` calculates distributions of the final composite
 scores, separately for demand and supply. Each side uses all areas with its own
 finite scores; Côte d’Ivoire therefore retains different demand and supply
 reference counts. Divide the distance from that side's area mean by its final
@@ -123,8 +122,8 @@ residence-specific exposure is retained for the individual models.
 
 ## Sensitivity analyses
 
-Each current report entry script and data builder ends with a labelled
-Sensitivity analyses section. Common code implements the alternatives once:
+The complete country scripts include the implemented sensitivity analyses.
+Shared score functions implement the alternatives once:
 
 | Method | Construction | Flag rule |
 |---|---|---|
@@ -140,6 +139,38 @@ PCA remains a separate sensitivity where previously implemented. Its projections
 and weighted linear algebra retain their existing definitions; mixed PC1 signs
 still require a pattern-score interpretation. A sign label cannot make mixed
 loadings a monotonic risk index.
+
+## Regression-completeness checks in aggregate reports
+
+The four aggregate reports include included/excluded profiles, genuinely broader
+formula-specific available-case fits and response-weighted joint models. The
+supply-only available sample does not require a complete personal demand score.
+Each single-indicator comparison includes supply and the agreed covariates.
+All use survey commands with the original weights and administrative-area CR2
+inference. Main common-sample models remain unchanged.
+
+Response-weighted joint models use original survey weights multiplied by inverse
+estimated completeness probabilities, targeting women with known outcome, controls
+and supply. A weighted response model uses observed modern use, controls and area
+indicators. Areas fully observed in that target have response probability one.
+Delete one area at a time and refit both the response and outcome models; compare
+survey-only and response-weighted fits with the same geographic jackknife and
+G-minus-one t intervals. These checks retain fixed score references and rely on
+observed-information selection assumptions. Substantive Don't know responses are
+not automatically recoded or imputed, and this does not establish ignorability of
+unrecorded concerns. The new appendix is scoped to aggregate reports, not the
+three existing Rural/Urban analyses.
+
+## Sindh training correction
+
+Current Sindh training is reconstructed from raw Q406 topic checkboxes and text
+responses using the selected Sindh A/C/D/G/H topics. Known explicit None is zero;
+Don't know, contradictory or malformed responses remain unresolved. The facility
+proportion uses trained known-status personnel divided by known-status personnel.
+Valid facility ratios are averaged equally among confirmed FP providers within
+district. Other settings retain their supplied cleaned training variables. The
+original raw/cleaned files remain unchanged; reconstruction and independent
+verification are included in `aggregate/sindh/Sindh_analysis.R`.
 
 ## Validation and report publication
 
