@@ -9,7 +9,7 @@ There are two ways to run the analyses. **Choose Approach 1 if you normally work
 
 ## Where are the input data?
 
-**The input datasets are in the separately supplied ZIP file, `SURGO_Manitoba_linkage_inputs_complete.zip`. They are not stored on GitHub.** Give your colleague this ZIP along with the script or repository link.
+**The input datasets are in the separately supplied ZIP file, `SURGO_Manitoba_linkage_inputs_complete.zip`. They are not stored on GitHub.** Use the zip from OneDrive along with the script or repository link.
 
 Inside the ZIP, the original women's survey files are in `inputs/surgo/`, and the detailed facility survey files are in `inputs/uom/`. Cleaned facility summaries, archetype assignments and other required inputs are also included in the ZIP, in folders such as `uom_pipeline/`, `surgo_pipeline/`, `exports/` and `lookups/`.
 
